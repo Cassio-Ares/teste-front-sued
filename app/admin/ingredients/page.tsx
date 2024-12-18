@@ -4,7 +4,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState, useEffect } from "react";
 
-
 import React from "react";
 
 import {
@@ -31,21 +30,32 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { informationError } from "@/components/informationError";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api } from "@/connect/api";
 import { Trash } from "lucide-react";
 
+//hooks personalizados
+import { useSearch } from "@/hook/useSearch";
+import { usePost } from "@/hook/usePost";
+import { useRemove } from "@/hook/useRemove";
+
+//formatValue
+import { formatValue } from "../../../lib/utils/formatValue.ts";
 
 interface Ingredient {
-  id?: number ;
+  id?: number;
   description: string;
   legend_type?: string;
   gross_weight: number;
   correction_factor: number | null;
-  cooked_weight: number | null;
   cooking_index: number | null;
   kcal: number | null;
-  kj: number | null;
   protein: number | null;
   lipids: number | null;
   carbohydrate: number | null;
@@ -61,10 +71,8 @@ const Ingredients = () => {
     description: "",
     gross_weight: 100,
     correction_factor: null,
-    cooked_weight: null,
     cooking_index: null,
     kcal: null,
-    kj: null,
     protein: null,
     lipids: null,
     carbohydrate: null,
@@ -75,60 +83,47 @@ const Ingredients = () => {
     sodium: null,
   });
   const [ingredientsData, setIngredientsData] = useState<Ingredient[]>([]);
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState(null)
-  const [search, setSearch] = useState<string>("")
+  const [search, setSearch] = useState<string>();
 
+  //get
+  const {
+    data: searchData,
+    loading: searchLoading,
+    error: searchError,
+    setQuery,
+    refetch,
+  } = useSearch<Ingredient>("ingredients", search);
 
-  useEffect(() => {
-    if (search.length > 2) {
-      fetchData();
-    } else {
-      fetchData();
-    }
-  }, [search]);
-
-  // Modificação no fetchData para não precisar passar o evento
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = search.length > 2
-        ? await api.get(`/ingredients/search/${search}`)
-        : await api.get("/ingredients");
-
-      setIngredientsData(response.data.data);
-    } catch (error) {
-      informationError(error);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearch(value);
+    setQuery(value);
   };
 
-  const removeitem = async (id: number) => {
-    try {
-      await api.delete(`/ingredients/${id}`);
-      fetchData();
-    } catch (error) {
-      informationError(error);
-    }
-  };
-
-  const handleCreateIngredient = async (event: React.FormEvent<HTMLFormElement>) => {
+ 
+  //post
+  const {
+    data: dataPost,
+    loading: postLoading,
+    error: postError,
+    postData: createPost,
+  } = usePost<Ingredient>("ingredients", refetch);
+  const handleCreateIngredient = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
-    setLoading(true);
-    setError(null);
+
     try {
-      await api.post('/ingredients', newIngredient);
+      const responseData = await createPost(newIngredient);
+
+      toast.success(responseData.message);
+
       setNewIngredient({
         description: "",
         gross_weight: 100,
         correction_factor: null,
-        cooked_weight: null,
         cooking_index: null,
         kcal: null,
-        kj: null,
         protein: null,
         lipids: null,
         carbohydrate: null,
@@ -139,17 +134,23 @@ const Ingredients = () => {
         sodium: null,
       });
 
-      fetchData();
+      setIsOpen(false);
     } catch (error) {
-      informationError(error);
-    } finally {
-      setLoading(false);
+      setIsOpen(true);
     }
   };
 
-  console.log(ingredientsData)
+  //delete
+  const { data, loading, error, removeData } = useRemove(
+    "ingredients",
+    refetch
+  );
 
+  const removeitem = async (id: number) => {
+    await removeData(id);
 
+    toast.success(data?.message);
+  };
 
   return (
     <div className="flex flex-col justify-start gap-4 ">
@@ -194,7 +195,7 @@ const Ingredients = () => {
                       onValueChange={(value) => {
                         setNewIngredient({
                           ...newIngredient,
-                          legend_type: value
+                          legend_type: value,
                         });
                       }}
                     >
@@ -206,7 +207,7 @@ const Ingredients = () => {
                           Oferta limitada para todas as idades
                         </SelectItem>
                         <SelectItem value="Limitada para > 3 anos e proibida para ≤ 3 anos">
-                          Limitada para  `&gt;` 3 anos e proibida para ≤ 3 anos
+                          Limitada para `&gt;` 3 anos e proibida para ≤ 3 anos
                         </SelectItem>
                         <SelectItem value="Aquisição proibida">
                           Aquisição proibida
@@ -228,31 +229,14 @@ const Ingredients = () => {
                     <Input
                       name="correction_factor"
                       type="number"
-                      value={newIngredient.correction_factor || ""}
+                      value={newIngredient.correction_factor || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
                           correction_factor: parseFloat(event.target.value),
                         });
                       }}
-
                       placeholder="Digite o fator de correção"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label>Peso Cozido </Label>
-                    <Input
-                      name="cooked_weight"
-                      type="number"
-                      value={newIngredient.cooked_weight || ""}
-                      onChange={(event) => {
-                        setNewIngredient({
-                          ...newIngredient,
-                          cooked_weight: parseFloat(event.target.value),
-                        });
-                      }}
-
-                      placeholder="Digite o peso cozido"
                     />
                   </div>
                   <div className="flex flex-col gap-2">
@@ -260,7 +244,7 @@ const Ingredients = () => {
                     <Input
                       name="cooking_index"
                       type="number"
-                      value={newIngredient.cooking_index || ""}
+                      value={newIngredient.cooking_index || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -275,7 +259,7 @@ const Ingredients = () => {
                     <Input
                       name="kcal"
                       type="number"
-                      value={newIngredient.kcal || ""}
+                      value={newIngredient.kcal || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -285,12 +269,12 @@ const Ingredients = () => {
                       placeholder="Digite o kcal"
                     />
                   </div>
-                  <div className="flex flex-col gap-2">
+                  {/* <div className="flex flex-col gap-2">
                     <Label>Kj</Label>
                     <Input
                       name="kj"
                       type="number"
-                      value={newIngredient.kj || ""}
+                      value={newIngredient.kj || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -299,13 +283,13 @@ const Ingredients = () => {
                       }}
                       placeholder="Digite o kj"
                     />
-                  </div>
+                  </div> */}
                   <div className="flex flex-col gap-2">
                     <Label>Proteínas</Label>
                     <Input
                       name="protein"
                       type="number"
-                      value={newIngredient.protein || ""}
+                      value={newIngredient.protein || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -320,7 +304,7 @@ const Ingredients = () => {
                     <Input
                       name="lipids"
                       type="number"
-                      value={newIngredient.lipids || ""}
+                      value={newIngredient.lipids || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -335,7 +319,7 @@ const Ingredients = () => {
                     <Input
                       name="carbohydrate"
                       type="number"
-                      value={newIngredient.carbohydrate || ""}
+                      value={newIngredient.carbohydrate || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -350,7 +334,7 @@ const Ingredients = () => {
                     <Input
                       name="calcium"
                       type="number"
-                      value={newIngredient.calcium || ""}
+                      value={newIngredient.calcium || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -365,7 +349,7 @@ const Ingredients = () => {
                     <Input
                       name="iron"
                       type="number"
-                      value={newIngredient.iron || ""}
+                      value={newIngredient.iron || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -380,7 +364,7 @@ const Ingredients = () => {
                     <Input
                       name="retinol"
                       type="number"
-                      value={newIngredient.retinol || ""}
+                      value={newIngredient.retinol || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -395,7 +379,7 @@ const Ingredients = () => {
                     <Input
                       name="vitaminC"
                       type="number"
-                      value={newIngredient.vitaminC || ""}
+                      value={newIngredient.vitaminC || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -410,7 +394,7 @@ const Ingredients = () => {
                     <Input
                       name="sodium"
                       type="number"
-                      value={newIngredient.sodium || ""}
+                      value={newIngredient.sodium || null}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -424,9 +408,7 @@ const Ingredients = () => {
               </DialogDescription>
 
               <DialogFooter>
-                <Button
-                  className="bg-orange-500 hover:bg-orange-600 font-bold"
-                >
+                <Button className="bg-orange-500 hover:bg-orange-600 font-bold">
                   Salvar Ingrediente
                 </Button>
               </DialogFooter>
@@ -437,7 +419,7 @@ const Ingredients = () => {
 
       <div className="flex justify-start items-center w-[300px] gap-4">
         <Search size={16} />
-        <Input onChange={(event) => setSearch(event.target.value)} placeholder="Pesquisar..."></Input>
+        <Input onChange={handleSearchChange} placeholder="Pesquisar..."></Input>
       </div>
       <div className="flex">
         <Card className="w-full p-4">
@@ -452,7 +434,6 @@ const Ingredients = () => {
 
                 <TableHead className="font-bold">PB(g)</TableHead>
                 <TableHead className="font-bold">FC</TableHead>
-                <TableHead className="font-bold">PC(g)</TableHead>
                 <TableHead className="font-bold">IC</TableHead>
 
                 <TableHead className="font-bold">Kcal</TableHead>
@@ -464,65 +445,77 @@ const Ingredients = () => {
 
                 <TableHead className="font-bold">Cálcio(mg)</TableHead>
                 <TableHead className="font-bold">Ferro(g)</TableHead>
-                <TableHead className="font-bold">Vit.A(mcg)</TableHead>
+                <TableHead className="font-bold">
+                  Retinol (Vit.A) (mcg)
+                </TableHead>
                 <TableHead className="font-bold">Vit.C(mg)</TableHead>
                 <TableHead className="font-bold">Sódio(g)</TableHead>
                 <TableHead className="font-bold">Acões</TableHead>
-
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ingredientsData?.map((ingredients) => (
+              {searchData?.data?.map((ingredients) => (
                 <TableRow key={ingredients.id}>
-                
-                  <TableCell className="font-medium">{ingredients.description}</TableCell>
+                  <TableCell className="font-medium">
+                    {ingredients.description}
+                  </TableCell>
 
-              
-                  <TableCell className="font-medium">{ingredients.legend_type}</TableCell>
+                  <TableCell className="font-medium">
+                    {formatValue(ingredients.legend_type)}
+                  </TableCell>
 
-              
-                  <TableCell className="font-medium">{ingredients.gross_weight}</TableCell>
+                  <TableCell className="font-medium">
+                    {formatValue(ingredients.gross_weight)}
+                  </TableCell>
 
-             
-                  <TableCell className="font-medium">{ingredients.correction_factor}</TableCell>
+                  <TableCell className="font-medium">
+                    {formatValue(ingredients.correction_factor)}
+                  </TableCell>
 
-              
-                  <TableCell className="font-medium">{ingredients.cooked_weight}</TableCell>
+                  <TableCell className="font-medium">
+                    {formatValue(ingredients.cooking_index)}
+                  </TableCell>
 
-        
-                  <TableCell className="font-medium">{ingredients.cooking_index}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.kcal)}
+                  </TableCell>
 
-           
-                  <TableCell className="font-medium">{ingredients.kcal}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.kj)}
+                  </TableCell>
 
-       
-                  <TableCell className="font-medium">{ingredients.kj}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.protein)}
+                  </TableCell>
 
-   
-                  <TableCell className="font-medium">{ingredients.protein}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.lipids)}
+                  </TableCell>
 
- 
-                  <TableCell className="font-medium">{ingredients.lipids}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.carbohydrate)}
+                  </TableCell>
 
-               
-                  <TableCell className="font-medium">{ingredients.carbohydrate}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.calcium)}
+                  </TableCell>
 
-              
-                  <TableCell className="font-medium">{ingredients.calcium}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.iron)}
+                  </TableCell>
 
-           
-                  <TableCell className="font-medium">{ingredients.iron}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.retinol)}
+                  </TableCell>
 
-                
-                  <TableCell className="font-medium">{ingredients.retinol}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.vitaminC)}
+                  </TableCell>
 
-           
-                  <TableCell className="font-medium">{ingredients.vitaminC}</TableCell>
+                  <TableCell className="font-medium text-center">
+                    {formatValue(ingredients.sodium)}
+                  </TableCell>
 
-        
-                  <TableCell className="font-medium">{ingredients.sodium}</TableCell>
-
-   
                   <TableCell className="font-medium text-center">
                     <Button
                       variant="ghost"
@@ -536,14 +529,11 @@ const Ingredients = () => {
                 </TableRow>
               ))}
             </TableBody>
-
           </Table>
         </Card>
       </div>
     </div>
   );
-}
+};
 
 export default Ingredients;
-
-

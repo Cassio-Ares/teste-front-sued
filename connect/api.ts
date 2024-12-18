@@ -3,12 +3,12 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosError,
 } from "axios";
-import { useRouter } from "next/router"; 
+import { useRouter } from "next/router";
 
 export function createApiInstance() {
   const api: AxiosInstance = axios.create({
-     //baseURL: "http://localhost:3001",
-       baseURL: "https://sued-technical-sheet-back-1.onrender.com",
+    baseURL: "http://localhost:3001",
+    //baseURL: "https://sued-technical-sheet-back-1.onrender.com",
     headers: {
       "Content-Type": "application/json",
     },
@@ -26,7 +26,6 @@ export function createApiInstance() {
     localStorage.removeItem("token");
   }
 
-
   api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const token = getToken();
@@ -40,13 +39,12 @@ export function createApiInstance() {
     }
   );
 
-
   api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
       if (error.response?.status === 401) {
         removeToken();
-        const router = useRouter(); 
+        const router = useRouter();
         router.push("/login");
       }
       return Promise.reject(error);
