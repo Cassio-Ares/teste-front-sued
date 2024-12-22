@@ -90,6 +90,8 @@ const Stock = () => {
     setQueryInventory(value);
   };
 
+  console.log(inventoryData);
+
   //busca para post
   const [schoolSearch, setSchoolSearch] = useState("");
   const {
@@ -247,11 +249,13 @@ const Stock = () => {
     refetchInventory
   );
   const removeItem = async (id: number) => {
-    console.log("id", id);
+    
     await removeData(id);
 
     toast.success(data?.message);
   };
+
+  console.log("stock", stock);
 
   return (
     <div className="flex flex-col justify-start gap-4">
@@ -366,7 +370,7 @@ const Stock = () => {
                         total_quantity: parseFloat(event.target.value),
                       })
                     }
-                    placeholder="Peso total"
+                    placeholder="Quantidade total"
                   />
                 </div>
               </div>
@@ -459,14 +463,36 @@ const Stock = () => {
                     )}
                   </TableCell>
                   <TableCell className="font-medium text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => removeItem(stock.id || 0)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                   <Dialog>
+                      <DialogTrigger>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>
+                            Deseja remover o item do estoque?
+                          </DialogTitle>
+                          <DialogDescription>
+                            Essa ação não poderá ser desfeita.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button
+                            variant="destructive"
+                             onClick={() => removeItem(stock.id || 0)}
+                          >
+                            Remover
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog> 
+                   
                   </TableCell>
                 </TableRow>
               ))}

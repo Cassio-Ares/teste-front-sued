@@ -2,19 +2,16 @@ import { api } from "../connect/api";
 import { useState } from "react";
 import { informationError } from "../components/informationError";
 
-export const useRemove = (endpoint: string, refetchFn?: () => void) => {
+export const useRemoveReal = (endpoint: string, refetchFn?: () => void) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
-  const [data, setData] = useState<any>(null);
+  const [error, setError] = useState < any > null;
+  const [data, setData] = useState < any > null;
 
   const removeData = async (id: string | number) => {
     setLoading(true);
     setError(null);
-   try {
-      // Mudando para PATCH ao invés de DELETE, enviando deleted_at
-      const response = await api.patch(`${endpoint}/${id}`, {
-        deleted_at: new Date()
-      });
+    try {
+      const response = await api.delete(`${endpoint}/${id}`);
       setData(response.data);
 
       // Chama a função de refetch se fornecida
@@ -32,6 +29,5 @@ export const useRemove = (endpoint: string, refetchFn?: () => void) => {
     }
   };
 
-  return { data, loading, error, removeData };
+  return { data, loading, error, realRemoveData };
 };
-

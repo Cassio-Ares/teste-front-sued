@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import {
   Dialog,
+  DialogTrigger,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -100,7 +101,6 @@ const Ingredients = () => {
     setQuery(value);
   };
 
- 
   //post
   const {
     data: dataPost,
@@ -517,14 +517,36 @@ const Ingredients = () => {
                   </TableCell>
 
                   <TableCell className="font-medium text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => removeitem(ingredients.id || 0)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                    {/* <Dialog>
+                      <DialogTrigger>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>
+                            Deseja remover o ingrediente?
+                          </DialogTitle>
+                          <DialogDescription>
+                            Essa ação não poderá ser desfeita.
+                            E irá apagar o ingrediente de todos os Estoques onde esta cadastrado.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button
+                            variant="destructive"
+                            onClick={() => removeitem(ingredients.id || 0)}
+                          >
+                            Remover
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog> */}
                   </TableCell>
                 </TableRow>
               ))}
@@ -537,3 +559,14 @@ const Ingredients = () => {
 };
 
 export default Ingredients;
+
+//  <TableCell className="font-medium text-center">
+//    <Button
+//      variant="ghost"
+//      size="sm"
+//      className="text-red-500 hover:text-red-700"
+//      onClick={() => removeitem(ingredients.id || 0)}
+//    >
+//      <Trash className="h-4 w-4" />
+//    </Button>
+//  </TableCell>;
