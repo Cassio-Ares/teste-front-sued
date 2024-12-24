@@ -1,3 +1,13 @@
+export interface BaseIngredient {
+  id: number;
+  description: string;
+  ingredient_description?: string;
+  gross_weight: number;
+  unit_of_measure: string;
+  cost: number;
+  cost_per_serving: number;
+}
+
 export interface IngredientBasicInformation {
   cooked_weight: number;
   gross_weight: number;
@@ -5,8 +15,8 @@ export interface IngredientBasicInformation {
   ingredient_description?: string;
   description?: string;
   legend_type: string | null;
-  correction_factor: number | string; 
-  cooking_index: number | string; 
+  correction_factor: number | string;
+  cooking_index: number | string;
   kcal: string | number;
   kj: string | number;
   protein: number | null;
@@ -39,6 +49,7 @@ export interface ExtendedIngredient extends BaseIngredient {
   total_cost?: number;
 }
 
+
 export interface BaseRecipeInformation {
   id: number;
   name: string;
@@ -47,7 +58,7 @@ export interface BaseRecipeInformation {
   required_utensils: string;
   description_of_recipe: string;
   observations: string;
-  timeOfCoccao number; 
+  timeOfCoccao: number; 
   prep_time: number;
   created_by: number;
   updated_by: number | null;
@@ -62,6 +73,7 @@ export interface BaseRecipeInformation {
   };
 }
 
+
 type RecipeResponseType1 = {
   success: true;
   recipe: BaseRecipe & {
@@ -73,6 +85,7 @@ type RecipeResponseType1 = {
   message: string;
 };
 
+
 type RecipeResponseType2 = BaseRecipe & {
   ingredients: (ExtendedIngredient & {
     id: number;
@@ -80,8 +93,8 @@ type RecipeResponseType2 = BaseRecipe & {
   })[];
 };
 
-export type RecipeInformationTypes = RecipeResponseType1 | RecipeResponseType2;
 
+export type RecipeInformationTypes = RecipeResponseType1 | RecipeResponseType2;
 
 // export interface IngredientBasicInformation {
 //   cooked_weight: number;
