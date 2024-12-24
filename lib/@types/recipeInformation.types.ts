@@ -3,7 +3,6 @@ import { IngredientTypes } from "./ingredient.types";
 export interface IngredientBasicInformation {
   cooked_weight: number;
   gross_weight: number;
-  unit_of_measure: string;
   ingredient_description?: string;
   description?: string;
   legend_type: string | null;
