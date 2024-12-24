@@ -51,6 +51,13 @@ import { formatValue } from "../../../lib/utils/formatValue";
 
 //types
 import { IngredientTypes } from "../../../lib/@types/ingredient.types";
+
+
+type SearchDataType = {
+  data: IngredientTypes[];
+};
+
+
 const Ingredients = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [newIngredient, setNewIngredient] = useState<Partial<IngredientTypes>>({
@@ -78,7 +85,7 @@ const Ingredients = () => {
     error: searchError,
     setQuery,
     refetch,
-  } = useSearch<IngredientTypes>("ingredients", search);
+  } = useSearch<SearchDataType>("ingredients", search);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
