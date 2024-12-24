@@ -80,7 +80,7 @@ const Stock = () => {
   };
 
   //busca para post
-  const [schoolSearch, setSchoolSearch] = useState<string | null>("");
+  const [schoolSearch, setSchoolSearch] = useState<string>("");
 
   const {
     data: searchSchool,
