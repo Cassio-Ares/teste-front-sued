@@ -78,7 +78,7 @@ const Ingredients = () => {
     error: searchError,
     setQuery,
     refetch,
-  } = useSearch<Ingredient>("ingredients", search);
+  } = useSearch<IngredientTypes>("ingredients", search);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
