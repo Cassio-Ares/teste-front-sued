@@ -101,7 +101,7 @@ const Ingredients = () => {
     try {
       const responseData = await createPost(newIngredient);
 
-      toast.success(responseData.message);
+      toast.success(responseData?.message || "Ingrediente criado com sucesso!");
 
       setNewIngredient({
         description: "",

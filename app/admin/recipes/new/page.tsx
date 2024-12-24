@@ -169,7 +169,7 @@ const NewRecipe = () => {
 
     try {
       const responseData = await createPost<RecipeTypes>(newRecipe);
-      toast.success(responseData?.message);
+      toast.success(responseData?.message || "Receita criada com sucesso!");
       setNewRecipe({
         name: "",
         preparation_method: "",

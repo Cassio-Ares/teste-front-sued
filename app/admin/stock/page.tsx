@@ -161,7 +161,7 @@ const Stock = () => {
 
       const responseData = await createPost(stockPayload);
 
-      toast.success(responseData?.message);
+      toast.success(responseData?.message || "Estoque criado com sucesso!");
 
       setStock({
         state_id: "",
