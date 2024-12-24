@@ -136,7 +136,7 @@ const Stock = () => {
     loading: postLoading,
     error: postError,
     postData: createPost,
-  } = usePost<StockTypes>("inventory", refetchInventory);
+  } = usePost("inventory", refetchInventory);
 
  
   const [resetSchoolInput, setResetSchoolInput] = useState(false);
