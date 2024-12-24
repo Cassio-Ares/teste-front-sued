@@ -44,13 +44,13 @@ import { usePost } from "@/hook/usePost";
 import { useRemove } from "@/hook/useRemove";
 
 //types
-import { SchoolTypes, SchoolBasictypes } from "../../../lib/@types/school.types";
-import { StockTypes } from "../../../lib/@types/stock.types";
-import { IngredientTypes } from "../../../lib/@types/ingredient.types";
+// import { SchoolTypes, SchoolBasictypes } from "../../../lib/@types/school.types";
+// import { StockTypes } from "../../../lib/@types/stock.types";
+// import { IngredientTypes } from "../../../lib/@types/ingredient.types";
 
 const Stock = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [stock, setStock] = useState<Partial<StockTypes>>({
+  const [stock, setStock] = useState<any>({
     state_id: "",
     city_id: "",
     school_id: "",
@@ -89,7 +89,7 @@ const Stock = () => {
     setQuery: setQuerySchool,
   } = useSearch<any>("schools", schoolSearch);
 
-  const [selectedSchool, setSelectedSchool] = useState<SchoolBasicTypes | null>(
+  const [selectedSchool, setSelectedSchool] = useState<any>(
     null
   );
 
@@ -116,7 +116,7 @@ const Stock = () => {
     setQuery: setQueryIngredient,
   } = useSearch<any>("ingredients", ingredientSearch);
 
-  const [selectedIngredient, setSelectedIngredient] = useState<IngredientTypes>(null);
+  const [selectedIngredient, setSelectedIngredient] = useState<any>(null);
 
   const handleIngredientSelect = (ingredientId: number) => {
     const ingredient = ingredientData?.find((i) => i.id === ingredientId);
