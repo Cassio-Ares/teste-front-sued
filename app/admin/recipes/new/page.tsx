@@ -175,8 +175,13 @@ const NewRecipe = () => {
   } = usePost<any>("recipes");
 
   console.log(dataPost);
+  
 
-  const createNewRecipe = async (event: React.FormEvent<HTMLFormElement>) => {
+  //colocar form 
+  //const createNewRecipe = async (event: React.FormEvent<HTMLFormElement>) => {
+  const createNewRecipe = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
     event.preventDefault();
 
     try {
