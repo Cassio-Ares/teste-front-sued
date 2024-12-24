@@ -85,7 +85,8 @@ const Ingredients = () => {
     error: searchError,
     setQuery,
     refetch,
-  } = useSearch<any>("ingredients", search);
+  } = useSearch<IngredientTypes[]>("ingredients", search);
+
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -446,7 +447,7 @@ const Ingredients = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {searchData?.data?.map((ingredients) => (
+              {searchData?.map((ingredients) => (
                 <TableRow key={ingredients.id}>
                   <TableCell className="font-medium">
                     {ingredients.description}

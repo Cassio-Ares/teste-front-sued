@@ -47,7 +47,7 @@ const RecipeView = () => {
     loading: schoolLoading,
     error: schoolError,
     setQuery: setQuerySchool,
-  } = useSearch<any>("schools", schoolSearch);
+  } = useSearch<SchoolBasicTypes[]>("schools", schoolSearch);
 
   const fetchRecipeDetails = useCallback(
     async (recipeId: number, schoolId?: number, desiredServings?: number) => {
@@ -110,13 +110,13 @@ const RecipeView = () => {
 
   const handleSchoolSelect = useCallback(
     (schoolId: number) => {
-      const school = searchSchool?.data?.find((s) => s.id === schoolId);
+      const school = searchSchool?.find((s) => s.id === schoolId);
       if (school && params.id) {
         setSelectedSchool(school);
         fetchRecipeDetails(Number(params.id), school.id, servings);
       }
     },
-    [searchSchool?.data, params.id, servings]
+    [searchSchool, params.id, servings]
   );
 
   // Handle servings change
@@ -174,7 +174,7 @@ const RecipeView = () => {
             <div className="flex justify-start items-center w-[300px] mb-6">
               <Label>Nome da Instituição</Label>
               <InputSelect
-                options={searchSchool?.data}
+                options={searchSchool}
                 value={selectedSchool?.id}
                 onChange={handleSchoolSelect}
                 onSearchChange={(query) => setQuerySchool(query)}

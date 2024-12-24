@@ -20,7 +20,8 @@ export const useSearch = <T>(endpoint: string, initialQuery: string = "") => {
         query ? `${endpoint}/search/${query}` : `${endpoint}/search`
       );
 
-      setData(response.data || response.data.data);
+      // setData(response.data || response.data.data);
+      setData(response.data.data);
     } catch (error) {
       informationError(error);
     } finally {

@@ -74,11 +74,11 @@ const NewRecipe = () => {
     loading: ingredientLoading,
     error: ingredientError,
     setQuery: setQueryIngredient,
-  } = useSearch<any>("ingredients", ingredientSearch);
+  } = useSearch<IngredientTypes[]>("ingredients", ingredientSearch);
 
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const handleIngredientSelect = (ingredientId: number) => {
-    const ingredient = ingredientData?.data?.find((i) => i.id === ingredientId);
+    const ingredient = ingredientData?.find((i) => i.id === ingredientId);
 
     if (ingredient) {
       setSelectedIngredient(ingredient);

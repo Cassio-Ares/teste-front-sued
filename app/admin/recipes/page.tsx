@@ -65,9 +65,9 @@ const Recipes = () => {
     error: recipesError,
     setQuery: setQueryRecipe,
     refetch: refetchRecipe,
-  } = useSearch("recipes", searchRecipe);
+  } = useSearch<Recipe[]>("recipes", searchRecipe);
 
-  console.log(recipesData);
+  console.log('recipesData ',  recipesData);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -118,7 +118,7 @@ const Recipes = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recipesData?.data?.map((recipe) => (
+              {recipesData?.map((recipe) => (
                 <TableRow key={recipe.id}>
                   <TableCell className="font-medium">{recipe.name}</TableCell>
                   <TableCell>{recipe?.nutricionist_name}</TableCell>

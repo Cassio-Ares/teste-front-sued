@@ -71,7 +71,7 @@ const Stock = () => {
     error: inventoryError,
     setQuery: setQueryInventory,
     refetch: refetchInventory,
-  } = useSearch<any>("inventory", search);
+  } = useSearch<StockTypes[]>("inventory", search);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -87,14 +87,14 @@ const Stock = () => {
     loading: schoolLoading,
     error: schoolError,
     setQuery: setQuerySchool,
-  } = useSearch<any>("schools", schoolSearch);
+  } = useSearch<SchoolBasicTypes[]>("schools", schoolSearch);
 
   const [selectedSchool, setSelectedSchool] = useState<SchoolBasicTypes | null>(
     null
   );
 
   const handleSchoolSelect = (schoolId: number) => {
-    const school = searchSchool?.data?.find((s) => s.id === schoolId);
+    const school = searchSchool?.find((s) => s.id === schoolId);
 
     if (school) {
       setSelectedSchool(school);
@@ -114,12 +114,12 @@ const Stock = () => {
     loading: ingredientLoading,
     error: ingredientError,
     setQuery: setQueryIngredient,
-  } = useSearch<any>("ingredients", ingredientSearch);
+  } = useSearch<IngredientTypes[]>("ingredients", ingredientSearch);
 
   const [selectedIngredient, setSelectedIngredient] = useState<IngredientTypes>(null);
 
   const handleIngredientSelect = (ingredientId: number) => {
-    const ingredient = ingredientData?.data?.find((i) => i.id === ingredientId);
+    const ingredient = ingredientData?.find((i) => i.id === ingredientId);
 
     if (ingredient) {
       setSelectedIngredient(ingredient);
@@ -270,7 +270,7 @@ const Stock = () => {
               <div className="flex justify-start items-center w-[300px] gap-4">
                 <Label>Nome da Instituição</Label>
                 <InputSelect
-                  options={searchSchool?.data}
+                  options={searchSchool}
                   value={selectedSchool?.id}
                   onChange={handleSchoolSelect}
                   onSearchChange={(query) => setQuerySchool(query)}
@@ -283,7 +283,7 @@ const Stock = () => {
                 <div className="flex w-full flex-col gap-2">
                   <Label>Nome do ingrediente</Label>
                   <InputSelect
-                    options={ingredientData?.data}
+                    options={ingredientData}
                     value={selectedIngredient?.id}
                     onChange={handleIngredientSelect}
                     onSearchChange={(query) => setQueryIngredient(query)}
@@ -425,7 +425,7 @@ const Stock = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {inventoryData?.data?.map((stock) => (
+              {inventoryData?.map((stock) => (
                 <TableRow key={stock.id}>
                   <TableCell>{stock.ingredient_name}</TableCell>
                   <TableCell>{stock.brand}</TableCell>
