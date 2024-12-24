@@ -38,7 +38,7 @@ export interface ExtendedIngredient extends IngredientTypes {
   quantity?: number;
   deleted_at?: string | null;
   total_cost?: number;
-  deleted_at?: Date | null | undefined;
+  deleted_at?: Date | null ;
 }
 
 
