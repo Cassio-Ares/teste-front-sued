@@ -66,7 +66,7 @@ export interface BaseRecipeInformation{
 
 type RecipeResponseType1 = {
   success: true;
-  recipe: BaseRecipe & {
+  recipe: BaseRecipeInformation & {
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
@@ -76,7 +76,7 @@ type RecipeResponseType1 = {
 };
 
 // Tipo para o terceiro formato
-type RecipeResponseType2 = BaseRecipe & {
+type RecipeResponseType2 = BaseRecipeInformation & {
   ingredients: (ExtendedIngredient & {
     id: number;
     description: string;
