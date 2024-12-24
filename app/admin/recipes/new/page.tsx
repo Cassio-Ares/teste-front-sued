@@ -45,6 +45,7 @@ interface Ingredient {
   ingredient_id: number;
   cooked_weight: number;
   gross_weight: number;
+  unit_of_measure: string;
   description: string;
 }
 
