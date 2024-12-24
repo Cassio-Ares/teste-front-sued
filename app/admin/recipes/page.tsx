@@ -65,7 +65,7 @@ const Recipes = () => {
     error: recipesError,
     setQuery: setQueryRecipe,
     refetch: refetchRecipe,
-  } = useSearch<Recipe[]>("recipes", searchRecipe);
+  } = useSearch<any>("recipes", searchRecipe);
 
   console.log('recipesData ',  recipesData);
 
