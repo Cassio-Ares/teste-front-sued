@@ -18,10 +18,10 @@ import {
   TableRow,
 } from "./ui/table";
 
-import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
+// import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
 
 
-const RecipeDialog = ({ recipe }: { recipe: RecipeInformationTypes }) => {
+const RecipeDialog = ({ recipe }: { recipe: any}) => {
   const [isOpen, setIsOpen] = useState(false);
 
  // console.log("recipeModal", recipe);
