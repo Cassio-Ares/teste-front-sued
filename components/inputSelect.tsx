@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 
-interface OptionType {
-  id: string | number; 
-  [key: string]: any; 
-}
+// interface OptionType {
+//   id: string | number; 
+//   [key: string]: any; 
+// }
 
-interface InputSelectProps {
-  options: OptionType[]; 
-  value: string | number | null; 
-  onChange: (value: string | number) => void; 
-  onSearchChange?: (search: string) => void; 
-  placeholder?: string; 
-  field: string; 
-  forceReset?: boolean; 
-}
+// interface InputSelectProps {
+//   options: OptionType[]; 
+//   value: string | number | null; 
+//   onChange: (value: string | number) => void; 
+//   onSearchChange?: (search: string) => void; 
+//   placeholder?: string; 
+//   field: string; 
+//   forceReset?: boolean; 
+// }
 
 export const InputSelect = ({
   options,
@@ -24,7 +24,7 @@ export const InputSelect = ({
   placeholder,
   field,
   forceReset = false,
-}: InputSelectProps) => {
+}) => {
   const [inputValue, setInputValue] = useState(value ?? "");
   const [showOptions, setShowOptions] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
