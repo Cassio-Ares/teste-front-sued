@@ -2,11 +2,11 @@ import { api } from "../connect/api";
 import { useEffect, useState } from "react";
 import { informationError } from "../components/informationError";
 
-interface ApiResponse<T> {
-  data: {
-    data: T[];
-  };
-}
+// interface ApiResponse<T> {
+//   data: {
+//     data: T[];
+//   };
+// }
 
 export const useGetById = <T>(endpoint: string) => {
   const [data, setData] = useState<T[] | null>(null);
@@ -17,7 +17,7 @@ export const useGetById = <T>(endpoint: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get<ApiResponse<T>>(`${endpoint}/${id}`);
+      const response = await api.get<any>(`${endpoint}/${id}`);
       setData(response.data.data);
     } catch (error) {
       informationError(error);
