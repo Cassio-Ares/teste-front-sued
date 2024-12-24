@@ -85,7 +85,9 @@ const Ingredients = () => {
     error: searchError,
     setQuery,
     refetch,
-  } = useSearch<IngredientTypes[]>("ingredients", search);
+  } = useSearch<any>("ingredients", search);
+
+  console.log('type', typeof searchData.id);
 
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
