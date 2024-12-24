@@ -35,10 +35,18 @@ import { usePost } from "@/hook/usePost";
 //types
 import {
   RecipeTypes
- // IngredientRecipeTypes,
+  IngredientRecipeTypes,
 } from "../../../../lib/@types/recipe.types";
 
 import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
+
+//temporario
+interface Ingredient {
+  ingredient_id: number;
+  cooked_weight: number;
+  gross_weight: number;
+  description: string;
+}
 
 const units: string[] = ["g", "ml"];
 
