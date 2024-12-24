@@ -448,70 +448,71 @@ const Ingredients = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {searchData.map((ingredients) => (
-                <TableRow key={ingredients.id}>
-                  <TableCell className="font-medium">
-                    {ingredients.description}
-                  </TableCell>
+              {searchData &&
+                searchData.map((ingredients) => (
+                  <TableRow key={ingredients.id}>
+                    <TableCell className="font-medium">
+                      {ingredients.description}
+                    </TableCell>
 
-                  <TableCell className="font-medium">
-                    {formatValue(ingredients.legend_type)}
-                  </TableCell>
+                    <TableCell className="font-medium">
+                      {formatValue(ingredients.legend_type)}
+                    </TableCell>
 
-                  <TableCell className="font-medium">
-                    {formatValue(ingredients.gross_weight)}
-                  </TableCell>
+                    <TableCell className="font-medium">
+                      {formatValue(ingredients.gross_weight)}
+                    </TableCell>
 
-                  <TableCell className="font-medium">
-                    {formatValue(ingredients.correction_factor)}
-                  </TableCell>
+                    <TableCell className="font-medium">
+                      {formatValue(ingredients.correction_factor)}
+                    </TableCell>
 
-                  <TableCell className="font-medium">
-                    {formatValue(ingredients.cooking_index)}
-                  </TableCell>
+                    <TableCell className="font-medium">
+                      {formatValue(ingredients.cooking_index)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.kcal)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.kcal)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.kj)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.kj)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.protein)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.protein)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.lipids)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.lipids)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.carbohydrate)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.carbohydrate)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.calcium)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.calcium)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.iron)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.iron)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.retinol)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.retinol)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.vitaminC)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.vitaminC)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {formatValue(ingredients.sodium)}
-                  </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {formatValue(ingredients.sodium)}
+                    </TableCell>
 
-                  <TableCell className="font-medium text-center">
-                    {/* <Dialog>
+                    <TableCell className="font-medium text-center">
+                      {/* <Dialog>
                       <DialogTrigger>
                         <Button
                           variant="ghost"
@@ -541,9 +542,9 @@ const Ingredients = () => {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog> */}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </Card>
