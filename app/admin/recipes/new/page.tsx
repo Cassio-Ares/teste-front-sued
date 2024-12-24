@@ -34,8 +34,8 @@ import { usePost } from "@/hook/usePost";
 
 //types
 import {
-  RecipeTypes
- // IngredientRecipeTypes,
+  RecipeTypes,
+  // IngredientRecipeTypes,
 } from "../../../../lib/@types/recipe.types";
 
 // import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
@@ -51,8 +51,6 @@ interface Ingredient {
   unit_of_measure: Unit;
   description?: string;
 }
-
-
 
 const units: string[] = ["g", "ml"];
 
@@ -386,7 +384,7 @@ const NewRecipe = () => {
                         <Label>Ingrediente</Label>
                         <InputSelect
                           options={ingredientData}
-                          value={selectedIngredient.id}
+                          value={selectedIngredient.id ?? 0}
                           onChange={handleIngredientSelect}
                           onSearchChange={(query) => setQueryIngredient(query)}
                           placeholder="Selecione um ingrediente"
