@@ -86,13 +86,17 @@ const Ingredients = () => {
     setQuery(value);
   };
 
+  type CreatePostResponse = {
+    message: string;
+    // any other fields the response may have
+  };
   //post
   const {
     data: dataPost,
     loading: postLoading,
     error: postError,
     postData: createPost,
-  } = usePost<Partial<IngredientTypes> & {message: string}>("ingredients", refetch);
+  } = usePost<CreatePostResponse>("ingredients", refetch);
   const handleCreateIngredient = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
