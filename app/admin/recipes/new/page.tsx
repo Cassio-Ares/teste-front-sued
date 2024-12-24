@@ -325,7 +325,7 @@ const NewRecipe = () => {
                           {ingredient.unit_of_measure}
                         </span>{" "}
                         de{" "}
-                        {ingredientData?.data?.find(
+                        {ingredientData?.find(
                           (i) => i.id === ingredient.ingredient_id
                         )?.description || "Ingrediente"}
                       </span>
