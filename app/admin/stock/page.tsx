@@ -71,7 +71,7 @@ const Stock = () => {
     error: inventoryError,
     setQuery: setQueryInventory,
     refetch: refetchInventory,
-  } = useSearch("inventory", search);
+  } = useSearch<any>("inventory", search);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -87,7 +87,7 @@ const Stock = () => {
     loading: schoolLoading,
     error: schoolError,
     setQuery: setQuerySchool,
-  } = useSearch("schools", schoolSearch);
+  } = useSearch<any>("schools", schoolSearch);
 
   const [selectedSchool, setSelectedSchool] = useState<SchoolBasicTypes | null>(
     null
@@ -114,7 +114,7 @@ const Stock = () => {
     loading: ingredientLoading,
     error: ingredientError,
     setQuery: setQueryIngredient,
-  } = useSearch("ingredients", ingredientSearch);
+  } = useSearch<any>("ingredients", ingredientSearch);
 
   const [selectedIngredient, setSelectedIngredient] = useState<IngredientTypes>(null);
 

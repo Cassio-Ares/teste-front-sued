@@ -47,7 +47,7 @@ const RecipeView = () => {
     loading: schoolLoading,
     error: schoolError,
     setQuery: setQuerySchool,
-  } = useSearch("schools", schoolSearch);
+  } = useSearch<any>("schools", schoolSearch);
 
   const fetchRecipeDetails = useCallback(
     async (recipeId: number, schoolId?: number, desiredServings?: number) => {
