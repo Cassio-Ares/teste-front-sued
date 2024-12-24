@@ -384,7 +384,7 @@ const NewRecipe = () => {
                         <Label>Ingrediente</Label>
                         <InputSelect
                           options={ingredientData}
-                          value={selectedIngredient.id ?? 0}
+                          value={selectedIngredient?.id ?? 0}
                           onChange={handleIngredientSelect}
                           onSearchChange={(query) => setQueryIngredient(query)}
                           placeholder="Selecione um ingrediente"
