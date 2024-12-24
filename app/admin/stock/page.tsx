@@ -107,7 +107,7 @@ const Stock = () => {
     }
   };
 
-  const [ingredientSearch, setIngredientSearch] = useState<string | null>("");
+  const [ingredientSearch, setIngredientSearch] = useState<string>("");
  
   const {
     data: ingredientData,
