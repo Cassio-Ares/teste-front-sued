@@ -92,7 +92,7 @@ const Ingredients = () => {
     loading: postLoading,
     error: postError,
     postData: createPost,
-  } = usePost<Ingredient>("ingredients", refetch);
+  } = usePost<Partial<IngredientTypes>>("ingredients", refetch);
   const handleCreateIngredient = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
