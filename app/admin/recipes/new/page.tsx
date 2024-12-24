@@ -33,12 +33,12 @@ import { useSearch } from "@/hook/useSearch";
 import { usePost } from "@/hook/usePost";
 
 //types
-import {
-  RecipeTypes,
-  IngredientRecipeTypes,
-} from "../../../../lib/@types/recipe.types";
+// import {
+//   RecipeTypes,
+//   IngredientRecipeTypes,
+// } from "../../../../lib/@types/recipe.types";
 
-import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
+// import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
 
 //temporario
 interface Ingredient {
@@ -176,7 +176,7 @@ const NewRecipe = () => {
     event.preventDefault();
 
     try {
-      const responseData = await createPost<RecipeTypes>(newRecipe);
+      const responseData = await createPost(newRecipe);
       toast.success(responseData?.message || "Receita criada com sucesso!");
       setNewRecipe({
         name: "",
