@@ -29,12 +29,12 @@ import { MissingIngredient } from "@/components/missingIngredient";
 
 //types
 import { SchoolBasicTypes } from "../../../../../lib/@types/school.types";
-//import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types";
+import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types";
 
 
 const RecipeView = () => {
   const params = useParams();
-  const [recipe, setRecipe] = useState(null);
+  const [recipe, setRecipe] = useState<RecipeInformationTypes>(null);
   const [servings, setServings] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
