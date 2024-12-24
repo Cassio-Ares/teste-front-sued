@@ -38,7 +38,7 @@ const RecipeView = () => {
   const [servings, setServings] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [selectedSchool, setSelectedSchool] = useState<any>(null);
 
  
   const [schoolSearch, setSchoolSearch] = useState("");
