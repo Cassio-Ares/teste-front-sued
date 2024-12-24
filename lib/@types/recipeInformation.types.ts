@@ -1,4 +1,4 @@
-export interface IngredientBasicInformation = {
+export interface IngredientBasicInformation {
   cooked_weight: number;
   gross_weight: number;
   unit_of_measure: string;
@@ -24,7 +24,7 @@ export interface IngredientBasicInformation = {
   cost_per_serving: number;
 };
 
-export interface ExtendedIngredient = BaseIngredient & {
+export interface ExtendedIngredient extends BaseIngredient {
   ingredient_id?: number;
   id?: number;
   ingredient_gross_weight?: string;
@@ -40,7 +40,7 @@ export interface ExtendedIngredient = BaseIngredient & {
   total_cost?: number;
 };
 
-export interface BaseRecipeInformation = {
+export interface BaseRecipeInformation{
   id: number;
   name: string;
   url_image: string | null;
