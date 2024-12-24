@@ -34,7 +34,7 @@ import { usePost } from "@/hook/usePost";
 
 //types
 import {
-  RecipeTypes
+  RecipeTypes,
   IngredientRecipeTypes,
 } from "../../../../lib/@types/recipe.types";
 
