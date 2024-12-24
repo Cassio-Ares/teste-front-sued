@@ -87,9 +87,7 @@ const Ingredients = () => {
     refetch,
   } = useSearch<any>("ingredients", search);
 
-  console.log('type', typeof searchData.id);
-
-
+  
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSearch(value);
