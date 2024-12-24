@@ -386,7 +386,7 @@ const NewRecipe = () => {
                         <Label>Ingrediente</Label>
                         <InputSelect
                           options={ingredientData}
-                          value={selectedIngredient?.id}
+                          value={selectedIngredient.id}
                           onChange={handleIngredientSelect}
                           onSearchChange={(query) => setQueryIngredient(query)}
                           placeholder="Selecione um ingrediente"
@@ -429,7 +429,7 @@ const NewRecipe = () => {
                         <Input
                           placeholder="Peso bruto"
                           type="number"
-                          value={newIngredient.gross_weight || ""}
+                          value={newIngredient.gross_weight ?? undefined}
                           onChange={(e) =>
                             setNewIngredient((prev) => ({
                               ...prev,
@@ -443,7 +443,7 @@ const NewRecipe = () => {
                         <Input
                           placeholder="Peso Cozido"
                           type="number"
-                          value={newIngredient.cooked_weight || ""}
+                          value={newIngredient.cooked_weight ?? undefined}
                           onChange={(e) =>
                             setNewIngredient((prev) => ({
                               ...prev,
