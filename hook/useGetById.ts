@@ -2,6 +2,12 @@ import { api } from "../connect/api";
 import { useEffect, useState } from "react";
 import { informationError } from "../components/informationError";
 
+interface ApiResponse<T> {
+  data: {
+    data: T[];
+  };
+}
+
 export const useGetById = <T>(endpoint: string) => {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -11,8 +17,8 @@ export const useGetById = <T>(endpoint: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get<T>(`${endpoint}/${id}`);
-      setData(response.data || response.data.data);
+      const response = await api.get<ApiResponse<T>>(`${endpoint}/${id}`);
+      setData(response.data.data);
     } catch (error) {
       informationError(error);
     } finally {
