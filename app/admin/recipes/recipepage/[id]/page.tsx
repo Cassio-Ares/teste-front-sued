@@ -129,7 +129,7 @@ const RecipeView = () => {
       if (params.id) {
         await fetchRecipeDetails(
           Number(params.id),
-          selectedSchool?.id,
+          selectedSchool.id,
           newServings
         );
       }
