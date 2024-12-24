@@ -33,10 +33,10 @@ import { useSearch } from "@/hook/useSearch";
 import { usePost } from "@/hook/usePost";
 
 //types
-// import {
-//   RecipeTypes,
-//   IngredientRecipeTypes,
-// } from "../../../../lib/@types/recipe.types";
+import {
+  RecipeTypes
+ // IngredientRecipeTypes,
+} from "../../../../lib/@types/recipe.types";
 
 // import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
 
