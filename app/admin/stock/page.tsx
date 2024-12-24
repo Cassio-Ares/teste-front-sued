@@ -44,13 +44,13 @@ import { usePost } from "@/hook/usePost";
 import { useRemove } from "@/hook/useRemove";
 
 //types
-import { SchoolTypes, SchoolBasictypes } from "../../../lib/@types/school.types.ts";
-import { StockTypes } from "../../../lib/@types/stock.types.ts";
-import { IngredientTypes } from "../../../lib/@types/ingredient.types.ts";
+import { SchoolTypes, SchoolBasictypes } from "../../../lib/@types/school.types";
+import { StockTypes } from "../../../lib/@types/stock.types";
+import { IngredientTypes } from "../../../lib/@types/ingredient.types";
 
 const Stock = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [stock, setStock] = useState<StockTypes>({
+  const [stock, setStock] = useState<Partial<StockTypes>>({
     state_id: "",
     city_id: "",
     school_id: "",

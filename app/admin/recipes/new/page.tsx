@@ -36,9 +36,9 @@ import { usePost } from "@/hook/usePost";
 import {
   RecipeTypes,
   IngredientRecipeTypes,
-} from "../../../../lib/@types/recipe.types.ts";
+} from "../../../../lib/@types/recipe.types";
 
-import { IngredientTypes } from "../../../../lib/@types/ingredient.types.ts";
+import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
 
 const units: string[] = ["g", "ml"];
 
@@ -47,7 +47,7 @@ const NewRecipe = () => {
     null
   );
   const [isOpen, setIsOpen] = useState(false);
-  const [newRecipe, setNewRecipe] = useState<RecipeTypes>({
+  const [newRecipe, setNewRecipe] = useState<Partial<RecipeTypes>>({
     name: "",
     preparation_method: "",
     required_utensils: "",
@@ -62,7 +62,7 @@ const NewRecipe = () => {
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [ingredients, setIngredients] = useState<IngredientRecipeTypes[]>([]);
 
-  const [newIngredient, setNewIngredient] = useState<IngredientRecipeTypes>({
+  const [newIngredient, setNewIngredient] = useState<Partial<IngredientRecipeTypes>>({
     ingredient_id: 0,
     cooked_weight: undefined,
     gross_weight: undefined,

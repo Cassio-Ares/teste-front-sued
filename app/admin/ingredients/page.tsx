@@ -47,28 +47,13 @@ import { usePost } from "@/hook/usePost";
 import { useRemove } from "@/hook/useRemove";
 
 //formatValue
-import { formatValue } from "../../../lib/utils/formatValue.ts";
+import { formatValue } from "../../../lib/utils/formatValue";
 
-interface Ingredient {
-  id?: number;
-  description: string;
-  legend_type?: string;
-  gross_weight: number;
-  correction_factor: number | null;
-  cooking_index: number | null;
-  kcal: number | null;
-  protein: number | null;
-  lipids: number | null;
-  carbohydrate: number | null;
-  calcium: number | null;
-  iron: number | null;
-  retinol: number | null;
-  vitaminC: number | null;
-  sodium: number | null;
-}
+//types
+import { IngredientTypes } from "../../../lib/@types/ingredient.types";
 const Ingredients = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [newIngredient, setNewIngredient] = useState<Ingredient>({
+  const [newIngredient, setNewIngredient] = useState<Partial<IngredientTypes>>({
     description: "",
     gross_weight: 100,
     correction_factor: null,
@@ -83,7 +68,7 @@ const Ingredients = () => {
     vitaminC: null,
     sodium: null,
   });
-  const [ingredientsData, setIngredientsData] = useState<Ingredient[]>([]);
+  const [ingredientsData, setIngredientsData] = useState<IngredientTypes[]>([]);
   const [search, setSearch] = useState<string>();
 
   //get

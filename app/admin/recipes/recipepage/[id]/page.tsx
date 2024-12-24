@@ -28,8 +28,8 @@ import { useSearch } from "../../../../../hook/useSearch.ts";
 import { MissingIngredient } from "@/components/missingIngredient";
 
 //types
-import { SchoolBasicTypes } from "../../../../../lib/@types/school.types.ts";
-import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types.ts";
+import { SchoolBasicTypes } from "../../../../../lib/@types/school.types";
+import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types";
 
 
 const RecipeView = () => {
