@@ -93,7 +93,6 @@ const RecipeView = () => {
         if (desiredServings) setServings(desiredServings);
       } catch (error) {
         informationError(error);
-        setError("Erro ao carregar receita");
       } finally {
         setLoading(false);
       }
