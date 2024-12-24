@@ -29,5 +29,5 @@ export const useRemoveReal = (endpoint: string, refetchFn?: () => void) => {
     }
   };
 
-  return { data, loading, error, realRemoveData };
+  return { data, loading, error, removeData };
 };
