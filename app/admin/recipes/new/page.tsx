@@ -46,7 +46,7 @@ interface Ingredient {
   cooked_weight: number;
   gross_weight: number;
   unit_of_measure: string;
-  description: string;
+  description?: string;
 }
 
 const units: string[] = ["g", "ml"];
@@ -71,7 +71,7 @@ const NewRecipe = () => {
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [ingredients, setIngredients] = useState<any>([]);
 
-  const [newIngredient, setNewIngredient] = useState<any>({
+  const [newIngredient, setNewIngredient] = useState<Partial<Ingredient>>({
     ingredient_id: 0,
     cooked_weight: undefined,
     gross_weight: undefined,
