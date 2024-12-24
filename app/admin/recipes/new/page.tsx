@@ -385,7 +385,7 @@ const NewRecipe = () => {
                       <div className="flex w-full flex-col gap-2">
                         <Label>Ingrediente</Label>
                         <InputSelect
-                          options={ingredientData?.data}
+                          options={ingredientData}
                           value={selectedIngredient?.id}
                           onChange={handleIngredientSelect}
                           onSearchChange={(query) => setQueryIngredient(query)}
