@@ -60,9 +60,9 @@ const NewRecipe = () => {
   });
 
   const [ingredientSearch, setIngredientSearch] = useState("");
-  const [ingredients, setIngredients] = useState<IngredientRecipeTypes[]>([]);
+  const [ingredients, setIngredients] = useState<any>([]);
 
-  const [newIngredient, setNewIngredient] = useState<Partial<IngredientRecipeTypes>>({
+  const [newIngredient, setNewIngredient] = useState<any>({
     ingredient_id: 0,
     cooked_weight: undefined,
     gross_weight: undefined,
