@@ -160,7 +160,7 @@ const NewRecipe = () => {
     loading: postLoading,
     error: postError,
     postData: createPost,
-  } = usePost("recipes");
+  } = usePost<Partial<RecipeTypes> & {message: string} >("recipes");
 
   console.log(dataPost);
 
