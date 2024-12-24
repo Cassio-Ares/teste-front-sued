@@ -46,8 +46,8 @@ type Unit = "g" | "ml";
 
 interface Ingredient {
   ingredient_id: number;
-  cooked_weight: number;
-  gross_weight: number;
+  cooked_weight?: number;
+  gross_weight?: number;
   unit_of_measure: Unit;
   description?: string;
 }
@@ -115,7 +115,7 @@ const NewRecipe = () => {
 
   const addIngredient = () => {
     const ingredientToAdd: Ingredient = {
-      ingredient_id: newIngredient.ingredient_id,
+      ingredient_id: newIngredient.ingredient_id ?? 0,
       cooked_weight: newIngredient.cooked_weight,
       gross_weight: newIngredient.gross_weight,
       unit_of_measure: newIngredient.unit_of_measure || "g",
