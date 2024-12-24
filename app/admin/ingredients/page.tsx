@@ -101,7 +101,7 @@ const Ingredients = () => {
     try {
       const responseData = await createPost(newIngredient);
 
-      toast.success(responseData?.message || "Ingrediente criado com sucesso!");
+      toast.success(responseData?.message);
 
       setNewIngredient({
         description: "",
@@ -214,7 +214,7 @@ const Ingredients = () => {
                     <Input
                       name="correction_factor"
                       type="number"
-                      value={newIngredient.correction_factor || null}
+                      value={newIngredient.correction_factor ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -229,7 +229,7 @@ const Ingredients = () => {
                     <Input
                       name="cooking_index"
                       type="number"
-                      value={newIngredient.cooking_index || null}
+                      value={newIngredient.cooking_index ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -244,7 +244,7 @@ const Ingredients = () => {
                     <Input
                       name="kcal"
                       type="number"
-                      value={newIngredient.kcal || null}
+                      value={newIngredient.kcal ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -274,7 +274,7 @@ const Ingredients = () => {
                     <Input
                       name="protein"
                       type="number"
-                      value={newIngredient.protein || null}
+                      value={newIngredient.protein ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -289,7 +289,7 @@ const Ingredients = () => {
                     <Input
                       name="lipids"
                       type="number"
-                      value={newIngredient.lipids || null}
+                      value={newIngredient.lipids ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -304,7 +304,7 @@ const Ingredients = () => {
                     <Input
                       name="carbohydrate"
                       type="number"
-                      value={newIngredient.carbohydrate || null}
+                      value={newIngredient.carbohydrate ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -319,7 +319,7 @@ const Ingredients = () => {
                     <Input
                       name="calcium"
                       type="number"
-                      value={newIngredient.calcium || null}
+                      value={newIngredient.calcium ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -334,7 +334,7 @@ const Ingredients = () => {
                     <Input
                       name="iron"
                       type="number"
-                      value={newIngredient.iron || null}
+                      value={newIngredient.iron ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -349,7 +349,7 @@ const Ingredients = () => {
                     <Input
                       name="retinol"
                       type="number"
-                      value={newIngredient.retinol || null}
+                      value={newIngredient.retinol ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -364,7 +364,7 @@ const Ingredients = () => {
                     <Input
                       name="vitaminC"
                       type="number"
-                      value={newIngredient.vitaminC || null}
+                      value={newIngredient.vitaminC ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
@@ -379,7 +379,7 @@ const Ingredients = () => {
                     <Input
                       name="sodium"
                       type="number"
-                      value={newIngredient.sodium || null}
+                      value={newIngredient.sodium ?? undefined}
                       onChange={(event) => {
                         setNewIngredient({
                           ...newIngredient,
