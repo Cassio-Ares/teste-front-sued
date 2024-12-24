@@ -94,6 +94,7 @@ const Ingredients = () => {
     setQuery(value);
   };
 
+  
    //post
   const {
     data: dataPost,
@@ -447,7 +448,7 @@ const Ingredients = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {searchData?.map((ingredients) => (
+              {searchData.map((ingredients) => (
                 <TableRow key={ingredients.id}>
                   <TableCell className="font-medium">
                     {ingredients.description}
