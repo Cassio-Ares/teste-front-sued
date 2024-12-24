@@ -1,6 +1,21 @@
 import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 
+interface OptionType {
+  id: string | number; 
+  [key: string]: any; 
+}
+
+interface InputSelectProps {
+  options: OptionType[]; 
+  value: string | number | null; 
+  onChange: (value: string | number) => void; 
+  onSearchChange?: (search: string) => void; 
+  placeholder?: string; 
+  field: string; 
+  forceReset?: boolean; 
+}
+
 export const InputSelect = ({
   options,
   value,
