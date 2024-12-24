@@ -27,7 +27,7 @@ export interface IngredientBasicInformation {
 
 export interface ExtendedIngredient extends IngredientTypes {
   ingredient_id?: number;
-  ingredient_gross_weight?: string;
+  ingredient_gross_weight?: string | number;
   brand?: string;
   unit_price?: string;
   expiration_date?: string;
@@ -38,6 +38,7 @@ export interface ExtendedIngredient extends IngredientTypes {
   quantity?: number;
   deleted_at?: string | null;
   total_cost?: number;
+  deleted_at: Date | null | undefined;
 }
 
 
