@@ -41,13 +41,18 @@ import {
 // import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
 
 //temporario
+
+type Unit = "g" | "ml";
+
 interface Ingredient {
   ingredient_id: number;
   cooked_weight: number;
   gross_weight: number;
-  unit_of_measure: string;
+  unit_of_measure: Unit;
   description?: string;
 }
+
+
 
 const units: string[] = ["g", "ml"];
 
@@ -113,7 +118,7 @@ const NewRecipe = () => {
       ingredient_id: newIngredient.ingredient_id,
       cooked_weight: newIngredient.cooked_weight,
       gross_weight: newIngredient.gross_weight,
-      unit_of_measure: newIngredient.unit_of_measure,
+      unit_of_measure: newIngredient.unit_of_measure || "g",
     };
 
     if (editingIngredient !== null) {
