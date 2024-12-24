@@ -27,52 +27,27 @@ import { useSearch } from "../../../../../hook/useSearch.ts";
 
 import { MissingIngredient } from "@/components/missingIngredient";
 
-// interface Ingredient {
-//   ingredient_description: string;
-//   description: string;
-//   quantity: number;
-//   adjusted_quantity: number;
-//   unit_of_measure: string;
-//   cost_per_serving?: number;
-//   adjusted_cost?: number;
-//   total_cost?: number;
-//   kcal: number;
-// }
+//types
+import { SchoolBasicTypes } from "../../../../../lib/@types/school.types.ts";
+import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types.ts";
 
-// interface Recipe {
-//   school_name?: string;
-//   name: string;
-//   metrics: {
-//     total_ingredients?: number;
-//     cost_per_serving?: number;
-//   };
-//   prep_time: string;
-//   servings: number;
-//   total_cost?: number;
-//   required_utensils: string[] | string;
-//   preparation_method: string;
-//   ingredients: Ingredient[];
-// }
 
-//   const [recipe, setRecipe] = useState<Recipe | null | any>(null);
-//   const [servings, setServings] = useState<number>(1);
-//   const [loading, setLoading] = useState<boolean>(true);
-//   const [error, setError] = useState<string | null>(null);
 const RecipeView = () => {
   const params = useParams();
-  const [recipe, setRecipe] = useState(null);
+  const [recipe, setRecipe] = useState<RecipeInformationTypes>(null);
   const [servings, setServings] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState(null);
   const [selectedSchool, setSelectedSchool] = useState(null);
 
+ 
   const [schoolSearch, setSchoolSearch] = useState("");
   const {
     data: searchSchool,
     loading: schoolLoading,
     error: schoolError,
     setQuery: setQuerySchool,
-  } = useSearch("schools", schoolSearch);
+  } = useSearch<SchoolBasicTypes>("schools", schoolSearch);
 
   const fetchRecipeDetails = useCallback(
     async (recipeId: number, schoolId?: number, desiredServings?: number) => {
@@ -235,8 +210,14 @@ const RecipeView = () => {
                 <p>
                   Número de Ingredientes: {recipe?.ingredients?.length || 0}
                 </p>
-                <p>Tempo de Preparo: {recipe?.recipe?.prep_time || recipe?.prep_time} min</p>
-                <p>Número de Porções: {recipe?.recipe?.servings || recipe?.servings}</p>
+                <p>
+                  Tempo de Preparo:{" "}
+                  {recipe?.recipe?.prep_time || recipe?.prep_time} min
+                </p>
+                <p>
+                  Número de Porções:{" "}
+                  {recipe?.recipe?.servings || recipe?.servings}
+                </p>
               </div>
 
               <div>
@@ -256,12 +237,16 @@ const RecipeView = () => {
 
             <div>
               <h2 className="font-semibold">Utensílios Necessários</h2>
-              <p>{recipe?.recipe?.required_utensils || recipe?.required_utensils}</p>
+              <p>
+                {recipe?.recipe?.required_utensils || recipe?.required_utensils}
+              </p>
             </div>
           </div>
 
           <h2 className="text-xl font-bold mb-2">Método de Preparo</h2>
-          <p className="mb-4">{recipe?.recipe?.preparation_method || recipe?.preparation_method}</p>
+          <p className="mb-4">
+            {recipe?.recipe?.preparation_method || recipe?.preparation_method}
+          </p>
 
           <h2 className="text-xl font-bold mb-2">Ingredientes</h2>
           <Table>

@@ -18,57 +18,13 @@ import {
   TableRow,
 } from "./ui/table";
 
-interface Recipe {
-  id: number;
-  name: string;
-  preparationMethod: string;
-  requiredUtensils: string;
-  prepTime: number;
-  cookTime: number;
-  servings: number;
-  totalCost: number;
-  createdByName: string;
-  schoolName: string;
-  metrics: RecipeMetrics;
-  ingredients: RecipeIngredient[];
-  description?: string;
-  observations?: string;
-}
+import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
 
-interface RecipeMetrics {
-  costPerServing: number;
-  totalIngredients: number;
-  averageIngredientCost: number;
-}
 
-interface RecipeIngredient {
-  id: number;
-  description: string;
-  grossWeight: number;
-  cookedWeight: number;
-  correctionFactor: number;
-  cookingIndex: number;
-  unitOfMeasure: string;
-  cost: number;
-  costPerServing: number;
-  kcal: number;
-  kj: number;
-  protein?: number;
-  lipids?: number;
-  carbohydrate?: number;
-  calcium?: number;
-  iron?: number;
-  retinol?: number;
-  vitaminC?: number;
-  sodium?: number;
-  brand: string;
-  expirationDate: string;
-}
-
-const RecipeDialog = ({ recipe }: { recipe: Recipe }) => {
+const RecipeDialog = ({ recipe }: { recipe: RecipeInformationTypes }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  console.log("recipeModal", recipe);
+ // console.log("recipeModal", recipe);
 
   const handleExportToPDF = () => {
     const doc = new jsPDF({

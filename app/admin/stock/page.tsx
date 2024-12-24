@@ -43,25 +43,14 @@ import { useSearch } from "@/hook/useSearch";
 import { usePost } from "@/hook/usePost";
 import { useRemove } from "@/hook/useRemove";
 
-interface Stock {
-  id?: number;
-  state_id?: string | number;
-  city_id?: string | number;
-  school_id?: string | number;
-  ingredient_id?: string | number;
-  ingredient_name?: string;
-  brand: string;
-  quantity_min: number | null;
-  unit_of_measure: string;
-  unit_price: number | null;
-  total_quantity: number | null;
-  total_invested?: number;
-  expiration_date: string | Date;
-}
+//types
+import { SchoolTypes, SchoolBasictypes } from "../../../lib/@types/school.types.ts";
+import { StockTypes } from "../../../lib/@types/stock.types.ts";
+import { IngredientTypes } from "../../../lib/@types/ingredient.types.ts";
 
 const Stock = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [stock, setStock] = useState<Stock>({
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [stock, setStock] = useState<StockTypes>({
     state_id: "",
     city_id: "",
     school_id: "",
@@ -82,7 +71,7 @@ const Stock = () => {
     error: inventoryError,
     setQuery: setQueryInventory,
     refetch: refetchInventory,
-  } = useSearch("inventory", search);
+  } = useSearch<Stock>("inventory", search);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -90,18 +79,19 @@ const Stock = () => {
     setQueryInventory(value);
   };
 
-  console.log(inventoryData);
-
   //busca para post
-  const [schoolSearch, setSchoolSearch] = useState("");
+  const [schoolSearch, setSchoolSearch] = useState<string | null>("");
+
   const {
     data: searchSchool,
     loading: schoolLoading,
     error: schoolError,
     setQuery: setQuerySchool,
-  } = useSearch("schools", schoolSearch);
+  } = useSearch<SchoolTypes>("schools", schoolSearch);
 
-  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [selectedSchool, setSelectedSchool] = useState<SchoolBasicTypes | null>(
+    null
+  );
 
   const handleSchoolSelect = (schoolId: number) => {
     const school = searchSchool?.data?.find((s) => s.id === schoolId);
@@ -117,8 +107,8 @@ const Stock = () => {
     }
   };
 
-  const [ingredientSearch, setIngredientSearch] = useState("");
-
+  const [ingredientSearch, setIngredientSearch] = useState<string | null>("");
+ 
   const {
     data: ingredientData,
     loading: ingredientLoading,
@@ -126,7 +116,8 @@ const Stock = () => {
     setQuery: setQueryIngredient,
   } = useSearch("ingredients", ingredientSearch);
 
-  const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [selectedIngredient, setSelectedIngredient] = useState<IngredientTypes>(null);
+
   const handleIngredientSelect = (ingredientId: number) => {
     const ingredient = ingredientData?.data?.find((i) => i.id === ingredientId);
 
@@ -145,10 +136,9 @@ const Stock = () => {
     loading: postLoading,
     error: postError,
     postData: createPost,
-  } = usePost<Stock>("inventory", refetchInventory);
+  } = usePost<StockTypes>("inventory", refetchInventory);
 
-  console.log("stock", stock);
-
+ 
   const [resetSchoolInput, setResetSchoolInput] = useState(false);
   const [resetIngredientInput, setResetIngredientInput] = useState(false);
 
@@ -217,7 +207,7 @@ const Stock = () => {
 
   //função para valor monetario
   const [unitPrice, setUnitPrice] = useState<any>(stock.unit_price || "");
-
+  
   const formatMoney = (value = "0") => {
     // Remove qualquer caractere não numérico
     let formattedValue = value.replace(/\D/g, "");
@@ -249,14 +239,12 @@ const Stock = () => {
     refetchInventory
   );
   const removeItem = async (id: number) => {
-    
     await removeData(id);
 
     toast.success(data?.message);
   };
 
-  console.log("stock", stock);
-
+ 
   return (
     <div className="flex flex-col justify-start gap-4">
       <h1 className="font-bold text-xl">Estoque</h1>
@@ -463,7 +451,7 @@ const Stock = () => {
                     )}
                   </TableCell>
                   <TableCell className="font-medium text-center">
-                   <Dialog>
+                    <Dialog>
                       <DialogTrigger>
                         <Button
                           variant="ghost"
@@ -485,14 +473,13 @@ const Stock = () => {
                         <DialogFooter>
                           <Button
                             variant="destructive"
-                             onClick={() => removeItem(stock.id || 0)}
+                            onClick={() => removeItem(stock.id || 0)}
                           >
                             Remover
                           </Button>
                         </DialogFooter>
                       </DialogContent>
-                    </Dialog> 
-                   
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))}

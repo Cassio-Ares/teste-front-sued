@@ -32,27 +32,13 @@ import { informationError } from "@/components/informationError";
 import { useSearch } from "@/hook/useSearch";
 import { usePost } from "@/hook/usePost";
 
-// Define types for better type safety
-interface Ingredient {
-  id?: number;
-  ingredient_id: number;
-  cooked_weight?: number | undefined;
-  gross_weight?: number | undefined;
-  unit_of_measure: "kg" | "g" | "L" | "ml";
-  description?: string;
-}
+//types
+import {
+  RecipeTypes,
+  IngredientRecipeTypes,
+} from "../../../../lib/@types/recipe.types.ts";
 
-interface Recipe {
-  name: string;
-  preparation_method: string;
-  required_utensils: string;
-  description_of_recipe: string;
-  observations: string;
-  prep_time: number;
-  timeOfCoccao: number;
-  servings: number;
-  ingredients: Ingredient[];
-}
+import { IngredientTypes } from "../../../../lib/@types/ingredient.types.ts";
 
 const units: string[] = ["g", "ml"];
 
@@ -61,7 +47,7 @@ const NewRecipe = () => {
     null
   );
   const [isOpen, setIsOpen] = useState(false);
-  const [newRecipe, setNewRecipe] = useState<Recipe>({
+  const [newRecipe, setNewRecipe] = useState<RecipeTypes>({
     name: "",
     preparation_method: "",
     required_utensils: "",
@@ -73,32 +59,10 @@ const NewRecipe = () => {
     ingredients: [],
   });
 
-  // //busca para post
-  // const [schoolSearch, setSchoolSearch] = useState("");
-  // const {
-  //   data: searchSchool,
-  //   loading: schoolLoading,
-  //   error: schoolError,
-  //   setQuery: setQuerySchool,
-  // } = useSearch("schools", schoolSearch);
-
-  // const [selectedSchool, setSelectedSchool] = useState(null);
-
-  // const handleSchoolSelect = (schoolId: number) => {
-  //   const school = searchSchool?.data?.find((s) => s.id === schoolId);
-
-  //   if (school) {
-  //     setSelectedSchool(school);
-  //     setNewRecipe({
-  //       ...newRecipe,
-  //       school_id: school.id,
-  //     });
-  //   }
-  // };
-
   const [ingredientSearch, setIngredientSearch] = useState("");
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [newIngredient, setNewIngredient] = useState<Ingredient>({
+  const [ingredients, setIngredients] = useState<IngredientRecipeTypes[]>([]);
+
+  const [newIngredient, setNewIngredient] = useState<IngredientRecipeTypes>({
     ingredient_id: 0,
     cooked_weight: undefined,
     gross_weight: undefined,
@@ -110,7 +74,7 @@ const NewRecipe = () => {
     loading: ingredientLoading,
     error: ingredientError,
     setQuery: setQueryIngredient,
-  } = useSearch("ingredients", ingredientSearch);
+  } = useSearch<IngredientTypes>("ingredients", ingredientSearch);
 
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const handleIngredientSelect = (ingredientId: number) => {
@@ -196,13 +160,15 @@ const NewRecipe = () => {
     loading: postLoading,
     error: postError,
     postData: createPost,
-  } = usePost<Stock>("recipes");
+  } = usePost("recipes");
+
+  console.log(dataPost);
 
   const createNewRecipe = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
-      const responseData = await createPost<Recipe>(newRecipe);
+      const responseData = await createPost<RecipeTypes>(newRecipe);
       toast.success(responseData?.message);
       setNewRecipe({
         name: "",
@@ -221,8 +187,6 @@ const NewRecipe = () => {
       setIsOpen(false);
     }
   };
-
-
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
