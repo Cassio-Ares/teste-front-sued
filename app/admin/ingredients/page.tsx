@@ -53,9 +53,9 @@ import { formatValue } from "../../../lib/utils/formatValue";
 import { IngredientTypes } from "../../../lib/@types/ingredient.types";
 
 
-type SearchDataType = {
-  data: IngredientTypes[];
-};
+// type SearchDataType = {
+//   data: IngredientTypes[];
+// };
 
 
 const Ingredients = () => {
@@ -85,7 +85,7 @@ const Ingredients = () => {
     error: searchError,
     setQuery,
     refetch,
-  } = useSearch<any>("ingredients", search);
+  } = useSearch("ingredients", search);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
