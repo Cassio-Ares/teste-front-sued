@@ -4,8 +4,8 @@ import { informationError } from "../components/informationError";
 
 export const useRemoveReal = (endpoint: string, refetchFn?: () => void) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState < any > null;
-  const [data, setData] = useState < any > null;
+  const [error, setError] = useState<any>(null);
+  const [data, setData] = useState<any>(null);
 
   const removeData = async (id: string | number) => {
     setLoading(true);

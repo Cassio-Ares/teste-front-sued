@@ -11,7 +11,7 @@ export const useUpdata = <T>(endpoint: string, refetchFn?: () => void) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.put<T>(`${endpoint}/${id}`, body);
+      const response = await api.put(`${endpoint}/${id}`, body);
       setData(response.data || response.data.data);
 
       if (refetchFn) {
