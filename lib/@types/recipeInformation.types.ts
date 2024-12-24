@@ -1,12 +1,4 @@
-export interface BaseIngredient {
-  id?: number;
-  description: string;
-  ingredient_description?: string;
-  gross_weight: number;
-  unit_of_measure: string;
-  cost: number;
-  cost_per_serving: number;
-}
+import { IngredientTypes } from "./ingredient.types";
 
 export interface IngredientBasicInformation {
   cooked_weight: number;
@@ -33,7 +25,7 @@ export interface IngredientBasicInformation {
   cost_per_serving: number;
 }
 
-export interface ExtendedIngredient extends BaseIngredient {
+export interface ExtendedIngredient extends IngredientTypes {
   ingredient_id?: number;
   ingredient_gross_weight?: string;
   brand?: string;
