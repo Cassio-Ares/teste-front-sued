@@ -34,7 +34,7 @@ import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformat
 
 const RecipeView = () => {
   const params = useParams();
-  const [recipe, setRecipe] = useState<RecipeInformationTypes>(null);
+  const [recipe, setRecipe] = useState<RecipeInformationTypes | null>(null);
   const [servings, setServings] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
