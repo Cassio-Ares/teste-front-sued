@@ -31,16 +31,14 @@ import { MissingIngredient } from "@/components/missingIngredient";
 import { SchoolBasicTypes } from "../../../../../lib/@types/school.types";
 import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types";
 
-
 const RecipeView = () => {
   const params = useParams();
-  const [recipe, setRecipe] = useState<RecipeInformationTypes | null>(null);
+  const [recipe, setRecipe] = useState(null);
   const [servings, setServings] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
 
- 
   const [schoolSearch, setSchoolSearch] = useState("");
   const {
     data: searchSchool,
@@ -140,8 +138,8 @@ const RecipeView = () => {
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>Erro: {error}</div>;
 
-  console.log("recipe", recipe);  
- 
+  console.log("recipe", recipe);
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
