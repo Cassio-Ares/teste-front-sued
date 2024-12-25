@@ -140,6 +140,7 @@ const RecipeView = () => {
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>Erro: {error}</div>;
 
+  console.log("recipe", recipe);  
  
   return (
     <div className="container mx-auto p-4">
