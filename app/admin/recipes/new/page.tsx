@@ -1,141 +1,122 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '@/components/ui/select';
-import { ArrowLeft, PlusCircle, Plus, Pencil, Trash } from 'lucide-react';
-import { ToastContainer, toast } from 'react-toastify';
-import { api } from '@/connect/api';
-import { InputSelect } from '@/components/inputSelect';
-import { informationError } from '@/components/informationError';
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectLabel,
+  SelectItem,
+} from "@/components/ui/select";
+import { ArrowLeft, PlusCircle, Plus, Pencil, Trash } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import { api } from "@/connect/api";
+import { InputSelect } from "@/components/inputSelect";
+import { informationError } from "@/components/informationError";
 
+import { useSearch } from "@/hook/useSearch";
+import { usePost } from "@/hook/usePost";
 
-// Define types for better type safety
+//types
+import {
+  RecipeTypes,
+  // IngredientRecipeTypes,
+} from "../../../../lib/@types/recipe.types";
+
+// import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
+
+//temporario
+
+type Unit = "g" | "ml";
+
 interface Ingredient {
-  id?: number;
   ingredient_id: number;
-  quantity: number;
-  unit_of_measure: 'kg' | 'g' | 'L' | 'ml';
+  cooked_weight?: number;
+  gross_weight?: number;
+  unit_of_measure: Unit;
   description?: string;
 }
 
-interface Recipe {
-  school_id: string | number;
-  name: string;
-  preparation_method: string;
-  required_utensils: string;
-  prep_time: number;
-  servings: number;
-  ingredients: Ingredient[];
-}
-
-const units: string[] = ['kg', 'g', 'L', 'ml'];
+const units: string[] = ["g", "ml"];
 
 const NewRecipe = () => {
-  const [editingIngredient, setEditingIngredient] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [editingIngredient, setEditingIngredient] = useState<number | null>(
+    null
+  );
   const [isOpen, setIsOpen] = useState(false);
-
-  const [newRecipe, setNewRecipe] = useState<Recipe>({
-    school_id: '',
+  const [newRecipe, setNewRecipe] = useState<Partial<RecipeTypes>>({
     name: "",
     preparation_method: "",
     required_utensils: "",
+    description_of_recipe: "",
+    observations: "",
     prep_time: 0,
+    timeOfCoccao: 0,
     servings: 1,
-    ingredients: []
+    ingredients: [],
   });
 
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [ingredientSearch, setIngredientSearch] = useState<string>('');
-  const [searchIngredient, setSearchIngredient] = useState<Ingredient[]>([]);
+  const [ingredientSearch, setIngredientSearch] = useState("");
+  const [ingredients, setIngredients] = useState<any>([]);
 
-  const [newIngredient, setNewIngredient] = useState<Ingredient>({
+  const [newIngredient, setNewIngredient] = useState<Partial<Ingredient>>({
     ingredient_id: 0,
-    quantity: 0,
-    unit_of_measure: 'g'
+    cooked_weight: undefined,
+    gross_weight: undefined,
+    unit_of_measure: "g",
   });
 
+  const {
+    data: ingredientData,
+    loading: ingredientLoading,
+    error: ingredientError,
+    setQuery: setQueryIngredient,
+  } = useSearch<any>("ingredients", ingredientSearch);
+
+  const [selectedIngredient, setSelectedIngredient] = useState<any>(null);
+  const handleIngredientSelect = (ingredientId: number) => {
+    const ingredient = ingredientData?.find((i) => i.id === ingredientId);
+
+    if (ingredient) {
+      setSelectedIngredient(ingredient);
+      setNewIngredient({
+        ...newIngredient,
+        ingredient_id: ingredient.id,
+      });
+    }
+  };
+
+  const [resetIngredientInput, setResetIngredientInput] = useState(false);
+
+  // Sincronizar ingredientes com newRecipe
   useEffect(() => {
-    if (ingredientSearch.length > 2) {
-      fetchDataIngredient();
-    } else {
-      fetchDataIngredient();
-    }
-  }, [ingredientSearch]);
-
-  const fetchDataIngredient = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = ingredientSearch.length > 2
-        ? await api.get(`/ingredients/search/${ingredientSearch}`)
-        : await api.get(`/ingredients`);
-
-      setSearchIngredient(response.data.data);
-
-      // if (response.data.data.length > 0) {
-      //   const ingredientData = response?.data?.data;
-      //   setIngredients(prevIngredient => ({
-      //     ...prevIngredient,
-      //     ingredient_id: ingredientData.id
-      //   }));
-      // }
-    } catch (error) {
-      informationError(error)
-    } finally {
-      setLoading(false);
-    }
-  }, [ingredientSearch])
-
-
-  const [schoolSearch, setSchoolSearch] = useState("");
-  const [searchSchool, setSearchSchool] = useState([]);
-
-  useEffect(() => {
-    if (schoolSearch.length > 2) {
-      fetchDataSchool();
-    }
-  }, [schoolSearch]);
-
- 
-  const fetchDataSchool = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get(`/schools/search/${schoolSearch}`)
-      
-
-      setSearchSchool(response.data.data);
-
-      if (response.data.data.length > 0) {
-        const schoolData = response?.data?.data[0];
-        setNewRecipe(prevRecipe => ({
-          ...prevRecipe,
-          // state_id: schoolData.state_id,
-          // city_id: schoolData.city_id,
-          school_id: schoolData.id
-        }));
-      }
-    } catch (error) {
-      informationError(error)
-    } finally {
-      setLoading(false);
-    }
-  }, [schoolSearch])
-
+    setNewRecipe((prev) => ({
+      ...prev,
+      ingredients: ingredients,
+    }));
+  }, [ingredients]);
 
   const addIngredient = () => {
     const ingredientToAdd: Ingredient = {
-      ingredient_id: newIngredient.ingredient_id,
-      quantity: newIngredient.quantity,
-      unit_of_measure: newIngredient.unit_of_measure
+      ingredient_id: newIngredient.ingredient_id ?? 0,
+      cooked_weight: newIngredient.cooked_weight,
+      gross_weight: newIngredient.gross_weight,
+      unit_of_measure: newIngredient.unit_of_measure || "g",
     };
 
     if (editingIngredient !== null) {
@@ -144,35 +125,36 @@ const NewRecipe = () => {
       setIngredients(updatedIngredients);
       toast.success("Ingrediente atualizado com sucesso!");
     } else {
-      setIngredients(prev => [...prev, ingredientToAdd]);
+      setIngredients((prev) => [...prev, ingredientToAdd]);
       toast.success("Ingrediente adicionado com sucesso!");
     }
 
-    // Reset states
+    // Resetar estados após adicionar o ingrediente
+    setSelectedIngredient(null);
+    setResetIngredientInput(true);
+
+    setTimeout(() => {
+      setResetIngredientInput(false);
+    }, 0);
+
+    setIngredientSearch("");
     setNewIngredient({
       ingredient_id: 0,
-      quantity: 0,
-      unit_of_measure: 'g'
+      cooked_weight: undefined,
+      gross_weight: undefined,
+      unit_of_measure: "g",
     });
     setEditingIngredient(null);
     setIsOpen(false);
-  };
-
-  const updateIngredient = (index: number, key: keyof Ingredient, value: any) => {
-    const updatedIngredients = [...ingredients];
-    updatedIngredients[index] = {
-      ...updatedIngredients[index],
-      [key]: value
-    };
-    setIngredients(updatedIngredients);
   };
 
   const handleAddIngredient = () => {
     setEditingIngredient(null);
     setNewIngredient({
       ingredient_id: 0,
-      quantity: 0,
-      unit_of_measure: 'g'
+      cooked_weight: undefined,
+      gross_weight: undefined,
+      unit_of_measure: "g",
     });
     setIsOpen(true);
   };
@@ -183,49 +165,45 @@ const NewRecipe = () => {
     setIsOpen(true);
   };
 
-  const createNewRecipe = async () => {
-    setLoading(true);
-    setError(null);
+  //post
+
+  const {
+    data: dataPost,
+    loading: postLoading,
+    error: postError,
+    postData: createPost,
+  } = usePost<any>("recipes");
+
+  console.log(dataPost);
+  
+
+  //colocar form 
+  //const createNewRecipe = async (event: React.FormEvent<HTMLFormElement>) => {
+  const createNewRecipe = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+
     try {
-      if (ingredients.length === 0) {
-        toast.error('Por favor, adicione pelo menos um ingrediente');
-        return;
-      }
-
-      const recipeData = {
-        ...newRecipe,
-        ingredients: ingredients.map(ing => ({
-          ingredient_id: ing.ingredient_id,
-          quantity: Number(ing.quantity), // Ensure number
-          unit_of_measure: ing.unit_of_measure
-        }))
-      };
-
-     console.log('recipeData: ', recipeData);
-
-      const response = await api.post('/recipes', recipeData);
-      toast.success(response.data.message);
-
-      // Reset form or navigate
+      const responseData = await createPost(newRecipe);
+      toast.success(responseData?.message || "Receita criada com sucesso!");
       setNewRecipe({
-        school_id: '',
         name: "",
         preparation_method: "",
         required_utensils: "",
+        description_of_recipe: "",
+        observations: "",
         prep_time: 0,
+        timeOfCoccao: 0,
         servings: 1,
-        ingredients: []
+        ingredients: [],
       });
+
       setIngredients([]);
     } catch (error) {
-      toast.error('Erro ao criar receita');
-      console.error(error);
-    } finally {
-      setLoading(false);
+      setIsOpen(false);
     }
   };
-
-  console.log('data', searchIngredient[0]?.description);
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
@@ -239,7 +217,10 @@ const NewRecipe = () => {
         </div>
         <div className="flex justify-start gap-4 md:justify-end mb-4">
           <Link href="/admin/recipes">
-            <Button variant="outline" className="text-orange-500 hover:text-orange-600 font-bold">
+            <Button
+              variant="outline"
+              className="text-orange-500 hover:text-orange-600 font-bold"
+            >
               <ArrowLeft /> Voltar
             </Button>
           </Link>
@@ -250,22 +231,27 @@ const NewRecipe = () => {
       <div className="flex flex-col md:flex-row w-full gap-4 mt-6 md:mt-20">
         <div className="flex w-full md:w-[60%] flex-col gap-4">
           {/* Recipe Name */}
-          <div className="flex justify-start items-center w-[300px] gap-4">
-            <Label>Nome da escola</Label>
+          {/* <div className="flex justify-start items-center w-[300px] gap-4">
+            <Label>Nome da Instituição</Label>
             <InputSelect
-              options={searchSchool}
-              value={newRecipe.school_id}
-              onChange={(value) => setNewRecipe({ ...newRecipe, school_id: value })}
-              onSearchChange={(searchTerm) => setSchoolSearch(searchTerm)}
-              placeholder="Selecione uma escola"
+              options={searchSchool?.data}
+              value={selectedSchool?.id}
+              onChange={handleSchoolSelect}
+              onSearchChange={(query) => setQuerySchool(query)}
+              placeholder="Selecione uma Instituição"
+              forceReset={resetSchoolInput}
               field="name"
             />
-          </div>
+          </div> */}
           <div className="flex w-full flex-col gap-2">
-            <Label className="text-base">Nome da refeição</Label>
+            <Label className="text-base mb-2 font-semibold">
+              Nome da refeição
+            </Label>
             <Input
               value={newRecipe.name}
-              onChange={(e) => setNewRecipe({ ...newRecipe, name: e.target.value })}
+              onChange={(e) =>
+                setNewRecipe({ ...newRecipe, name: e.target.value })
+              }
               placeholder="Nome do prato"
             />
           </div>
@@ -273,46 +259,87 @@ const NewRecipe = () => {
           {/* Servings and Prep Time */}
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex w-full flex-col gap-2">
-              <Label className="text-base">Atende quantas pessoas?</Label>
+              <Label className="text-base mb-2 font-semibold">
+                Atende quantas pessoas?
+              </Label>
               <Input
                 type="number"
-                value={newRecipe.servings = 1}
-                onChange={(e) => setNewRecipe({ ...newRecipe, servings: parseInt(e.target.value) })}
+                value={(newRecipe.servings = 1)}
+                onChange={(e) =>
+                  setNewRecipe({
+                    ...newRecipe,
+                    servings: parseInt(e.target.value),
+                  })
+                }
                 placeholder="Ex.: 1"
                 disabled
               />
             </div>
 
             <div className="flex w-full flex-col gap-2">
-              <Label className="text-base">Tempo de Preparo</Label>
+              <Label className="text-base mb-2 font-semibold">
+                Tempo de Cocção (min)
+              </Label>
+              <Input
+                type="text"
+                value={newRecipe.timeOfCoccao || ""}
+                onChange={(e) =>
+                  setNewRecipe({
+                    ...newRecipe,
+                    timeOfCoccao: parseInt(e.target.value),
+                  })
+                }
+                placeholder="Ex.: 30"
+              />
+            </div>
+            <div className="flex w-full flex-col gap-2">
+              <Label className="text-base mb-2 font-semibold">
+                Tempo de Preparo(min)
+              </Label>
               <Input
                 type="text"
                 value={newRecipe.prep_time || ""}
-                onChange={(e) => setNewRecipe({ ...newRecipe, prep_time: parseInt(e.target.value) })}
-                placeholder="Ex.: 30 min"
+                onChange={(e) =>
+                  setNewRecipe({
+                    ...newRecipe,
+                    prep_time: parseInt(e.target.value),
+                  })
+                }
+                placeholder="Ex.: 30"
               />
             </div>
           </div>
 
           {/* Ingredients List */}
           <div className="flex flex-col mt-4">
-            {ingredients.length > 0 && (
+            {ingredients?.length > 0 && (
               <div className="mb-4">
                 <h4 className="font-semibold">Ingredientes adicionados</h4>
                 <ul className="list-disc pl-5 marker:text-gray-500">
                   {ingredients.map((ingredient, index) => (
-                    <li key={index} className="flex justify-between items-center">
+                    <li
+                      key={index}
+                      className="flex justify-between items-center"
+                    >
                       <span>
-                        - <span className="font-bold">
-                          {ingredient.quantity} {ingredient.unit_of_measure}
-                        </span> de {searchIngredient.find(i => i.id === ingredient.ingredient_id)?.description || 'Ingrediente'}
+                        -{" "}
+                        <span className="font-bold">
+                          {ingredient.cooked_weight || ingredient.gross_weight}{" "}
+                          {ingredient.unit_of_measure}
+                        </span>{" "}
+                        de{" "}
+                        {ingredientData?.find(
+                          (i) => i.id === ingredient.ingredient_id
+                        )?.description || "Ingrediente"}
                       </span>
                       <div className="flex gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
                           className="text-black"
-                          onClick={() => handleEditIngredient(index, ingredient)}
+                          onClick={() =>
+                            handleEditIngredient(index, ingredient)
+                          }
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -321,7 +348,9 @@ const NewRecipe = () => {
                           size="sm"
                           className="text-red-500 hover:text-red-700"
                           onClick={() => {
-                            setIngredients(prev => prev.filter((_, i) => i !== index));
+                            setIngredients((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            );
                             toast.success("Ingrediente removido com sucesso!");
                           }}
                         >
@@ -350,40 +379,35 @@ const NewRecipe = () => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    {editingIngredient !== null ? "Editar ingrediente" : "Adicionar ingrediente"}
+                    {editingIngredient !== null
+                      ? "Editar ingrediente"
+                      : "Adicionar ingrediente"}
                   </DialogTitle>
                   <DialogDescription>
                     <div className="flex w-full gap-4 mt-4 text-start">
                       <div className="flex w-full flex-col gap-2">
                         <Label>Ingrediente</Label>
                         <InputSelect
-                          options={searchIngredient}
-                          value={newIngredient.ingredient_id || ''}  
-                          onChange={(value) => setNewIngredient(prev => ({
-                            ...prev,
-                            ingredient_id: value as Ingredient['ingredient_id']
-                          }))}
-                          onSearchChange={(searchTerm) => setIngredientSearch(searchTerm)}
+                          options={ingredientData}
+                          value={selectedIngredient?.id ?? 0}
+                          onChange={handleIngredientSelect}
+                          onSearchChange={(query) => setQueryIngredient(query)}
                           placeholder="Selecione um ingrediente"
+                          forceReset={resetIngredientInput}
                           field="description"
                         />
-                        {/* <InputSelect
-                          options={searchIngredient}
-                          value={ingredients.ingredient_id}
-                          onChange={(value) => setIngredients({ ...ingredients, ingredient_id: value })}
-                          onSearchChange={(searchTerm) => setIngredientSearch(searchTerm)}
-                          placeholder="Selecione um ingrediente"
-                          field="description"
-                        /> */}
                       </div>
                       <div className="flex w-full flex-col gap-2">
                         <Label>Unidade de medida</Label>
                         <Select
-                          value={newIngredient.unit_of_measure || 'g'}
-                          onValueChange={(value) => setNewIngredient(prev => ({
-                            ...prev,
-                            unit_of_measure: value as Ingredient['unit_of_measure']
-                          }))}
+                          value={newIngredient.unit_of_measure || "g"}
+                          onValueChange={(value) =>
+                            setNewIngredient((prev) => ({
+                              ...prev,
+                              unit_of_measure:
+                                value as Ingredient["unit_of_measure"],
+                            }))
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione uma unidade de medida" />
@@ -408,11 +432,27 @@ const NewRecipe = () => {
                         <Input
                           placeholder="Peso bruto"
                           type="number"
-                          value={newIngredient.quantity || ''}
-                          onChange={(e) => setNewIngredient(prev => ({
-                            ...prev,
-                            quantity: Number(e.target.value)
-                          }))}
+                          value={newIngredient.gross_weight ?? undefined}
+                          onChange={(e) =>
+                            setNewIngredient((prev) => ({
+                              ...prev,
+                              gross_weight: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="flex w-full flex-col gap-2">
+                        <Label>Peso Cozido</Label>
+                        <Input
+                          placeholder="Peso Cozido"
+                          type="number"
+                          value={newIngredient.cooked_weight ?? undefined}
+                          onChange={(e) =>
+                            setNewIngredient((prev) => ({
+                              ...prev,
+                              cooked_weight: Number(e.target.value),
+                            }))
+                          }
                         />
                       </div>
                     </div>
@@ -434,11 +474,18 @@ const NewRecipe = () => {
         {/* Preparation Method and Utensils */}
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-col">
-            <Label className="text-base mb-2 font-semibold">Modo de preparo</Label>
+            <Label className="text-base mb-2 font-semibold">
+              Modo de preparo
+            </Label>
             <Card className="p-4">
               <Textarea
                 value={newRecipe.preparation_method || ""}
-                onChange={(e) => setNewRecipe({ ...newRecipe, preparation_method: e.target.value })}
+                onChange={(e) =>
+                  setNewRecipe({
+                    ...newRecipe,
+                    preparation_method: e.target.value,
+                  })
+                }
                 className="w-full"
                 rows={6}
                 placeholder="Descreva como você prepara a sua receita..."
@@ -448,15 +495,56 @@ const NewRecipe = () => {
 
           <div className="flex flex-col mt-2">
             <Label className="text-base mb-2 font-semibold">
-              Utensílios e equipamentos <small className="font-normal">(Opcional)</small>
+              Utensílios e equipamentos
             </Label>
             <Card className="p-4">
               <Textarea
                 value={newRecipe.required_utensils || ""}
-                onChange={(e) => setNewRecipe({ ...newRecipe, required_utensils: e.target.value })}
+                onChange={(e) =>
+                  setNewRecipe({
+                    ...newRecipe,
+                    required_utensils: e.target.value,
+                  })
+                }
                 className="w-full"
                 rows={6}
                 placeholder="Liste os utensílios necessários..."
+              />
+            </Card>
+          </div>
+          <div className="flex flex-col mt-2">
+            <Label className="text-base mb-2 font-semibold">
+              Cardápio (descreva como você quer a descrição do cardápio)
+            </Label>
+            <Card className="p-4">
+              <Textarea
+                value={newRecipe.description_of_recipe || ""}
+                onChange={(e) =>
+                  setNewRecipe({
+                    ...newRecipe,
+                    description_of_recipe: e.target.value,
+                  })
+                }
+                className="w-full"
+                rows={6}
+                placeholder="Descreva como você quer a descrição do cardápio..."
+              />
+            </Card>
+          </div>
+          <div className="flex flex-col mt-2">
+            <Label className="text-base mb-2 font-semibold">Observação</Label>
+            <Card className="p-4">
+              <Textarea
+                value={newRecipe.observations || ""}
+                onChange={(e) =>
+                  setNewRecipe({
+                    ...newRecipe,
+                    observations: e.target.value,
+                  })
+                }
+                className="w-full"
+                rows={6}
+                placeholder="Descreva alguma observações..."
               />
             </Card>
           </div>
@@ -466,9 +554,10 @@ const NewRecipe = () => {
               variant="outline"
               className="flex w-[300px] md:w-[200px] bg-orange-500 hover:bg-orange-600 text-white hover:text-white font-bold"
               onClick={createNewRecipe}
-              disabled={loading}
+              disabled={postLoading}
             >
-              <Plus className="mr-2" /> {loading ? 'Salvando...' : 'Salvar cardápio'}
+              <Plus className="mr-2" />{" "}
+              {postLoading ? "Salvando..." : "Salvar cardápio"}
             </Button>
           </div>
         </div>
