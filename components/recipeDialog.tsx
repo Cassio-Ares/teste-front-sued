@@ -20,11 +20,10 @@ import {
 
 // import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
 
-
-const RecipeDialog = ({ recipe }: { recipe: any}) => {
+const RecipeDialog = ({ recipe }: { recipe: any }) => {
   const [isOpen, setIsOpen] = useState(false);
 
- // console.log("recipeModal", recipe);
+  // console.log("recipeModal", recipe);
 
   const handleExportToPDF = () => {
     const doc = new jsPDF({
@@ -102,7 +101,7 @@ const RecipeDialog = ({ recipe }: { recipe: any}) => {
       "Custo Total (R$)",
     ];
     const columnWidths = [
-      40, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,30
+      40, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
     ];
 
     doc.setFontSize(10);
@@ -218,13 +217,13 @@ const RecipeDialog = ({ recipe }: { recipe: any}) => {
             <p>
               Custo Total: R${" "}
               {recipe?.recipe?.metrics?.total_cost.toFixed(2) ||
-                recipe?.metrics?.total_cost.toFixed(2) ||
+                recipe?.metrics?.total_cost?.toFixed(2) ||
                 "0,00"}
             </p>
             <p>
               Custo por Porção: R${" "}
               {recipe?.recipe?.metrics?.cost_per_serving.toFixed(2) ||
-                recipe?.metrics?.cost_per_serving.toFixed(2) ||
+                recipe?.metrics?.cost_per_serving?.toFixed(2) ||
                 "0,00"}
             </p>
             <p>
@@ -238,7 +237,11 @@ const RecipeDialog = ({ recipe }: { recipe: any}) => {
           </div>
           <div>
             <h3 className="font-semibold">Utensílios Necessários</h3>
-            <p>{recipe?.recipe?.required_utensils || recipe?.required_utensils || "Não informado"}</p>
+            <p>
+              {recipe?.recipe?.required_utensils ||
+                recipe?.required_utensils ||
+                "Não informado"}
+            </p>
           </div>
         </div>
 
@@ -300,7 +303,11 @@ const RecipeDialog = ({ recipe }: { recipe: any}) => {
           <p>{recipe.recipe?.name}</p> */}
 
         <h3 className="text-lg font-bold mt-4">Método de Preparo</h3>
-        <p>{recipe?.recipe?.preparation_method || recipe?.preparation_method || "Não informado"}</p>
+        <p>
+          {recipe?.recipe?.preparation_method ||
+            recipe?.preparation_method ||
+            "Não informado"}
+        </p>
 
         <h3 className="text-lg font-bold mt-4">Tempo de Cocçõa</h3>
         <p>{recipe?.recipe?.timeOfCoccao || recipe?.timeOfCoccao || "0"} min</p>
@@ -309,10 +316,18 @@ const RecipeDialog = ({ recipe }: { recipe: any}) => {
         <p>{recipe?.recipe?.prep_time || recipe?.prep_time || "0"} min</p>
 
         <h3 className="text-lg font-bold mt-4">Descrições de Preparo</h3>
-        <p>{recipe?.recipe?.description_of_recipe || recipe?.description_of_recipe || "Não informado"}</p>
+        <p>
+          {recipe?.recipe?.description_of_recipe ||
+            recipe?.description_of_recipe ||
+            "Não informado"}
+        </p>
 
         <h3 className="text-lg font-bold mt-4">Observações</h3>
-        <p>{recipe?.recipe?.observations || recipe?.observations || "Não informado"}</p>
+        <p>
+          {recipe?.recipe?.observations ||
+            recipe?.observations ||
+            "Não informado"}
+        </p>
 
         <Button onClick={handleExportToPDF}>Exportar para PDF</Button>
       </DialogContent>

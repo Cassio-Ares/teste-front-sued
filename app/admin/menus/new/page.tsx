@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useCallback, useEffect, useState } from "react";
-import { ingredientsRecipe } from '../../../mock/ingredienteRecipe.mock'
+import { ingredientsRecipe } from "../../../mock/ingredienteRecipe.mock";
 
 import {
   Select,
@@ -48,7 +48,17 @@ import { api } from "@/connect/api";
 import { informationError } from "@/components/informationError";
 import { InputSelect } from "@/components/inputSelect";
 
+import { useSearch } from "./../../../../hook/useSearch";
+import { usePost } from "./../../../../hook/usePost";
 
+interface MenuItems {
+  school_id: string;
+  menu_id: string;
+  recipe_id: string;
+  weekday: number | "";
+  meal_type: string | "";
+  additional_notes: string;
+}
 
 const weekDay = [
   { label: "Domingo", value: 1 },
@@ -68,69 +78,44 @@ const mealType = [
   { label: "Lanche Periodo Integral Tarde", value: "FullPeriodMealAfternoon" },
 ];
 
-// interface MenuItem {
-//   school_id: number | string;
-//   menu_id: number | string;
-//   recipe_id: number | string;
-//   weekday: number | string;
-//   meal_type: number | string;
-//   additional_notes: number | string;
-// }
-
-
 const NewMenu = () => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [menuItems, setMenuItems] = useState<any>({
-    school_id: '',
-    menu_id: '',
-    recipe_id: '',
+  const [menuItems, setMenuItems] = useState<MenuItems>({
+    school_id: "",
+    menu_id: "",
+    recipe_id: "",
     weekday: "",
     meal_type: "",
     additional_notes: "",
   });
 
   //school
-  const [searchSchool, setSearchSchool] = useState<any[]>([]);
   const [schoolSearch, setSchoolSearch] = useState("");
 
-  useEffect(() => {
-    if (schoolSearch.length > 2) {
-      fetchDataSchool();
-    } else {
-      fetchDataSchool()
+  const {
+    data: searchSchool,
+    loading: searchSchoolLoading,
+    error: searchSchoolError,
+    setQuery: setQuerySchool,
+  } = useSearch<any>("schools", schoolSearch);
+
+  const [selectedSchool, setSelectedSchool] = useState<any>(null);
+  const [resetSchoolInput, setResetSchoolInput] = useState(false);
+
+  const handleSchoolSelect = (schoolId: number) => {
+    const school = searchSchool?.find((s) => s.id === schoolId);
+    if (school) {
+      setMenuItems((prevMenuItems) => ({
+        ...prevMenuItems,
+        school_id: school.id,
+      }));
     }
-    fetchDataSchool();
-  }, [schoolSearch]);
+  };
 
-  const fetchDataSchool = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get(`/schools/search/${schoolSearch}`)
-
-      setSearchSchool(response.data.data);
-
-      if (response.data.data.length > 0) {
-        const schoolData = response?.data?.data[0];
-        setMenuItems(prevMenuItems => ({
-          ...prevMenuItems,
-          school_id: schoolData.id
-        }));
-      }
-    } catch (error) {
-      informationError(error)
-    } finally {
-      setLoading(false);
-    }
-  }, [schoolSearch])
-
-
- 
-
-
-  const [menu, setMenu] = useState<any>('');
+  //menu
+  const [menu, setMenu] = useState<any>("");
   const [searchMenu, setSearchMenu] = useState<any[]>([]);
 
   useEffect(() => {
@@ -144,128 +129,185 @@ const NewMenu = () => {
     setError(null);
 
     try {
+      // Fazendo a requisição para obter os menus
       const response = await api.get("/menus", {
         params: {
-          month: menu,
-          school_id: menu.school_id,
-          year: new Date().getFullYear(),
+          school_id: selectedSchool?.id, // Usando o selectedSchool para filtrar os menus pela escola
+          month: menu, // Utilizando o mês selecionado
+          year: new Date().getFullYear(), // Usando o ano atual
         },
       });
 
+      console.log("response.data.data.menu:", response.data.data);
+
+      // Formatação dos dados recebidos
       const formattedData = response.data.data.map((item: any) => ({
-        formattedLabel: `Mês: ${item.month},
-                          Semanas: ${item.month_weeks === 'FIRST_AND_THIRD' ? '1 e 3' : '2 e 4'},
-                           Tipo: ${item.week_type === 'ODD' ? 'Impar' : 'Par'},`,
+        formattedLabel: `Mês: ${item.month}, 
+                          Semanas: ${
+                            item.month_weeks === "FIRST_AND_THIRD"
+                              ? "1 e 3"
+                              : "2 e 4"
+                          },
+                          Tipo: ${item.week_type === "ODD" ? "Impar" : "Par"}`,
       }));
 
       console.log("formattedData:", formattedData);
 
+      // Atualizando o estado com os menus formatados
       setSearchMenu(formattedData);
 
+      // Definindo o menu_id se houver dados
       if (response.data.data.length > 0) {
         const menuData = response?.data?.data[0];
-        setMenuItems(prevMenuItems => ({
+        setMenuItems((prevMenuItems) => ({
           ...prevMenuItems,
-          menu_id: menuData.id
+          menu_id: menuData.id,
         }));
       }
-
     } catch (error) {
       informationError(error);
     } finally {
       setLoading(false);
     }
-  }, [menu]);
+  }, [menu, selectedSchool]);
 
-  console.log('menu: ', searchMenu);
+  //recipe
+  const [recipeSearch, setRecipeSearch] = useState("");
 
+  const {
+    data: searchRecipe,
+    loading: searchRecipeLoading,
+    error: searchRecipeError,
+    setQuery: setQueryRecipe,
+  } = useSearch<any>("recipes", recipeSearch);
 
+  const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
+  const [resetRecipeInput, setResetRecipeInput] = useState(false);
 
-  //search recipe
-  const [recipes, setRecipes] = useState([]);
-  const [searchRecipe, setSeachRecipe] = useState<string>("");
-
-  useEffect(() => {
-    if (searchRecipe.length > 2) {
-      fieldData();
-    } else {
-      fieldData();
-    }
-    fieldData();
-  }, [searchRecipe]);
-
-  const fieldData = useCallback(async () => {
-    try {
-      const response = searchRecipe.length > 2
-        ? await api.get(`/recipes/search/${searchRecipe}`)
-        : await api.get("/recipes");
-
-      setRecipes(response.data.data);
-
-      if (response.data.data.length > 0) {
-        const recipeData = response?.data?.data[0];
-        setMenuItems(prevMenuItems => ({
-          ...prevMenuItems,
-          recipe_id: recipeData.id
-        }));
-      }
-
-    } catch (error) {
-      informationError(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [searchRecipe]);
-
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    try {
-      const response = await api.post("/menu_items", menuItems);
-
-      toast.success(response.data.message);
-
-      setMenuItems({
-        school_id: "",
-        menu_id:  "",
-        recipe_id:  '',
-        weekday: "",
-        meal_type: "",
-        additional_notes: "",
-      })
-
-      // Limpa os estados de pesquisa IMPORTANTE
-      setSchoolSearch("");
-      setMenu("");
-      setSeachRecipe("");
-
-    } catch (error) {
-      informationError(error);
+  const handleRecipeSelect = (recipeId: number) => {
+    const recipe = searchRecipe?.find((r) => r.id === recipeId);
+    if (recipe) {
+      setMenuItems((prevMenuItems) => ({
+        ...prevMenuItems,
+        recipe_id: recipe.id,
+      }));
     }
   };
 
-  console.log('menuItems: ', menuItems);
+  const {
+    data: dataPost,
+    loading: postLoading,
+    error: postError,
+    postData: createPost,
+  } = usePost("menu_items");
+
+  const [selectedMenu, setSelectedMenu] = useState<any>(null);
+  const [resetMenuInput, setResetMenuInput] = useState(false);
+
+  // const createMenuItem = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   try {
+  //     const response = await createPost(menuItems);
+
+  //     console.log("response:", response);
+
+  //     toast.success(response?.message);
+
+  //     setMenuItems({
+  //       school_id: "",
+  //       menu_id: "",
+  //       recipe_id: "",
+  //       weekday: "",
+  //       meal_type: "",
+  //       additional_notes: "",
+  //     });
+
+  //     setSelectedSchool(null);
+  //     setSelectedRecipe(null);
+  //     setSelectedMenu(null);
+
+  //     setResetSchoolInput(true);
+  //     setResetRecipeInput(true);
+  //     setResetMenuInput(true);
+
+  //     setTimeout(() => {
+  //       setResetSchoolInput(false);
+  //       setResetRecipeInput(false);
+  //       setResetMenuInput(false);
+  //     }, 0);
+
+  //     setSchoolSearch("");
+  //     setRecipeSearch("");
+  //     setMenu("");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  const createMenuItem = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const response = await createPost(menuItems);
+
+      console.log("response:", response);
+
+      toast.success(response?.message);
+
+      setMenuItems({
+        school_id: "",
+        menu_id: "",
+        recipe_id: "",
+        weekday: "",
+        meal_type: "",
+        additional_notes: "",
+      });
+
+      setSelectedSchool(null);
+      setSelectedRecipe(null);
+      setSelectedMenu(null);
+
+      setResetSchoolInput(true);
+      setResetRecipeInput(true);
+      setResetMenuInput(true);
+
+      setTimeout(() => {
+        setResetSchoolInput(false);
+        setResetRecipeInput(false);
+        setResetMenuInput(false);
+      }, 100); // Atraso de 100ms para garantir que o reset seja aplicado corretamente
+
+      setSchoolSearch("");
+      setRecipeSearch("");
+      setMenu("");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
         <Link href="/admin/menus">
-          <Button variant="outline" className="text-orange-500 hover:text-orange-600 font-bold">
+          <Button
+            variant="outline"
+            className="text-orange-500 hover:text-orange-600 font-bold"
+          >
             <ArrowLeft /> Voltar
           </Button>
         </Link>
         <ToastContainer />
       </div>
       <h1 className="text-3xl font-bold">Criar Novo Menu</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={createMenuItem} className="space-y-4">
         <div className="flex flex-col gap-2">
-          <Label>Nome da escola</Label>
+          <Label>Nome da Instituição</Label>
           <InputSelect
             options={searchSchool}
-            value={menuItems.school_id}
-            onChange={(value) => setMenu({ ...menuItems, school_id: value })}
-            onSearchChange={(searchTerm) => setSchoolSearch(searchTerm)}
-            placeholder="Selecione uma escola"
+            value={selectedSchool?.id}
+            onChange={handleSchoolSelect}
+            onSearchChange={(query) => setQuerySchool(query)}
+            placeholder="Selecione uma Instituição"
+            forceReset={resetSchoolInput}
             field="name"
           />
         </div>
@@ -273,11 +315,12 @@ const NewMenu = () => {
         <div className="flex w-full flex-col gap-2">
           <Label>Escolha um periodo</Label>
           <InputSelect
-            options={searchMenu || ""}
+            options={searchMenu || []}
             value={menuItems.menu_id}
             onChange={(value) => setMenu({ ...menuItems, menu_id: value })}
             onSearchChange={(searchTerm) => setMenu(searchTerm)}
-            placeholder="Selecione um Mês"
+            placeholder="Selecione um Mês ex: 10"
+            forceReset={resetMenuInput}
             field="formattedLabel"
           />
         </div>
@@ -285,11 +328,12 @@ const NewMenu = () => {
         <div className="flex w-full flex-col gap-2">
           <Label>Escolha um Receita</Label>
           <InputSelect
-            options={recipes}
-            value={menuItems.recipe_id}
-            onChange={(value) => setMenu({ ...menuItems, recipe_id: value })}
-            onSearchChange={(searchTerm) => setMenu(searchTerm)}
+            options={searchRecipe}
+            value={selectedRecipe?.id}
+            onChange={handleRecipeSelect}
+            onSearchChange={(query) => setQueryRecipe(query)}
             placeholder="Selecione uma Receita"
+            forceReset={resetRecipeInput}
             field="name"
           />
         </div>
@@ -299,11 +343,16 @@ const NewMenu = () => {
           <Select
             value={menuItems.weekday}
             onValueChange={(value) =>
-              setMenuItems((prev: any) => ({ ...prev, weekday:parseFloat(value) }))
+              setMenuItems((prev: any) => ({
+                ...prev,
+                weekday: parseFloat(value),
+              }))
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Escolha um dia da semana" />
+              {/* <SelectValue placeholder="Escolha um dia da semana" /> */}
+              {weekDay.find((day) => day.value === menuItems.weekday)?.label ||
+                "Escolha um dia da semana"}
             </SelectTrigger>
             <SelectContent>
               {weekDay.map((day) => (
@@ -339,18 +388,16 @@ const NewMenu = () => {
           <Card className="p-4">
             <Textarea
               value={menuItems.additional_notes}
-              onChange={(e) => setMenuItems({ ...menuItems, additional_notes: e.target.value })}
+              onChange={(e) =>
+                setMenuItems({ ...menuItems, additional_notes: e.target.value })
+              }
               placeholder="Observações"
               rows={6}
             />
           </Card>
         </div>
 
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full"
-        >
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Criando..." : "Enviar"}
         </Button>
       </form>
