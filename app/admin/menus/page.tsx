@@ -3,8 +3,11 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { informationError } from "@/components/informationError";
 import { InputSelect } from "@/components/inputSelect";
@@ -15,6 +18,7 @@ import { api } from "@/connect/api";
 import Link from "next/link";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
+import { Eye, Trash } from "lucide-react";
 import { useSearch } from "@/hook/useSearch";
 
 const MealTypeLabels = {
@@ -51,6 +55,8 @@ const Menus = () => {
       setSelectedSchool(school);
     }
   };
+
+  console.log(selectedSchool?.name);
 
   const fetchMenus = async (selectedDate: Date) => {
     if (!selectedSchool) {
@@ -110,6 +116,9 @@ const Menus = () => {
     }).format(date);
   };
 
+  //enviar dados pelo link
+  // const encodedData = encodeURIComponent(JSON.stringify(selectedDateMenus));
+
   console.log("selectedDateMenus", selectedDateMenus);
 
   return (
@@ -148,11 +157,20 @@ const Menus = () => {
             />
           </div>
 
-          <Calendar
+          {/* <Calendar
             mode="single"
             selected={date}
             onSelect={handleDateSelect}
             className="rounded-md border"
+          /> */}
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={selectedSchool ? handleDateSelect : undefined} // Só permite seleção se houver uma escola selecionada
+            className={`rounded-md border ${
+              !selectedSchool && "cursor-not-allowed opacity-80"
+            }`} // Adiciona estilo visual para indicar que está desabilitado
+            disabled={!selectedSchool} // Prop fictícia para visualização, pode ser ajustada dependendo da biblioteca usada
           />
         </div>
       </div>
@@ -168,29 +186,86 @@ const Menus = () => {
           <div className="space-y-4">
             {selectedDateMenus?.items?.length > 0 ? (
               selectedDateMenus.items.map((item: any, index: number) => (
-                <div
-                  key={index}
-                  className="p-4 rounded-lg bg-orange-50 border border-orange-200"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-orange-800">
-                      {MealTypeLabels[item.meal_type]}
-                    </h3>
+                <div>
+                  <div
+                    key={index}
+                    className="p-4 rounded-lg bg-orange-50 border border-orange-200"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-orange-800">
+                        {MealTypeLabels[item.meal_type]}
+                      </h3>
+                    </div>
+
+                    <div className="text-gray-700">
+                      {/* <p className="font-medium">{item.recipe_name}</p> */}
+                      <div className="flex justify-between items-center mt-2">
+                        <p className="font-medium">{item.recipe_name}</p>
+                        {item.recipe_id && (
+                          <Link
+                            //href={`/admin/menus/menudetails/${item.recipe_id}?data=${encodedData}`}
+                            href={`/admin/menus/menudetails/${
+                              item.recipe_id
+                            }?data=${encodeURIComponent(
+                              JSON.stringify({
+                                date: selectedDateMenus.date,
+                                schoolId: selectedSchool.id,
+                                schoolName: selectedSchool.name,
+                                items: selectedDateMenus.items.filter(
+                                  (menuItem: any) =>
+                                    menuItem.recipe_id === item.recipe_id
+                                ),
+                              })
+                            )}`}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-500 hover:text-gray-700"
+                            >
+                              <Eye />
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
+                      {item.estimated_portions && (
+                        <p className="text-sm mt-1">
+                          Porções estimadas: {item.estimated_portions}
+                        </p>
+                      )}
+                      {item.additional_notes && (
+                        <p className="text-sm mt-2 text-gray-600">
+                          Observações: {item.additional_notes}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="text-gray-700">
-                    <p className="font-medium">{item.recipe_name}</p>
-                    {item.estimated_portions && (
-                      <p className="text-sm mt-1">
-                        Porções estimadas: {item.estimated_portions}
-                      </p>
-                    )}
-                    {item.additional_notes && (
-                      <p className="text-sm mt-2 text-gray-600">
-                        Observações: {item.additional_notes}
-                      </p>
-                    )}
-                  </div>
+                  {/* <DialogTrigger>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Deseja remover o cardápio?</DialogTitle>
+                      <DialogDescription>
+                        Essa ação não poderá ser desfeita.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="destructive"
+                        onClick={() => removeItem(recipe.id || 0)}
+                      >
+                        Remover
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent> */}
                 </div>
               ))
             ) : (
