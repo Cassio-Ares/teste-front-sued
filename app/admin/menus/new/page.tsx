@@ -341,11 +341,11 @@ const NewMenu = () => {
         <div className="flex w-full flex-col gap-2">
           <Label>Dia da semana</Label>
           <Select
-            value={menuItems.weekday}
+            value={menuItems.weekday?.toString() || ""}
             onValueChange={(value) =>
               setMenuItems((prev: any) => ({
                 ...prev,
-                weekday: parseFloat(value),
+                weekday: value !== "" ? parseInt(value) : "",
               }))
             }
           >
