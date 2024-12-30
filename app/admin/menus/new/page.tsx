@@ -251,7 +251,7 @@ const NewMenu = () => {
 
       console.log("response:", response);
 
-      toast.success(response?.message);
+      toast.success(response?.message || "Item criado com sucesso!");
 
       setMenuItems({
         school_id: "",
