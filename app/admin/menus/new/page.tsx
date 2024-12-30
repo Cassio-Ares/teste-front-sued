@@ -199,7 +199,7 @@ const NewMenu = () => {
     loading: postLoading,
     error: postError,
     postData: createPost,
-  } = usePost("menu_items");
+  } = usePost<any>("menu_items");
 
   const [selectedMenu, setSelectedMenu] = useState<any>(null);
   const [resetMenuInput, setResetMenuInput] = useState(false);
