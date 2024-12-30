@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { informationError } from "@/components/informationError";
 import RecipeDialog from "@/components/recipeDialog";
 import { Input } from "@/components/ui/input";
