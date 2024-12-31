@@ -52,11 +52,9 @@ import { formatValue } from "../../../lib/utils/formatValue";
 //types
 import { IngredientTypes } from "../../../lib/@types/ingredient.types";
 
-
 // type SearchDataType = {
 //   data: IngredientTypes[];
 // };
-
 
 const Ingredients = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -87,15 +85,13 @@ const Ingredients = () => {
     refetch,
   } = useSearch<any>("ingredients", search);
 
-  
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSearch(value);
     setQuery(value);
   };
 
-  
-   //post
+  //post
   const {
     data: dataPost,
     loading: postLoading,
@@ -145,6 +141,8 @@ const Ingredients = () => {
 
     toast.success(data?.message);
   };
+  console.log("new", newIngredient);
+  console.log(ingredientsData);
 
   return (
     <div className="flex flex-col justify-start gap-4 ">
@@ -250,7 +248,7 @@ const Ingredients = () => {
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label>Kcal</Label>
-                    <Input
+                    {/* <Input
                       name="kcal"
                       type="number"
                       value={newIngredient.kcal ?? undefined}
@@ -258,6 +256,19 @@ const Ingredients = () => {
                         setNewIngredient({
                           ...newIngredient,
                           kcal: parseFloat(event.target.value),
+                        });
+                      }}
+                      placeholder="Digite o kcal"
+                    /> */}
+                    <Input
+                      name="kcal"
+                      type="number"
+                      value={newIngredient.kcal ?? undefined} // Asegura que o valor seja 0 se for null ou undefined
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setNewIngredient({
+                          ...newIngredient,
+                          kcal: value === "" ? 0 : parseFloat(value), // Quando o campo estiver vazio, o valor será 0
                         });
                       }}
                       placeholder="Digite o kcal"
@@ -554,4 +565,3 @@ const Ingredients = () => {
 };
 
 export default Ingredients;
-

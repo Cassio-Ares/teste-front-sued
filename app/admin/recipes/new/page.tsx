@@ -89,6 +89,9 @@ const NewRecipe = () => {
   } = useSearch<any>("ingredients", ingredientSearch);
 
   const [selectedIngredient, setSelectedIngredient] = useState<any>(null);
+
+  console.log("selectedIngredient", selectedIngredient);
+
   const handleIngredientSelect = (ingredientId: number) => {
     const ingredient = ingredientData?.find((i) => i.id === ingredientId);
 
@@ -175,9 +178,8 @@ const NewRecipe = () => {
   } = usePost<any>("recipes");
 
   console.log(dataPost);
-  
 
-  //colocar form 
+  //colocar form
   //const createNewRecipe = async (event: React.FormEvent<HTMLFormElement>) => {
   const createNewRecipe = async (
     event: React.MouseEvent<HTMLButtonElement>
@@ -204,6 +206,9 @@ const NewRecipe = () => {
       setIsOpen(false);
     }
   };
+
+  console.log(ingredients);
+  console.log(newRecipe);
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
@@ -389,7 +394,7 @@ const NewRecipe = () => {
                         <Label>Ingrediente</Label>
                         <InputSelect
                           options={ingredientData}
-                          value={selectedIngredient?.id ?? 0}
+                          value={selectedIngredient?.id}
                           onChange={handleIngredientSelect}
                           onSearchChange={(query) => setQueryIngredient(query)}
                           placeholder="Selecione um ingrediente"
@@ -441,7 +446,7 @@ const NewRecipe = () => {
                           }
                         />
                       </div>
-                      <div className="flex w-full flex-col gap-2">
+                      {/* <div className="flex w-full flex-col gap-2">
                         <Label>Peso Cozido</Label>
                         <Input
                           placeholder="Peso Cozido"
@@ -454,7 +459,7 @@ const NewRecipe = () => {
                             }))
                           }
                         />
-                      </div>
+                      </div> */}
                     </div>
                   </DialogDescription>
                 </DialogHeader>

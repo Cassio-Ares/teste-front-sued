@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 
 // interface OptionType {
-//   id: string | number; 
-//   [key: string]: any; 
+//   id: string | number;
+//   [key: string]: any;
 // }
 
 // interface InputSelectProps {
-//   options: OptionType[]; 
-//   value: string | number | null; 
-//   onChange: (value: string | number) => void; 
-//   onSearchChange?: (search: string) => void; 
-//   placeholder?: string; 
-//   field: string; 
-//   forceReset?: boolean; 
+//   options: OptionType[];
+//   value: string | number | null;
+//   onChange: (value: string | number) => void;
+//   onSearchChange?: (search: string) => void;
+//   placeholder?: string;
+//   field: string;
+//   forceReset?: boolean;
 // }
 
 export const InputSelect = ({
@@ -41,16 +41,25 @@ export const InputSelect = ({
   }, [value, options, field]);
 
   // Novo efeito para handle de reset
+  // useEffect(() => {
+  //   if (forceReset) {
+  //     setInputValue("");
+  //     setSelectedItem(null);
+  //     setShowOptions(false);
+
+  //     // Limpa a busca no componente pai
+  //     if (onSearchChange) {
+  //       onSearchChange("");
+  //     }
+  //   }
+  // }, [forceReset, onSearchChange]);
+
   useEffect(() => {
     if (forceReset) {
-      setInputValue("");
-      setSelectedItem(null);
-      setShowOptions(false);
-
-      // Limpa a busca no componente pai
-      if (onSearchChange) {
-        onSearchChange("");
-      }
+      setInputValue(""); // Limpa o valor do input
+      setSelectedItem(null); // Limpa o item selecionado
+      setShowOptions(false); // Esconde as opções
+      if (onSearchChange) onSearchChange(""); // Limpa a busca
     }
   }, [forceReset, onSearchChange]);
 
