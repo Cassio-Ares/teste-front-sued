@@ -39,12 +39,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/connect/api";
-import { Trash } from "lucide-react";
+import { Trash, Pencil } from "lucide-react";
 
 //hooks personalizados
 import { useSearch } from "@/hook/useSearch";
 import { usePost } from "@/hook/usePost";
 import { useRemove } from "@/hook/useRemove";
+import { useGetById } from "@/hook/useGetById";
+import { useUpdate } from "@/hook/useUpdate";
 
 //formatValue
 import { formatValue } from "../../../lib/utils/formatValue";
@@ -58,6 +60,7 @@ import { IngredientTypes } from "../../../lib/@types/ingredient.types";
 
 const Ingredients = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [newIngredient, setNewIngredient] = useState<Partial<IngredientTypes>>({
     description: "",
     gross_weight: 100,
@@ -130,19 +133,125 @@ const Ingredients = () => {
     }
   };
 
-  //delete
-  const { data, loading, error, removeData } = useRemove(
-    "ingredients",
-    refetch
-  );
+  //get by id
+  const {
+    data: ingredientIdData,
+    loading: ingredientIdLoading,
+    error: ingredientIdError,
+    fetchData: ingredientIdFetch,
+  } = useGetById<any>("ingredients");
 
-  const removeitem = async (id: number) => {
-    await removeData(id);
+  const [editingIngredient, setEditingIngredient] = useState<
+    Partial<IngredientTypes>
+  >({
+    id: 0,
+    description: "",
+    legend_type: "",
+    gross_weight: 100,
+    correction_factor: null,
+    cooking_index: null,
+    kcal: null,
+    protein: null,
+    lipids: null,
+    carbohydrate: null,
+    calcium: null,
+    iron: null,
+    retinol: null,
+    vitaminC: null,
+    sodium: null,
+  });
 
-    toast.success(data?.message);
+  const selectedIngredientIdHandler = (id: number) => {
+    ingredientIdFetch(id);
+    setIsEditOpen(true);
   };
-  console.log("new", newIngredient);
-  console.log(ingredientsData);
+
+  useEffect(() => {
+    if (ingredientIdData && ingredientIdData[0]) {
+      setEditingIngredient({
+        id: ingredientIdData[0].id,
+        description: ingredientIdData[0].description,
+        legend_type: ingredientIdData[0].legend_type,
+        gross_weight: ingredientIdData[0].gross_weight,
+        correction_factor: ingredientIdData[0].correction_factor,
+        cooking_index: ingredientIdData[0].cooking_index,
+        kcal: ingredientIdData[0].kcal,
+        protein: ingredientIdData[0].protein,
+        lipids: ingredientIdData[0].lipids,
+        carbohydrate: ingredientIdData[0].carbohydrate,
+        calcium: ingredientIdData[0].calcium,
+        iron: ingredientIdData[0].iron,
+        retinol: ingredientIdData[0].retinol,
+        vitaminC: ingredientIdData[0].vitaminC,
+        sodium: ingredientIdData[0].sodium,
+      });
+    }
+  }, [ingredientIdData]);
+
+  //update ingredient
+
+  const {
+    data: dataUpdate,
+    loading: updateLoading,
+    error: updateError,
+    upDate: updateIngredientPost,
+  } = useUpdate<any>("ingredients", refetch);
+
+  const handleUpdateIngredient = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    try {
+      console.log("editingIngredient", editingIngredient);
+      console.log("editingIngredient.id", editingIngredient.id);
+      console.log("url", `/ingredients/${editingIngredient.id}`);
+
+      const responseData = await updateIngredientPost(
+        editingIngredient.id,
+        editingIngredient
+      );
+
+      console.log("Response update", responseData);
+
+      toast.success(responseData?.message);
+
+      setEditingIngredient({
+        id: 0,
+        description: "",
+        legend_type: "",
+        gross_weight: 100,
+        correction_factor: null,
+        cooking_index: null,
+        kcal: null,
+        protein: null,
+        lipids: null,
+        carbohydrate: null,
+        calcium: null,
+        iron: null,
+        retinol: null,
+        vitaminC: null,
+        sodium: null,
+      });
+
+      setIsEditOpen(false);
+    } catch (error) {
+      console.log("error", error);
+      setIsEditOpen(true);
+    }
+  };
+
+  // //delete não esta visivel no front mudei regra de negocio
+  // const { data, loading, error, removeData } = useRemove(
+  //   "ingredients",
+  //   refetch
+  // );
+
+  // const removeitem = async (id: number) => {
+  //   await removeData(id);
+
+  //   toast.success(data?.message);
+  // };
 
   return (
     <div className="flex flex-col justify-start gap-4 ">
@@ -523,6 +632,16 @@ const Ingredients = () => {
                     </TableCell>
 
                     <TableCell className="font-medium text-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-black"
+                        onClick={() =>
+                          selectedIngredientIdHandler(ingredients.id)
+                        }
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       {/* <Dialog>
                       <DialogTrigger>
                         <Button
@@ -559,6 +678,243 @@ const Ingredients = () => {
             </TableBody>
           </Table>
         </Card>
+        <>
+          <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <DialogContent className="sm:max-w-[600px]">
+              <form onSubmit={handleUpdateIngredient}>
+                <DialogHeader>
+                  <DialogTitle>Atualizar dados do Ingrediente</DialogTitle>
+                </DialogHeader>
+                <DialogDescription>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <Label>Nome do Ingrediente</Label>
+                      <Input
+                        name="name"
+                        value={editingIngredient.description}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            description: event.target.value,
+                          });
+                        }}
+                        placeholder="Digite o nome do ingrediente"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Legenda (CD/FNDE nº 06/2020)</Label>
+                      <Select
+                        value={editingIngredient.legend_type || ""}
+                        onValueChange={(value) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            legend_type: value,
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="p-2 border rounded">
+                          <SelectValue placeholder="Legenda" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Oferta limitada para todas as idades">
+                            Oferta limitada para todas as idades
+                          </SelectItem>
+                          <SelectItem value="Limitada para > 3 anos e proibida para ≤ 3 anos">
+                            Limitada para `&gt;` 3 anos e proibida para ≤ 3 anos
+                          </SelectItem>
+                          <SelectItem value="Aquisição proibida">
+                            Aquisição proibida
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Peso bruto(g)</Label>
+                      <Input
+                        name="gross_weight"
+                        type="number"
+                        value={editingIngredient.gross_weight}
+                        disabled
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Fator de Correção </Label>
+                      <Input
+                        name="correction_factor"
+                        type="number"
+                        value={editingIngredient.correction_factor ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            correction_factor: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite o fator de correção"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Índice de Cocção</Label>
+                      <Input
+                        name="cooking_index"
+                        type="number"
+                        value={editingIngredient.cooking_index ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            cooking_index: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite o indice Índice de cocção"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Kcal</Label>
+                      <Input
+                        name="kcal"
+                        type="number"
+                        value={editingIngredient.kcal ?? undefined}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            kcal: value === "" ? 0 : parseFloat(value),
+                          });
+                        }}
+                        placeholder="Digite o kcal"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Proteínas</Label>
+                      <Input
+                        name="protein"
+                        type="number"
+                        value={editingIngredient.protein ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            protein: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite as proteínas"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Lipídios</Label>
+                      <Input
+                        name="lipids"
+                        type="number"
+                        value={editingIngredient.lipids ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            lipids: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite os lipídios"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Carboidratos</Label>
+                      <Input
+                        name="carbohydrate"
+                        type="number"
+                        value={editingIngredient.carbohydrate ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            carbohydrate: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite os carboidratos"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Cálcio</Label>
+                      <Input
+                        name="calcium"
+                        type="number"
+                        value={editingIngredient.calcium ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            calcium: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite o cálcio"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Ferro</Label>
+                      <Input
+                        name="iron"
+                        type="number"
+                        value={editingIngredient.iron ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            iron: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite o ferro"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Retinol (vit. A)</Label>
+                      <Input
+                        name="retinol"
+                        type="number"
+                        value={editingIngredient.retinol ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            retinol: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite o retinol"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Vit. C</Label>
+                      <Input
+                        name="vitaminC"
+                        type="number"
+                        value={editingIngredient.vitaminC ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            vitaminC: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite o vitamina C"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Sódio</Label>
+                      <Input
+                        name="sodium"
+                        type="number"
+                        value={editingIngredient.sodium ?? undefined}
+                        onChange={(event) => {
+                          setEditingIngredient({
+                            ...editingIngredient,
+                            sodium: parseFloat(event.target.value),
+                          });
+                        }}
+                        placeholder="Digite o sódio"
+                      />
+                    </div>
+                  </div>
+                </DialogDescription>
+
+                <DialogFooter>
+                  <Button className="bg-orange-500 hover:bg-orange-600 font-bold">
+                    Atualizar Ingrediente
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </>
       </div>
     </div>
   );

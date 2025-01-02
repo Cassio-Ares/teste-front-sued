@@ -2,12 +2,12 @@ import { api } from "../connect/api";
 import { useEffect, useState } from "react";
 import { informationError } from "../components/informationError";
 
-export const useUpdata = <T>(endpoint: string, refetchFn?: () => void) => {
+export const useUpdate = <T>(endpoint: string, refetchFn?: () => void) => {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const updataData = async (id: string | number, body: T[]) => {
+  const upDate = async (id: string | number, body: T[]) => {
     setLoading(true);
     setError(null);
     try {
@@ -24,5 +24,5 @@ export const useUpdata = <T>(endpoint: string, refetchFn?: () => void) => {
     }
   };
 
-  return { data, loading, error, updataData };
+  return { data, loading, error, upDate };
 };

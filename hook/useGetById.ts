@@ -9,7 +9,7 @@ import { informationError } from "../components/informationError";
 // }
 
 export const useGetById = <T>(endpoint: string) => {
-  const [data, setData] = useState<T[] | null>(null);
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -17,14 +17,14 @@ export const useGetById = <T>(endpoint: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get<any>(`${endpoint}/${id}`);
+      const response = await api.get<{ data: T }>(`${endpoint}/${id}`);
       setData(response.data.data);
     } catch (error) {
-      informationError(error);
+      setError(error as Error);
     } finally {
       setLoading(false);
     }
-
-    return { data, loading, error, fetchData };
   };
+
+  return { data, loading, error, fetchData };
 };

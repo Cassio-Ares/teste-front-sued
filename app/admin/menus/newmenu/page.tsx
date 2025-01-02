@@ -74,6 +74,7 @@ const CreateMenuPage = () => {
   const handleSchoolSelect = (schoolId: number) => {
     const school = searchSchool?.find((s) => s.id === schoolId);
     if (school) {
+      setSelectedSchool(school);
       setMenu((prevMenu) => ({
         ...prevMenu,
         state_id: school.state_id,
@@ -154,9 +155,13 @@ const CreateMenuPage = () => {
           <Label>Mês</Label>
           <Select
             value={menu.month.toString()}
-            onValueChange={(value) =>
-              setMenu({ ...menu, month: parseInt(value) })
+            onValueChange={
+              selectedSchool
+                ? (value) => setMenu({ ...menu, month: parseInt(value) })
+                : undefined
             }
+            className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
+            disabled={!selectedSchool}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione Mês" />
@@ -175,7 +180,13 @@ const CreateMenuPage = () => {
           <Label>Semanas</Label>
           <Select
             value={menu.month_weeks}
-            onValueChange={(value) => setMenu({ ...menu, month_weeks: value })}
+            onValueChange={
+              selectedSchool
+                ? (value) => setMenu({ ...menu, month_weeks: value })
+                : undefined
+            }
+            className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
+            disabled={!selectedSchool}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecionar semanas" />
