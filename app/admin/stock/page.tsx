@@ -91,9 +91,19 @@ const Stock = () => {
 
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
 
-  const handleSchoolSelect = (schoolId: number) => {
-    const school = searchSchool?.find((s) => s.id === schoolId);
+  const handleSchoolSelect = (schoolId: number | null) => {
+    if (schoolId === null) {
+      setSelectedSchool(null);
+      setStock({
+        ...stock,
+        state_id: "",
+        city_id: "",
+        school_id: "",
+      });
+      return;
+    }
 
+    const school = searchSchool?.find((s) => s.id === schoolId);
     if (school) {
       setSelectedSchool(school);
       setStock({
@@ -116,7 +126,16 @@ const Stock = () => {
 
   const [selectedIngredient, setSelectedIngredient] = useState<any>(null);
 
-  const handleIngredientSelect = (ingredientId: number) => {
+  const handleIngredientSelect = (ingredientId: number | null) => {
+    if (ingredientId === null) {
+      setSelectedIngredient(null);
+      setStock({
+        ...stock,
+        ingredient_id: "",
+      });
+      return;
+    }
+
     const ingredient = ingredientData?.find((i) => i.id === ingredientId);
 
     if (ingredient) {

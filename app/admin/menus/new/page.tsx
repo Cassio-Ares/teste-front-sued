@@ -105,6 +105,15 @@ const NewMenu = () => {
   const [resetSchoolInput, setResetSchoolInput] = useState(false);
 
   const handleSchoolSelect = (schoolId: number) => {
+    if (schoolId === null) {
+      setSelectedSchool(null);
+      setMenuItems((prevMenuItems) => ({
+        ...prevMenuItems,
+        school_id: "",
+      }));
+      return;
+    }
+
     const school = searchSchool?.find((s) => s.id === schoolId);
     if (school) {
       setSelectedSchool(school);
@@ -190,6 +199,13 @@ const NewMenu = () => {
   const [resetRecipeInput, setResetRecipeInput] = useState(false);
 
   const handleRecipeSelect = (recipeId: number) => {
+    if (recipeId === null) {
+      setMenuItems((prevMenuItems) => ({
+        ...prevMenuItems,
+        recipe_id: "",
+      }));
+      return;
+    }
     const recipe = searchRecipe?.find((r) => r.id === recipeId);
     if (recipe) {
       setMenuItems((prevMenuItems) => ({
