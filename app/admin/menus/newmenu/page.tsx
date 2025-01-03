@@ -160,10 +160,11 @@ const CreateMenuPage = () => {
                 ? (value) => setMenu({ ...menu, month: parseInt(value) })
                 : undefined
             }
-            className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
-            disabled={!selectedSchool}
           >
-            <SelectTrigger>
+            <SelectTrigger
+              className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
+              disabled={!selectedSchool}
+            >
               <SelectValue placeholder="Selecione Mês" />
             </SelectTrigger>
             <SelectContent>
@@ -185,10 +186,11 @@ const CreateMenuPage = () => {
                 ? (value) => setMenu({ ...menu, month_weeks: value })
                 : undefined
             }
-            className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
-            disabled={!selectedSchool}
           >
-            <SelectTrigger>
+            <SelectTrigger
+              className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
+              disabled={!selectedSchool}
+            >
               <SelectValue placeholder="Selecionar semanas" />
             </SelectTrigger>
             <SelectContent>

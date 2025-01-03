@@ -370,10 +370,11 @@ const NewMenu = () => {
                     }))
                 : undefined
             }
-            className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
-            disabled={!selectedSchool}
           >
-            <SelectTrigger>
+            <SelectTrigger
+              className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
+              disabled={!selectedSchool}
+            >
               {/* <SelectValue placeholder="Escolha um dia da semana" /> */}
               {weekDay.find((day) => day.value === menuItems.weekday)?.label ||
                 "Escolha um dia da semana"}
@@ -397,10 +398,11 @@ const NewMenu = () => {
                     setMenuItems((prev) => ({ ...prev, meal_type: value }))
                 : undefined
             }
-            className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
-            disabled={!selectedSchool}
           >
-            <SelectTrigger>
+            <SelectTrigger
+              className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
+              disabled={!selectedSchool}
+            >
               <SelectValue placeholder="Escolha um tipo de refeição" />
             </SelectTrigger>
             <SelectContent>
