@@ -72,6 +72,17 @@ const CreateMenuPage = () => {
   const [resetSchoolInput, setResetSchoolInput] = useState(false);
 
   const handleSchoolSelect = (schoolId: number) => {
+    if (schoolId === null) {
+      setSelectedSchool(null);
+      setMenu((prevMenu) => ({
+        ...prevMenu,
+        state_id: 0,
+        city_id: 0,
+        school_id: 0,
+      }));
+      return;
+    }
+
     const school = searchSchool?.find((s) => s.id === schoolId);
     if (school) {
       setSelectedSchool(school);

@@ -31,7 +31,6 @@ import { MissingIngredient } from "@/components/missingIngredient";
 import { SchoolBasicTypes } from "../../../../../lib/@types/school.types";
 import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types";
 
-
 const RecipeView = () => {
   const params = useParams();
   const [recipe, setRecipe] = useState<any>(null);
@@ -40,7 +39,6 @@ const RecipeView = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
 
- 
   const [schoolSearch, setSchoolSearch] = useState("");
   const {
     data: searchSchool,
@@ -108,7 +106,15 @@ const RecipeView = () => {
   }, [params.id]);
 
   const handleSchoolSelect = useCallback(
-    (schoolId: number) => {
+    (schoolId: number | null) => {
+      if (schoolId === null) {
+        setSelectedSchool(null);
+        if (params.id) {
+          setServings(1);
+          fetchRecipeDetails(Number(params.id));
+        }
+        return;
+      }
       const school = searchSchool?.find((s) => s.id === schoolId);
       if (school && params.id) {
         setSelectedSchool(school);
@@ -140,8 +146,8 @@ const RecipeView = () => {
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>Erro: {error}</div>;
 
-  console.log("recipe", recipe);  
- 
+  console.log("recipe", recipe);
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
@@ -190,8 +196,15 @@ const RecipeView = () => {
               type="number"
               min="1"
               value={servings || ""}
-              onChange={(e) => setServings(Number(e.target.value))}
-              className="w-20 p-2 border rounded"
+              onChange={
+                selectedSchool
+                  ? (e) => setServings(Number(e.target.value))
+                  : undefined
+              }
+              className={`w-20 p-2 border rounded ${
+                !selectedSchool ? "cursor-not-allowed opacity-80" : ""
+              }`}
+              disabled={!selectedSchool}
             />
             <Button
               className="mr-10"
