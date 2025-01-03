@@ -141,9 +141,7 @@ const Ingredients = () => {
     fetchData: ingredientIdFetch,
   } = useGetById<any>("ingredients");
 
-  const [editingIngredient, setEditingIngredient] = useState<
-    Partial<IngredientTypes>
-  >({
+  const [editingIngredient, setEditingIngredient] = useState<any>({
     id: 0,
     description: "",
     legend_type: "",
@@ -203,9 +201,9 @@ const Ingredients = () => {
     event.preventDefault();
 
     try {
-      console.log("editingIngredient", editingIngredient);
-      console.log("editingIngredient.id", editingIngredient.id);
-      console.log("url", `/ingredients/${editingIngredient.id}`);
+      // console.log("editingIngredient", editingIngredient);
+      // console.log("editingIngredient.id", editingIngredient.id);
+      // console.log("url", `/ingredients/${editingIngredient.id}`);
 
       const responseData = await updateIngredientPost(
         editingIngredient?.id ?? 0,
