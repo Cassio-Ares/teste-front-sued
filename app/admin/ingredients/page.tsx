@@ -208,7 +208,7 @@ const Ingredients = () => {
       console.log("url", `/ingredients/${editingIngredient.id}`);
 
       const responseData = await updateIngredientPost(
-        editingIngredient?.id,
+        editingIngredient?.id ?? 0,
         editingIngredient
       );
 
