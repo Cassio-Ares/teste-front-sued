@@ -24,6 +24,8 @@ export const InputSelect = ({
   placeholder,
   field,
   forceReset = false,
+  className = "",
+  disabled = false,
 }) => {
   const [inputValue, setInputValue] = useState(value ?? "");
   const [showOptions, setShowOptions] = useState<boolean>(false);
@@ -97,10 +99,13 @@ export const InputSelect = ({
         onChange={handleInputChange}
         onFocus={() => setShowOptions(true)}
         placeholder={placeholder}
-        className="w-full p-2 border rounded"
+        className={`w-full p-2 border rounded ${
+          disabled ? "cursor-not-allowed opacity-80" : ""
+        }`}
+        disabled={disabled}
       />
 
-      {showOptions && inputValue && !selectedItem && (
+      {showOptions && inputValue && !selectedItem && !disabled && (
         <ul className="absolute z-10 w-full border rounded mt-1 max-h-40 overflow-y-auto bg-white shadow-lg">
           {options?.map((option) => (
             <li

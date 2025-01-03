@@ -28,7 +28,6 @@ export const usePost = <T>(endpoint: string, refetchFn?: () => void) => {
       setLoading(false);
     }
   };
-  console.log(data);
   return { data, loading, error, postData };
 };
 
