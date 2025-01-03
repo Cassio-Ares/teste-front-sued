@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 
 // interface OptionType {
-//   id: string | number; 
-//   [key: string]: any; 
+//   id: string | number;
+//   [key: string]: any;
 // }
 
 // interface InputSelectProps {
-//   options: OptionType[]; 
-//   value: string | number | null; 
-//   onChange: (value: string | number) => void; 
-//   onSearchChange?: (search: string) => void; 
-//   placeholder?: string; 
-//   field: string; 
-//   forceReset?: boolean; 
+//   options: OptionType[];
+//   value: string | number | null;
+//   onChange: (value: string | number) => void;
+//   onSearchChange?: (search: string) => void;
+//   placeholder?: string;
+//   field: string;
+//   forceReset?: boolean;
 // }
 
 export const InputSelect = ({
@@ -24,6 +24,8 @@ export const InputSelect = ({
   placeholder,
   field,
   forceReset = false,
+  className = "",
+  disabled = false,
 }) => {
   const [inputValue, setInputValue] = useState(value ?? "");
   const [showOptions, setShowOptions] = useState<boolean>(false);
@@ -41,16 +43,25 @@ export const InputSelect = ({
   }, [value, options, field]);
 
   // Novo efeito para handle de reset
+  // useEffect(() => {
+  //   if (forceReset) {
+  //     setInputValue("");
+  //     setSelectedItem(null);
+  //     setShowOptions(false);
+
+  //     // Limpa a busca no componente pai
+  //     if (onSearchChange) {
+  //       onSearchChange("");
+  //     }
+  //   }
+  // }, [forceReset, onSearchChange]);
+
   useEffect(() => {
     if (forceReset) {
-      setInputValue("");
-      setSelectedItem(null);
-      setShowOptions(false);
-
-      // Limpa a busca no componente pai
-      if (onSearchChange) {
-        onSearchChange("");
-      }
+      setInputValue(""); // Limpa o valor do input
+      setSelectedItem(null); // Limpa o item selecionado
+      setShowOptions(false); // Esconde as opções
+      if (onSearchChange) onSearchChange(""); // Limpa a busca
     }
   }, [forceReset, onSearchChange]);
 
@@ -88,10 +99,13 @@ export const InputSelect = ({
         onChange={handleInputChange}
         onFocus={() => setShowOptions(true)}
         placeholder={placeholder}
-        className="w-full p-2 border rounded"
+        className={`w-full p-2 border rounded ${
+          disabled ? "cursor-not-allowed opacity-80" : ""
+        }`}
+        disabled={disabled}
       />
 
-      {showOptions && inputValue && !selectedItem && (
+      {showOptions && inputValue && !selectedItem && !disabled && (
         <ul className="absolute z-10 w-full border rounded mt-1 max-h-40 overflow-y-auto bg-white shadow-lg">
           {options?.map((option) => (
             <li

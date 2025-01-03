@@ -89,9 +89,7 @@ const Stock = () => {
     setQuery: setQuerySchool,
   } = useSearch<any>("schools", schoolSearch);
 
-  const [selectedSchool, setSelectedSchool] = useState<any>(
-    null
-  );
+  const [selectedSchool, setSelectedSchool] = useState<any>(null);
 
   const handleSchoolSelect = (schoolId: number) => {
     const school = searchSchool?.find((s) => s.id === schoolId);
@@ -108,7 +106,7 @@ const Stock = () => {
   };
 
   const [ingredientSearch, setIngredientSearch] = useState<string>("");
- 
+
   const {
     data: ingredientData,
     loading: ingredientLoading,
@@ -138,7 +136,6 @@ const Stock = () => {
     postData: createPost,
   } = usePost<any>("inventory", refetchInventory);
 
- 
   const [resetSchoolInput, setResetSchoolInput] = useState(false);
   const [resetIngredientInput, setResetIngredientInput] = useState(false);
 
@@ -207,7 +204,7 @@ const Stock = () => {
 
   //função para valor monetario
   const [unitPrice, setUnitPrice] = useState<any>(stock.unit_price || "");
-  
+
   const formatMoney = (value = "0") => {
     // Remove qualquer caractere não numérico
     let formattedValue = value.replace(/\D/g, "");
@@ -244,7 +241,6 @@ const Stock = () => {
     toast.success(data?.message);
   };
 
- 
   return (
     <div className="flex flex-col justify-start gap-4">
       <h1 className="font-bold text-xl">Estoque</h1>

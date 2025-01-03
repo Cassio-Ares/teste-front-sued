@@ -92,12 +92,12 @@ const NewMenu = () => {
   });
 
   //school
-  const [schoolSearch, setSchoolSearch] = useState("");
+  const [schoolSearch, setSchoolSearch] = useState<string>("");
 
   const {
     data: searchSchool,
-    loading: searchSchoolLoading,
-    error: searchSchoolError,
+    loading: schoolLoading,
+    error: schoolError,
     setQuery: setQuerySchool,
   } = useSearch<any>("schools", schoolSearch);
 
@@ -107,12 +107,15 @@ const NewMenu = () => {
   const handleSchoolSelect = (schoolId: number) => {
     const school = searchSchool?.find((s) => s.id === schoolId);
     if (school) {
+      setSelectedSchool(school);
       setMenuItems((prevMenuItems) => ({
         ...prevMenuItems,
         school_id: school.id,
       }));
     }
   };
+
+  console.log("menuItems:", menuItems);
 
   //menu
   const [menu, setMenu] = useState<any>("");
@@ -138,7 +141,7 @@ const NewMenu = () => {
         },
       });
 
-      console.log("response.data.data.menu:", response.data.data);
+      // console.log("response.data.data.menu:", response.data.data);
 
       // Formatação dos dados recebidos
       const formattedData = response.data.data.map((item: any) => ({
@@ -155,6 +158,8 @@ const NewMenu = () => {
 
       // Atualizando o estado com os menus formatados
       setSearchMenu(formattedData);
+
+      console.log("searchMenu:", searchMenu);
 
       // Definindo o menu_id se houver dados
       if (response.data.data.length > 0) {
@@ -284,6 +289,7 @@ const NewMenu = () => {
     }
   };
 
+  console.log("selectedSchool?.id", selectedSchool?.id);
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
@@ -317,11 +323,21 @@ const NewMenu = () => {
           <InputSelect
             options={searchMenu || []}
             value={menuItems.menu_id}
-            onChange={(value) => setMenu({ ...menuItems, menu_id: value })}
-            onSearchChange={(searchTerm) => setMenu(searchTerm)}
+            onChange={
+              selectedSchool
+                ? (value) => setMenu({ ...menuItems, menu_id: value })
+                : undefined
+            }
+            onSearchChange={
+              selectedSchool ? (searchTerm) => setMenu(searchTerm) : undefined
+            }
             placeholder="Selecione um Mês ex: 10"
             forceReset={resetMenuInput}
             field="formattedLabel"
+            // className={`rounded-md border ${
+            //   !selectedSchool && "cursor-not-allowed opacity-80"
+            // }`}
+            disabled={!selectedSchool} // Pode variar dependendo da biblioteca
           />
         </div>
 
@@ -330,10 +346,13 @@ const NewMenu = () => {
           <InputSelect
             options={searchRecipe}
             value={selectedRecipe?.id}
-            onChange={handleRecipeSelect}
-            onSearchChange={(query) => setQueryRecipe(query)}
+            onChange={selectedSchool ? handleRecipeSelect : undefined}
+            onSearchChange={
+              selectedSchool ? (query) => setQueryRecipe(query) : undefined
+            }
             placeholder="Selecione uma Receita"
             forceReset={resetRecipeInput}
+            disabled={!selectedSchool}
             field="name"
           />
         </div>
@@ -342,14 +361,20 @@ const NewMenu = () => {
           <Label>Dia da semana</Label>
           <Select
             value={menuItems.weekday?.toString() || ""}
-            onValueChange={(value) =>
-              setMenuItems((prev: any) => ({
-                ...prev,
-                weekday: value !== "" ? parseInt(value) : "",
-              }))
+            onValueChange={
+              selectedSchool
+                ? (value) =>
+                    setMenuItems((prev: any) => ({
+                      ...prev,
+                      weekday: value !== "" ? parseInt(value) : "",
+                    }))
+                : undefined
             }
           >
-            <SelectTrigger>
+            <SelectTrigger
+              className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
+              disabled={!selectedSchool}
+            >
               {/* <SelectValue placeholder="Escolha um dia da semana" /> */}
               {weekDay.find((day) => day.value === menuItems.weekday)?.label ||
                 "Escolha um dia da semana"}
@@ -367,11 +392,17 @@ const NewMenu = () => {
           <Label>Tipo de refeição</Label>
           <Select
             value={menuItems.meal_type}
-            onValueChange={(value) =>
-              setMenuItems((prev) => ({ ...prev, meal_type: value }))
+            onValueChange={
+              selectedSchool
+                ? (value) =>
+                    setMenuItems((prev) => ({ ...prev, meal_type: value }))
+                : undefined
             }
           >
-            <SelectTrigger>
+            <SelectTrigger
+              className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
+              disabled={!selectedSchool}
+            >
               <SelectValue placeholder="Escolha um tipo de refeição" />
             </SelectTrigger>
             <SelectContent>
