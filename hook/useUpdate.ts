@@ -12,11 +12,15 @@ export const useUpdate = <T>(endpoint: string, refetchFn?: () => void) => {
     setError(null);
     try {
       const response = await api.put(`${endpoint}/${id}`, body);
-      setData(response.data || response.data.data);
+
+      setData(response.data);
+      // setData(response.data || response.data.data);
 
       if (refetchFn) {
         refetchFn();
       }
+
+      return response.data;
     } catch (error) {
       informationError(error);
     } finally {

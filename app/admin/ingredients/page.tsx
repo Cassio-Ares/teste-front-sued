@@ -210,8 +210,6 @@ const Ingredients = () => {
         editingIngredient
       );
 
-      console.log("Response update", responseData);
-
       toast.success(responseData?.message);
 
       setEditingIngredient({
