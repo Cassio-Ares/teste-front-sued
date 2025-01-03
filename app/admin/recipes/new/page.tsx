@@ -93,6 +93,14 @@ const NewRecipe = () => {
   console.log("selectedIngredient", selectedIngredient);
 
   const handleIngredientSelect = (ingredientId: number) => {
+    if (ingredientId === null) {
+      setSelectedIngredient(null);
+      setNewIngredient({
+        ...newIngredient,
+        ingredient_id: 0,
+      });
+      return;
+    }
     const ingredient = ingredientData?.find((i) => i.id === ingredientId);
 
     if (ingredient) {
