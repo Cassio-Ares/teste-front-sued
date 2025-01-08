@@ -65,6 +65,7 @@ const NewRecipe = () => {
     required_utensils: "",
     description_of_recipe: "",
     observations: "",
+    home_measurements: "",
     prep_time: 0,
     timeOfCoccao: 0,
     servings: 1,
@@ -203,6 +204,7 @@ const NewRecipe = () => {
         required_utensils: "",
         description_of_recipe: "",
         observations: "",
+        home_measurements: "",
         prep_time: 0,
         timeOfCoccao: 0,
         servings: 1,
@@ -505,7 +507,6 @@ const NewRecipe = () => {
               />
             </Card>
           </div>
-
           <div className="flex flex-col mt-2">
             <Label className="text-base mb-2 font-semibold">
               Utensílios e equipamentos
@@ -522,6 +523,25 @@ const NewRecipe = () => {
                 className="w-full"
                 rows={6}
                 placeholder="Liste os utensílios necessários..."
+              />
+            </Card>
+          </div>
+          <div className="flex flex-col mt-2">
+            <Label className="text-base mb-2 font-semibold">
+              Medidas caseiras
+            </Label>
+            <Card className="p-4">
+              <Textarea
+                value={newRecipe.home_measurements || ""}
+                onChange={(e) =>
+                  setNewRecipe({
+                    ...newRecipe,
+                    home_measurements: e.target.value,
+                  })
+                }
+                className="w-full"
+                rows={6}
+                placeholder="Descreva medidas caseiras para os ingredientes..."
               />
             </Card>
           </div>

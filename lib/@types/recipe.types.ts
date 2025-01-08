@@ -4,6 +4,7 @@ export interface RecipeTypes {
   required_utensils: string;
   description_of_recipe: string;
   observations: string;
+  home_measurements: string;
   prep_time: number;
   timeOfCoccao: number;
   servings: number;
