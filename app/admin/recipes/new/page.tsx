@@ -1,42 +1,37 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { InputSelect } from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectGroup,
-  SelectLabel,
   SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, PlusCircle, Plus, Pencil, Trash } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Pencil, Plus, PlusCircle, Trash } from "lucide-react";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { api } from "@/connect/api";
-import { InputSelect } from "@/components/inputSelect";
-import { informationError } from "@/components/informationError";
 
-import { useSearch } from "@/hook/useSearch";
 import { usePost } from "@/hook/usePost";
+import { useSearch } from "@/hook/useSearch";
 
 //types
-import {
-  RecipeTypes,
-  // IngredientRecipeTypes,
-} from "../../../../lib/@types/recipe.types";
+import { RecipeTypes } from "../../../../lib/@types/recipe.types";
 
 // import { IngredientTypes } from "../../../../lib/@types/ingredient.types";
 
@@ -197,7 +192,7 @@ const NewRecipe = () => {
 
     try {
       const responseData = await createPost(newRecipe);
-      toast.success(responseData?.message || "Receita criada com sucesso!");
+      toast.success(responseData?.message);
       setNewRecipe({
         name: "",
         preparation_method: "",

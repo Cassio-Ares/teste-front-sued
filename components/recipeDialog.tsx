@@ -1,5 +1,7 @@
 import jsPDF from "jspdf";
 import { useState } from "react";
+import { formatValue } from "../lib/utils/formatValue";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { Button } from "./ui/button";
 import {
   Table,
   TableBody,
@@ -17,14 +18,19 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { formatValue } from "../lib/utils/formatValue";
 
 // import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
 
-const RecipeDialog = ({ recipe }: { recipe: any }) => {
+const RecipeDialog = ({
+  recipe,
+  teaching_modality = null,
+}: {
+  recipe: any;
+  teaching_modality?: any;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  console.log("recipeModalDetails", recipe);
+  //console.log("recipeModalDetails", recipe);
 
   // console.log("recipeModal", recipe);
 
@@ -47,12 +53,7 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
       align: "left",
     });
     yPosition += 10;
-    doc.text(
-      "FICHA TÉCNICA DE PREPARO - Cardápio ETAPA/MODALIDADE DE ENSINO (FAIXA ETÁRIA)",
-      margin,
-      yPosition,
-      { align: "left" }
-    );
+    doc.text("FICHA TÉCNICA DE PREPARO", margin, yPosition, { align: "left" });
     yPosition += 15;
 
     doc.setFontSize(16);
@@ -226,6 +227,24 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
     return lineHeight * numberOfLines;
   };
 
+  //ajuste do nome da tabela (lembrar de reorganizar)
+  const schoolName =
+    recipe?.recipe?.school_name ||
+    recipe?.school_name ||
+    "Escola não informada";
+  const isMunicipal = schoolName.toLowerCase().includes("municipal");
+  const isEstadual = schoolName.toLowerCase().includes("estadual");
+
+  const getSecretaryTitle = () => {
+    if (isMunicipal) {
+      return `Secretaria Municipal de Educação do Município de ${recipe?.city_name}`;
+    } else if (isEstadual) {
+      return `Secretaria Estadual de Educação do Estado de ${recipe?.state_name}`;
+    }
+
+    return schoolName;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -233,12 +252,19 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
       </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="m-auto">
-          <DialogTitle className="text-3xl">
-            {recipe?.recipe?.school_name ||
-              recipe?.school_name ||
-              "Escola não informada"}
+          <DialogTitle className="text-4xl flex flex-col justify-center items-center">
+            {teaching_modality !== null
+              ? getSecretaryTitle()
+              : getSecretaryTitle() || "Escola não informada"}
+            <div className="text-2xl items-center">
+              PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE
+            </div>
           </DialogTitle>
-          <DialogDescription>FICHA TÉCNICA DE PREPARO</DialogDescription>
+          <DialogDescription className="text-center text-lg">
+            {teaching_modality !== null
+              ? `FICHA TÉCNICA DE PREPARO - ${teaching_modality}`
+              : "FICHA TÉCNICA DE PREPARO"}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div>

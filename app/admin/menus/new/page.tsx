@@ -1,10 +1,9 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useCallback, useEffect, useState } from "react";
-import { ingredientsRecipe } from "../../../mock/ingredienteRecipe.mock";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import {
   Select,
@@ -14,42 +13,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  Bold,
-  Code2,
-  Copy,
-  Eraser,
-  Italic,
-  List,
-  Pencil,
-  Plus,
-  PlusCircle,
-  Quote,
-  Strikethrough,
-  Trash,
-} from "lucide-react";
-
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Search } from "lucide-react";
-import { Card, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { api } from "@/connect/api";
 import { informationError } from "@/components/informationError";
 import { InputSelect } from "@/components/inputSelect";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { api } from "@/connect/api";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
-import { useSearch } from "./../../../../hook/useSearch";
 import { usePost } from "./../../../../hook/usePost";
+import { useSearch } from "./../../../../hook/useSearch";
 
 interface MenuItems {
   school_id: string;
@@ -305,7 +278,19 @@ const NewMenu = () => {
     }
   };
 
-  console.log("selectedSchool?.id", selectedSchool?.id);
+  useEffect(() => {
+    if (!selectedSchool) {
+      setMenu((prevMenu) => ({
+        ...prevMenu,
+        state_id: 0,
+        city_id: 0,
+        school_id: 0,
+        month_weeks: "",
+        observations: "",
+      }));
+    }
+  }, [selectedSchool]);
+
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
