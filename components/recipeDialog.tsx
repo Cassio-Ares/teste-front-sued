@@ -334,16 +334,16 @@ const RecipeDialog = ({
                     formatValue(ingredient.adjusted_quantity)}
                 </TableCell>
                 <TableCell>
-                  {formatValue(ingredient?.unit_of_measure) ||
-                    formatValue(ingredient?.unit_of_measure_gross_weight)}
+                  {ingredient.unit_of_measure ||
+                    ingredient.unit_of_measure_gross_weight}
                 </TableCell>
                 <TableCell>
                   {formatValue(ingredient?.cooked_weight) ||
                     formatValue(ingredient?.ajustedCookedWeight)}
                 </TableCell>
                 <TableCell>
-                  {formatValue(ingredient?.unit_of_measure) ||
-                    formatValue(ingredient?.unit_of_measure_cooked_weight)}
+                  {ingredient.unit_of_measure ||
+                    ingredient.unit_of_measure_gross_weight}
                 </TableCell>
                 <TableCell>
                   {formatValue(ingredient?.correction_factor)}
