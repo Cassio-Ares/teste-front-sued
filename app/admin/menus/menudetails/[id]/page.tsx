@@ -269,7 +269,10 @@ const RecipeMenuDetails = () => {
                       ingredient.description}
                   </TableCell>
                   <TableCell>{ingredient.gross_weight}</TableCell>
-                  <TableCell>{ingredient.unit_of_measure}</TableCell>
+                  <TableCell>
+                    {ingredient.unit_of_measure ||
+                      ingredient.unit_of_measure_gross_weight}
+                  </TableCell>
                   <TableCell>R$ {ingredient?.cost?.toFixed(2)}</TableCell>
                   <TableCell>{ingredient.kcal}</TableCell>
                 </TableRow>
