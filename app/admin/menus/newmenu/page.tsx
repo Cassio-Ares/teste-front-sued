@@ -1,6 +1,5 @@
 "use client";
 
-import { informationError } from "@/components/informationError";
 import { InputSelect } from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,14 +12,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/connect/api";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 
-import { useSearch } from "./../../../../hook/useSearch";
 import { usePost } from "./../../../../hook/usePost";
+import { useSearch } from "./../../../../hook/useSearch";
 
 const months: string[] = [
   "Janeiro",
@@ -110,7 +108,7 @@ const CreateMenuPage = () => {
 
       console.log("Response createMenu", response);
 
-      toast.success(response?.message || "Menu criado com sucesso!");
+      toast.success(response?.message);
 
       setMenu({
         state_id: 0,
@@ -134,6 +132,20 @@ const CreateMenuPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (!selectedSchool) {
+      setMenu((prevMenu) => ({
+        ...prevMenu,
+        state_id: 0,
+        city_id: 0,
+        school_id: 0,
+        month_weeks: "",
+        observations: "",
+      }));
+    }
+  }, [selectedSchool]);
+
+  console.log("menu fora", menu);
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
@@ -206,12 +218,10 @@ const CreateMenuPage = () => {
             </SelectTrigger>
             <SelectContent>
               {/* <SelectItem value="ALL_WEEKS">Todas as Semanas</SelectItem> */}
-              <SelectItem value="FIRST_AND_THIRD">
-                Primeira e Terceira
+              <SelectItem value="FIRST_THIRD_AND_FIFTH">
+                Semanas Impares
               </SelectItem>
-              <SelectItem value="SECOND_AND_FOURTH">
-                Segunda e Quarta
-              </SelectItem>
+              <SelectItem value="SECOND_AND_FOURTH">Semanas Pares</SelectItem>
             </SelectContent>
           </Select>
         </div>

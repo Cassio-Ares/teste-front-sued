@@ -1,17 +1,8 @@
 "use client";
 
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import React, { memo, useCallback, useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { InputSelect } from "@/components/inputSelect";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -22,8 +13,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Search, Trash } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -32,16 +21,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { informationError } from "@/components/informationError";
-import { api } from "@/connect/api";
-import { InputSelect } from "@/components/inputSelect";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Search, Trash } from "lucide-react";
+import React, { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 //hooks personalizados
-import { useSearch } from "@/hook/useSearch";
 import { usePost } from "@/hook/usePost";
 import { useRemove } from "@/hook/useRemove";
+import { useSearch } from "@/hook/useSearch";
 
 //types
 // import { SchoolTypes, SchoolBasictypes } from "../../../lib/@types/school.types";
@@ -177,7 +174,7 @@ const Stock = () => {
 
       const responseData = await createPost(stockPayload);
 
-      toast.success(responseData?.message || "Estoque criado com sucesso!");
+      toast.success(responseData?.message);
 
       setStock({
         state_id: "",
