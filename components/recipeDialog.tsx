@@ -1,5 +1,7 @@
 import jsPDF from "jspdf";
 import { useState } from "react";
+import { formatValue } from "../lib/utils/formatValue";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { Button } from "./ui/button";
 import {
   Table,
   TableBody,
@@ -20,8 +21,16 @@ import {
 
 // import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
 
-const RecipeDialog = ({ recipe }: { recipe: any }) => {
+const RecipeDialog = ({
+  recipe,
+  teaching_modality = null,
+}: {
+  recipe: any;
+  teaching_modality?: any;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  //console.log("recipeModalDetails", recipe);
 
   // console.log("recipeModal", recipe);
 
@@ -84,8 +93,10 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
 
     const headers = [
       "Ingrediente",
-      "Bruto (g)",
-      "Líquido (g)",
+      "Bruto",
+      "Uni.med",
+      "Líquido",
+      "Uni.med",
       "Fator Correção",
       "Custo Unitário (R$)",
       "kcal",
@@ -101,7 +112,7 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
       "Custo Total (R$)",
     ];
     const columnWidths = [
-      40, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+      40, 30, 15, 30, 15, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
     ];
 
     doc.setFontSize(10);
@@ -120,7 +131,13 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
       const rowData = [
         ingredient.ingredient_description || ingredient.description,
         ingredient?.gross_weight || ingredient?.adjusted_quantity || "N/A",
+        ingredient?.unit_of_measure ||
+          ingredient?.unit_of_measure_gross_weight ||
+          "N/A",
         ingredient?.cooked_weight || ingredient?.ajustedCookedWeight || "N/A",
+        ingredient?.unit_of_measure ||
+          ingredient?.unit_of_measure_cooked_weight ||
+          "N/A",
         ingredient?.correction_factor || "N/A",
         `R$ ${
           ingredient?.cost_per_serving || ingredient?.adjusted_cost || "0"
@@ -175,6 +192,20 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
     });
 
     doc.setFontSize(16);
+    doc.text("Medidas Caseiras", margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(12);
+    const preparationText2 = doc.splitTextToSize(
+      recipe?.home_measurements || "Medidas caseiras não informadas",
+      170
+    );
+    preparationText2.forEach((line: string) => {
+      doc.text(line, margin, yPosition);
+      yPosition += 6;
+    });
+
+    doc.setFontSize(16);
     doc.text("Tempo de Preparo", margin, yPosition);
     yPosition += 10;
 
@@ -196,6 +227,24 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
     return lineHeight * numberOfLines;
   };
 
+  //ajuste do nome da tabela (lembrar de reorganizar)
+  const schoolName =
+    recipe?.recipe?.school_name ||
+    recipe?.school_name ||
+    "Escola não informada";
+  const isMunicipal = schoolName.toLowerCase().includes("municipal");
+  const isEstadual = schoolName.toLowerCase().includes("estadual");
+
+  const getSecretaryTitle = () => {
+    if (isMunicipal) {
+      return `Secretaria Municipal de Educação do Município de ${recipe?.city_name}`;
+    } else if (isEstadual) {
+      return `Secretaria Estadual de Educação do Estado de ${recipe?.state_name}`;
+    }
+
+    return schoolName;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -203,14 +252,20 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
       </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="m-auto">
-          <DialogTitle className="text-3xl">
-            {recipe?.recipe?.school_name ||
-              recipe?.school_name ||
-              "Escola não informada"}
+          <DialogTitle className="text-4xl flex flex-col justify-center items-center">
+            {teaching_modality !== null
+              ? getSecretaryTitle()
+              : getSecretaryTitle() || "Escola não informada"}
+            <div className="text-2xl items-center">
+              PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE
+            </div>
           </DialogTitle>
-          <DialogDescription>FICHA TÉCNICA DE PREPARO</DialogDescription>
+          <DialogDescription className="text-center text-lg">
+            {teaching_modality !== null
+              ? `FICHA TÉCNICA DE PREPARO - ${teaching_modality}`
+              : "FICHA TÉCNICA DE PREPARO"}
+          </DialogDescription>
         </DialogHeader>
-
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div>
             <h3 className="font-semibold">Informações da Receita</h3>
@@ -244,14 +299,15 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
             </p>
           </div>
         </div>
-
         <h3 className="text-lg font-bold mb-2">Ingredientes</h3>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Ingrediente</TableHead>
               <TableHead>Per capita (bruto)</TableHead>
+              <TableHead>Unid.Med</TableHead>
               <TableHead>Per capita (liquído)</TableHead>
+              <TableHead>Unid.Med</TableHead>
               <TableHead>Fator de correção</TableHead>
               <TableHead>Custo unitário R$</TableHead>
               <TableHead>(kcal)</TableHead>
@@ -274,61 +330,74 @@ const RecipeDialog = ({ recipe }: { recipe: any }) => {
                   {ingredient.ingredient_description || ingredient?.description}
                 </TableCell>
                 <TableCell>
-                  {ingredient?.gross_weight || ingredient.adjusted_quantity}
+                  {formatValue(ingredient?.gross_weight) ||
+                    formatValue(ingredient.adjusted_quantity)}
                 </TableCell>
                 <TableCell>
-                  {ingredient?.cooked_weight || ingredient?.ajustedCookedWeight}
+                  {formatValue(ingredient?.unit_of_measure) ||
+                    formatValue(ingredient?.unit_of_measure_gross_weight)}
                 </TableCell>
-                <TableCell>{ingredient?.correction_factor}</TableCell>
                 <TableCell>
-                  R$ {ingredient?.cost_per_serving || ingredient?.adjusted_cost}
+                  {formatValue(ingredient?.cooked_weight) ||
+                    formatValue(ingredient?.ajustedCookedWeight)}
                 </TableCell>
-                <TableCell>{ingredient?.kcal}</TableCell>
-                <TableCell>{ingredient?.kj}</TableCell>
-                <TableCell>{ingredient?.protein}</TableCell>
-                <TableCell>{ingredient?.lipids}</TableCell>
-                <TableCell>{ingredient?.carbohydrate}</TableCell>
-                <TableCell>{ingredient?.calcium}</TableCell>
-                <TableCell>{ingredient?.iron}</TableCell>
-                <TableCell>{ingredient?.retinol}</TableCell>
-                <TableCell>{ingredient?.vitaminC}</TableCell>
-                <TableCell>{ingredient?.sodium}</TableCell>
-                <TableCell>{ingredient?.cost}</TableCell>
+                <TableCell>
+                  {formatValue(ingredient?.unit_of_measure) ||
+                    formatValue(ingredient?.unit_of_measure_cooked_weight)}
+                </TableCell>
+                <TableCell>
+                  {formatValue(ingredient?.correction_factor)}
+                </TableCell>
+                <TableCell>
+                  R${" "}
+                  {formatValue(ingredient?.cost_per_serving) ||
+                    formatValue(ingredient?.adjusted_cost)}
+                </TableCell>
+                <TableCell>{formatValue(ingredient?.kcal)}</TableCell>
+                <TableCell>{formatValue(ingredient?.kj)}</TableCell>
+                <TableCell>{formatValue(ingredient?.protein)}</TableCell>
+                <TableCell>{formatValue(ingredient?.lipids)}</TableCell>
+                <TableCell>{formatValue(ingredient?.carbohydrate)}</TableCell>
+                <TableCell>{formatValue(ingredient?.calcium)}</TableCell>
+                <TableCell>{formatValue(ingredient?.iron)}</TableCell>
+                <TableCell>{formatValue(ingredient?.retinol)}</TableCell>
+                <TableCell>{formatValue(ingredient?.vitaminC)}</TableCell>
+                <TableCell>{formatValue(ingredient?.sodium)}</TableCell>
+                <TableCell>{formatValue(ingredient?.cost)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-
         {/* <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
-          <p>{recipe.recipe?.name}</p> */}
-
+          <p>{recipe.recipe?.name}</p> */}{" "}
         <h3 className="text-lg font-bold mt-4">Método de Preparo</h3>
         <p>
           {recipe?.recipe?.preparation_method ||
             recipe?.preparation_method ||
             "Não informado"}
         </p>
-
+        <h3 className="text-lg font-bold mt-4">Medida Caseira</h3>
+        <p>
+          {recipe?.recipe?.home_measurements ||
+            recipe?.home_measurements ||
+            "Não informado"}
+        </p>
         <h3 className="text-lg font-bold mt-4">Tempo de Cocçõa</h3>
         <p>{recipe?.recipe?.timeOfCoccao || recipe?.timeOfCoccao || "0"} min</p>
-
         <h3 className="text-lg font-bold mt-4">Tempo de Preparo</h3>
         <p>{recipe?.recipe?.prep_time || recipe?.prep_time || "0"} min</p>
-
         <h3 className="text-lg font-bold mt-4">Descrições de Preparo</h3>
         <p>
           {recipe?.recipe?.description_of_recipe ||
             recipe?.description_of_recipe ||
             "Não informado"}
         </p>
-
         <h3 className="text-lg font-bold mt-4">Observações</h3>
         <p>
           {recipe?.recipe?.observations ||
             recipe?.observations ||
             "Não informado"}
         </p>
-
         <Button onClick={handleExportToPDF}>Exportar para PDF</Button>
       </DialogContent>
     </Dialog>

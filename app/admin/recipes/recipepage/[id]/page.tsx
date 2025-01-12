@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, use, useCallback } from "react";
-import { useParams } from "next/navigation";
-import { api } from "@/connect/api";
-import { Card } from "@/components/ui/card";
+import { informationError } from "@/components/informationError";
+import RecipeDialog from "@/components/recipeDialog";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -13,13 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
+import { api } from "@/connect/api";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
-import { informationError } from "@/components/informationError";
-import RecipeDialog from "@/components/recipeDialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import { InputSelect } from "@/components/inputSelect";
 
@@ -28,8 +28,6 @@ import { useSearch } from "../../../../../hook/useSearch";
 import { MissingIngredient } from "@/components/missingIngredient";
 
 //types
-import { SchoolBasicTypes } from "../../../../../lib/@types/school.types";
-import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types";
 
 const RecipeView = () => {
   const params = useParams();
@@ -237,12 +235,12 @@ const RecipeView = () => {
                 <p>
                   Custo Total: R${" "}
                   {recipe?.recipe?.metrics?.total_cost.toFixed(2) ||
-                    recipe?.metrics?.total_cost}
+                    recipe?.metrics?.total_cost.toFixed(2)}
                 </p>
                 <p>
                   Custo por Porção: R${" "}
                   {recipe?.recipe?.metrics?.cost_per_serving?.toFixed(2) ||
-                    recipe?.metrics?.cost_per_serving}
+                    recipe?.metrics?.cost_per_serving.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -279,7 +277,10 @@ const RecipeView = () => {
                       ingredient.description}
                   </TableCell>
                   <TableCell>{ingredient.gross_weight}</TableCell>
-                  <TableCell>{ingredient.unit_of_measure}</TableCell>
+                  <TableCell>
+                    {ingredient.unit_of_measure ||
+                      ingredient.unit_of_measure_gross_weight}
+                  </TableCell>
                   <TableCell>R$ {ingredient?.cost?.toFixed(2)}</TableCell>
                   <TableCell>{ingredient.kcal}</TableCell>
                 </TableRow>

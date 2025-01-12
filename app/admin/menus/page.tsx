@@ -1,25 +1,22 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { informationError } from "@/components/informationError";
 import { InputSelect } from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { api } from "@/connect/api";
+import { useSearch } from "@/hook/useSearch";
+import { Eye } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { Eye, Trash } from "lucide-react";
-import { useSearch } from "@/hook/useSearch";
 
 const MealTypeLabels = {
   MorningSnack: "Lanche da Manhã",

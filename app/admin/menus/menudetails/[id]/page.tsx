@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import { api } from "@/connect/api";
-import { Card } from "@/components/ui/card";
+import { informationError } from "@/components/informationError";
+import RecipeDialog from "@/components/recipeDialog";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -13,23 +14,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
+import { api } from "@/connect/api";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { informationError } from "@/components/informationError";
-import RecipeDialog from "@/components/recipeDialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
-import { InputSelect } from "@/components/inputSelect";
-
-import { useSearch } from "../../../../../hook/useSearch";
 
 import { MissingIngredient } from "@/components/missingIngredient";
 
 //types
-import { SchoolBasicTypes } from "../../../../../lib/@types/school.types";
-import { RecipeInformationTypes } from "../../../../../lib/@types/recipeInformation.types";
 
 const MealTypeLabels = {
   MorningSnack: "Lanche da Manhã",
@@ -160,7 +154,7 @@ const RecipeMenuDetails = () => {
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>Erro: {error}</div>;
 
-  console.log("recipe", recipe);
+  console.log("menuData", menuData.items[0].teaching_modality);
 
   return (
     <div className="container mx-auto p-4">
@@ -205,7 +199,10 @@ const RecipeMenuDetails = () => {
             >
               Recalcular
             </Button>
-            <RecipeDialog recipe={recipe} />
+            <RecipeDialog
+              recipe={recipe}
+              teaching_modality={menuData?.items[0]?.teaching_modality}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
@@ -230,12 +227,12 @@ const RecipeMenuDetails = () => {
                 <p>
                   Custo Total: R${" "}
                   {recipe?.recipe?.metrics?.total_cost.toFixed(2) ||
-                    recipe?.metrics?.total_cost}
+                    recipe?.metrics?.total_cost.toFixed(2)}
                 </p>
                 <p>
                   Custo por Porção: R${" "}
                   {recipe?.recipe?.metrics?.cost_per_serving?.toFixed(2) ||
-                    recipe?.metrics?.cost_per_serving}
+                    recipe?.metrics?.cost_per_serving.toFixed(2)}
                 </p>
               </div>
             </div>
