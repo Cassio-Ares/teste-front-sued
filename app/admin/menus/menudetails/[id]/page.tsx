@@ -227,12 +227,12 @@ const RecipeMenuDetails = () => {
                 <p>
                   Custo Total: R${" "}
                   {recipe?.recipe?.metrics?.total_cost.toFixed(2) ||
-                    recipe?.metrics?.total_cost}
+                    recipe?.metrics?.total_cost.toFixed(2)}
                 </p>
                 <p>
                   Custo por Porção: R${" "}
                   {recipe?.recipe?.metrics?.cost_per_serving?.toFixed(2) ||
-                    recipe?.metrics?.cost_per_serving}
+                    recipe?.metrics?.cost_per_serving.toFixed(2)}
                 </p>
               </div>
             </div>

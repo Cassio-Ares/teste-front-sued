@@ -108,7 +108,7 @@ const CreateMenuPage = () => {
 
       console.log("Response createMenu", response);
 
-      toast.success(response?.message || "Menu criado com sucesso!");
+      toast.success(response?.message);
 
       setMenu({
         state_id: 0,
@@ -218,12 +218,10 @@ const CreateMenuPage = () => {
             </SelectTrigger>
             <SelectContent>
               {/* <SelectItem value="ALL_WEEKS">Todas as Semanas</SelectItem> */}
-              <SelectItem value="FIRST_AND_THIRD">
-                Primeira e Terceira
+              <SelectItem value="FIRST_THIRD_AND_FIFTH">
+                Semanas Impares
               </SelectItem>
-              <SelectItem value="SECOND_AND_FOURTH">
-                Segunda e Quarta
-              </SelectItem>
+              <SelectItem value="SECOND_AND_FOURTH">Semanas Pares</SelectItem>
             </SelectContent>
           </Select>
         </div>
