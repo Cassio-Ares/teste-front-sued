@@ -1,18 +1,21 @@
 "use client";
 import {
-  Building2,
   ChefHat,
   CookingPot,
   LayoutDashboard,
   LogOutIcon,
   MenuIcon,
   Package,
-  UsersRound,
   Utensils,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Sheet,
   SheetClose,
@@ -26,7 +29,7 @@ import {
 const Sidenav = () => {
   return (
     <>
-      <div className="flex w-full h-full flex-col border-r lg:block dark:bg-gray-800/40">
+      <div className="flex w-full h-screen flex-col border-r lg:block dark:bg-gray-800/40">
         <div className=" flex h-20 items-center justify-between px-4 md:h-20 w-screen md:w-full bg-orange-100">
           <div className="flex items-center justify-center md:w-full ">
             <img
@@ -115,7 +118,7 @@ const Sidenav = () => {
           </div>
         </div>
 
-        <div className="hidden md:flex md:flex-col ml-4  bg-gray-50 mt-8">
+        <div className="hidden md:flex md:flex-col ml-4 bg-gray-50 mt-8 flex-1 overflow-y-auto">
           <ul className="antialiased flex md:flex-col gap-3">
             <li>
               <small className="flex gap-2 mb-3">Dashboard</small>
@@ -153,17 +156,73 @@ const Sidenav = () => {
                 <Package size={18} /> Estoque
               </Link>
             </li>
-
-            <li className="hidden md:block">
-              <Link
-                className=" hover:bg-red-400 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-bold text-sm text-red-400 flex gap-2 md:mt-20 md:fixed md:bottom-10  md:w-64"
-                href="/admin"
-              >
-                <LogOutIcon size={18} /> Sair
-              </Link>
+            <li>
+              <small className="flex gap-2 mb-3">Cadastros</small>
+              <Accordion type="single" collapsible>
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>Cadastros</AccordionTrigger>
+                  <AccordionContent>
+                    <Link
+                      className="hover:bg-orange-500 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-semibold text-slate-800 text-sm flex gap-2"
+                      href="/admin/stock"
+                    >
+                      <Package size={18} /> Usuario
+                    </Link>
+                  </AccordionContent>
+                  <AccordionContent>
+                    <Link
+                      className="hover:bg-orange-500 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-semibold text-slate-800 text-sm flex gap-2"
+                      href="/admin/stock"
+                    >
+                      <Package size={18} /> Instituições
+                    </Link>
+                  </AccordionContent>
+                  <AccordionContent>
+                    <Link
+                      className="hover:bg-orange-500 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-semibold text-slate-800 text-sm flex gap-2"
+                      href="/admin/stock"
+                    >
+                      <Package size={18} /> Nutricionista
+                    </Link>
+                  </AccordionContent>
+                  <AccordionContent>
+                    <Link
+                      className="hover:bg-orange-500 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-semibold text-slate-800 text-sm flex gap-2"
+                      href="/admin/stock"
+                    >
+                      <Package size={18} /> Estado
+                    </Link>
+                  </AccordionContent>
+                  <AccordionContent>
+                    <Link
+                      className="hover:bg-orange-500 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-semibold text-slate-800 text-sm flex gap-2"
+                      href="/admin/stock"
+                    >
+                      <Package size={18} /> Cidade
+                    </Link>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </li>
           </ul>
         </div>
+        <div className="hidden md:block px-4 py-3 border-t">
+          <Link
+            className="hover:bg-red-400 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-bold text-sm text-red-400 flex gap-2"
+            href="/admin"
+          >
+            <LogOutIcon size={18} /> Sair
+          </Link>
+        </div>
+
+        {/* <li className="hidden md:block">
+          <Link
+            className=" hover:bg-red-400 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-bold text-sm text-red-400 flex gap-2 md:mt-20 md:bottom-10  md:w-64"
+            href="/admin"
+          >
+            <LogOutIcon size={18} /> Sair
+          </Link>
+        </li> */}
       </div>
     </>
   );
