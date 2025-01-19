@@ -1,29 +1,29 @@
 "use client";
 
-import { informationError } from "@/components/informationError";
 import { InputSelect } from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api } from "@/connect/api";
 import { useSearch } from "@/hook/useSearch";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-
-const MealTypeLabels = {
-  MorningSnack: "Lanche da Manhã",
-  Lunch: "Almoço",
-  AfternoonSnack: "Lanche da Tarde",
-  NightSnack: "Lanche da Noite",
-  FullPeriodMealMorning: "Lanche Integral - Manhã",
-  FullPeriodMealAfternoon: "Lanche Integral - Tarde",
-};
 
 const Menus = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [menus, setMenus] = useState<any>({});
+  const [searchMenu, setSearchMenu] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedDateMenus, setSelectedDateMenus] = useState<any>(null);
 
@@ -47,40 +47,30 @@ const Menus = () => {
 
   console.log(selectedSchool?.name);
 
-  const fetchMenus = async (selectedDate: Date) => {
-    if (!selectedSchool) {
-      toast.error("Selecione uma escola");
-      return;
-    }
+  useEffect(() => {
+    fetchDataMenu();
+  }, [selectedSchool]);
+
+  const fetchDataMenu = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
     try {
-      setLoading(true);
-      setError(null);
-
-      const month = selectedDate.getMonth() + 1;
-      const year = selectedDate.getFullYear();
-
       const response = await api.get("/menus", {
         params: {
-          month,
-          year,
-          schoolId: selectedSchool.id,
+          school_id: String(selectedSchool?.id),
+          year: new Date().getFullYear(),
         },
       });
 
-      setMenus(response.data.data);
+      console.log("API Response:", response.data); // Para debug
 
-      setIsDialogOpen(true);
-    } catch (error) {
-      informationError(error);
+      setSearchMenu(response.data.data);
+    } catch (error: any) {
+      setError(error.message);
+      toast.error("Erro ao buscar menus");
     } finally {
       setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedSchool) {
-      fetchMenus(new Date());
     }
   }, [selectedSchool]);
 
@@ -117,113 +107,147 @@ const Menus = () => {
               placeholder="Selecione uma Instituição"
               field="name"
             />
+            {/* <Select
+              value={menu}
+              onValueChange={(value) => {
+                setMenu(value);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o mês" />
+              </SelectTrigger>
+              <SelectContent>
+                {monthType.map((month) => (
+                  <SelectItem
+                    key={month.value}
+                    value={month.value}
+                    onClick={() => setMenu(month.value)}
+                  >
+                    {month.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select> */}
           </div>
         </div>
+      </div>
+      <div className="flex">
+        <Card className="w-full p-4">
+          <Table>
+            <TableCaption className="mt-10 text-gray-400">
+              Lista com todos os menus cadastrados.
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px] font-bold">Mês</TableHead>
+                <TableHead className="font-bold">Semana Impar</TableHead>
+                <TableHead className="font-bold">Semana Par</TableHead>
+                <TableHead className="font-bold">Menu Completo</TableHead>
+                <TableHead className="font-bold text-center">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from(new Set(searchMenu.map((menu) => menu.month))).map(
+                (month) => {
+                  console.log("Processing month:", month);
+                  const monthMenus = searchMenu.filter(
+                    (menu) => menu.month === month
+                  );
+                  const oddWeek = monthMenus.find(
+                    (menu) => menu.week_type === "ODD"
+                  );
+                  const evenWeek = monthMenus.find(
+                    (menu) => menu.week_type === "EVEN"
+                  );
+
+                  return (
+                    <TableRow key={month}>
+                      <TableCell>
+                        {new Date(new Date().getFullYear(), month - 1)
+                          .toLocaleString("default", {
+                            month: "long",
+                          })
+                          .charAt(0)
+                          .toUpperCase() +
+                          new Date(new Date().getFullYear(), month - 1)
+                            .toLocaleString("default", {
+                              month: "long",
+                            })
+                            .slice(1)
+                            .toLowerCase()}
+                      </TableCell>
+                      <TableCell>
+                        {oddWeek && (
+                          <Button
+                            variant="ghost"
+                            className="hover:bg-orange-100"
+                            onClick={() => {
+                              /* Handle odd week view */
+                            }}
+                          >
+                            Cardápio Ímpar
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {evenWeek && (
+                          <Button
+                            variant="ghost"
+                            className="hover:bg-orange-100"
+                            onClick={() => {
+                              /* Handle even week view */
+                            }}
+                          >
+                            Cardápio Par
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          className="hover:bg-orange-100"
+                          onClick={() => {
+                            /* Handle complete menu view */
+                          }}
+                        >
+                          Menu Completo
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-medium text-center">
+                        {/* <Dialog>
+                          <DialogTrigger>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>
+                               
+                              </DialogTitle>
+                              <DialogDescription>
+                                Essa ação não poderá ser desfeita.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog> */}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }
+              )}
+            </TableBody>
+          </Table>
+        </Card>
       </div>
     </div>
   );
 };
 
 export default Menus;
-
-// <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-// <DialogContent className="max-w-xl">
-//   <DialogHeader>
-//     <DialogTitle>
-//       {selectedDateMenus?.date && formatDate(selectedDateMenus.date)}
-//     </DialogTitle>
-//   </DialogHeader>
-
-//   <div className="space-y-4">
-//     {selectedDateMenus?.items?.length > 0 ? (
-//       selectedDateMenus.items.map((item: any, index: number) => (
-//         <div>
-//           <div
-//             key={index}
-//             className="p-4 rounded-lg bg-orange-50 border border-orange-200"
-//           >
-//             <div className="flex justify-between items-start mb-2">
-//               <h3 className="font-semibold text-orange-800">
-//                 {MealTypeLabels[item.meal_type]}
-//               </h3>
-//             </div>
-
-//             <div className="text-gray-700">
-//               {/* <p className="font-medium">{item.recipe_name}</p> */}
-//               <div className="flex justify-between items-center mt-2">
-//                 <p className="font-medium">{item.recipe_name}</p>
-//                 {item.recipe_id && (
-//                   <Link
-//                     //href={`/admin/menus/menudetails/${item.recipe_id}?data=${encodedData}`}
-//                     href={`/admin/menus/menudetails/${
-//                       item.recipe_id
-//                     }?data=${encodeURIComponent(
-//                       JSON.stringify({
-//                         date: selectedDateMenus.date,
-//                         schoolId: selectedSchool.id,
-//                         schoolName: selectedSchool.name,
-//                         items: selectedDateMenus.items.filter(
-//                           (menuItem: any) =>
-//                             menuItem.recipe_id === item.recipe_id
-//                         ),
-//                       })
-//                     )}`}
-//                   >
-//                     <Button
-//                       variant="ghost"
-//                       size="sm"
-//                       className="text-gray-500 hover:text-gray-700"
-//                     >
-//                       <Eye />
-//                     </Button>
-//                   </Link>
-//                 )}
-//               </div>
-//               {item.estimated_portions && (
-//                 <p className="text-sm mt-1">
-//                   Porções estimadas: {item.estimated_portions}
-//                 </p>
-//               )}
-//               {item.additional_notes && (
-//                 <p className="text-sm mt-2 text-gray-600">
-//                   Observações: {item.additional_notes}
-//                 </p>
-//               )}
-//             </div>
-//           </div>
-
-//           {/* <DialogTrigger>
-//             <Button
-//               variant="ghost"
-//               size="sm"
-//               className="text-red-500 hover:text-red-700"
-//             >
-//               <Trash />
-//             </Button>
-//           </DialogTrigger>
-//           <DialogContent>
-//             <DialogHeader>
-//               <DialogTitle>Deseja remover o cardápio?</DialogTitle>
-//               <DialogDescription>
-//                 Essa ação não poderá ser desfeita.
-//               </DialogDescription>
-//             </DialogHeader>
-//             <DialogFooter>
-//               <Button
-//                 variant="destructive"
-//                 onClick={() => removeItem(recipe.id || 0)}
-//               >
-//                 Remover
-//               </Button>
-//             </DialogFooter>
-//           </DialogContent> */}
-//         </div>
-//       ))
-//     ) : (
-//       <div className="text-center text-gray-500 py-4">
-//         Nenhum cardápio encontrado para esta data
-//       </div>
-//     )}
-//   </div>
-// </DialogContent>
-// </Dialog>
