@@ -29,18 +29,18 @@ const mealType = [
 
 const MenuDataContent = () => {
   const searchParams = useSearchParams();
-  // const id = searchParams.get("id");
-  // const type = searchParams.get("type");
-  // const [formattedData, setFormattedData] = useState<any[]>([]);
-
-  let id: any;
-  let type: string | null;
+  const id = searchParams.get("id");
+  const type = searchParams.get("type");
   const [formattedData, setFormattedData] = useState<any[]>([]);
 
-  useEffect(() => {
-    id = searchParams.get("id");
-    type = searchParams.get("type");
-  }, [searchParams]);
+  // let id: any;
+  // let type: string | null;
+  // const [formattedData, setFormattedData] = useState<any[]>([]);
+
+  // useEffect(() => {
+  //   id = searchParams.get("id");
+  //   type = searchParams.get("type");
+  // }, [searchParams]);
 
   const idList = id ? id.split(",").map(Number).filter(Boolean) : [];
 
