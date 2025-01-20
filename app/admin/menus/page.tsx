@@ -63,7 +63,7 @@ const Menus = () => {
         },
       });
 
-      console.log("API Response:", response.data); // Para debug
+      // console.log("response", response.data);
 
       setSearchMenu(response.data.data);
     } catch (error: any) {
@@ -73,6 +73,8 @@ const Menus = () => {
       setLoading(false);
     }
   }, [selectedSchool]);
+
+  console.log("searchMenu", searchMenu);
 
   return (
     <div className="flex flex-col justify-start gap-4 h-full">
@@ -107,27 +109,6 @@ const Menus = () => {
               placeholder="Selecione uma Instituição"
               field="name"
             />
-            {/* <Select
-              value={menu}
-              onValueChange={(value) => {
-                setMenu(value);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {monthType.map((month) => (
-                  <SelectItem
-                    key={month.value}
-                    value={month.value}
-                    onClick={() => setMenu(month.value)}
-                  >
-                    {month.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select> */}
           </div>
         </div>
       </div>
@@ -178,40 +159,69 @@ const Menus = () => {
                       </TableCell>
                       <TableCell>
                         {oddWeek && (
-                          <Button
-                            variant="ghost"
-                            className="hover:bg-orange-100"
-                            onClick={() => {
-                              /* Handle odd week view */
+                          <Link
+                            href={{
+                              pathname: "/admin/menus/menudata",
+                              query: {
+                                type: "odd",
+                                id: oddWeek?.id,
+                              },
                             }}
+                            className="w-full"
                           >
-                            Cardápio Ímpar
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              className="hover:bg-orange-100"
+                            >
+                              Cardápio Ímpar
+                            </Button>
+                          </Link>
                         )}
                       </TableCell>
                       <TableCell>
                         {evenWeek && (
-                          <Button
-                            variant="ghost"
-                            className="hover:bg-orange-100"
-                            onClick={() => {
-                              /* Handle even week view */
+                          <Link
+                            href={{
+                              pathname: "/admin/menus/menudata",
+                              query: {
+                                type: "even",
+                                id: evenWeek?.id,
+                              },
                             }}
+                            className="w-full"
                           >
-                            Cardápio Par
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              className="hover:bg-orange-100"
+                            >
+                              Cardápio Par
+                            </Button>
+                          </Link>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          className="hover:bg-orange-100"
-                          onClick={() => {
-                            /* Handle complete menu view */
+                        <Link
+                          href={{
+                            pathname: "/admin/menus/menudata",
+                            query: {
+                              type: "complete",
+                              id: monthMenus
+                                .filter((menu) =>
+                                  ["ODD", "EVEN"].includes(menu.week_type)
+                                )
+                                .map((menu) => menu.id)
+                                .join(","),
+                            },
                           }}
+                          className="w-full"
                         >
-                          Menu Completo
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            className="hover:bg-orange-100"
+                          >
+                            Menu Completo
+                          </Button>
+                        </Link>
                       </TableCell>
                       <TableCell className="font-medium text-center">
                         {/* <Dialog>
