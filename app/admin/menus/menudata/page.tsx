@@ -4,7 +4,7 @@ import { useGetById } from "@/hook/useGetById";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 
 const weekDay = [
@@ -29,8 +29,9 @@ const mealType = [
 
 const MenuData = () => {
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
-  const type = searchParams.get("type");
+  // Armazenando os valores obtidos dos parâmetros de busca
+  const id = useMemo(() => searchParams.get("id"), [searchParams]);
+  const type = useMemo(() => searchParams.get("type"), [searchParams]);
   const [formattedData, setFormattedData] = useState<any[]>([]);
 
   const idList = id ? id.split(",").map(Number).filter(Boolean) : [];
