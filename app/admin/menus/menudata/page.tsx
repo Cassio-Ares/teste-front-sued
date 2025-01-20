@@ -4,7 +4,7 @@ import { useGetById } from "@/hook/useGetById";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 
 const weekDay = [
@@ -27,7 +27,7 @@ const mealType = [
   { label: "Lanche Extra", value: "ExtraSnack" },
 ];
 
-const MenuData = () => {
+const MenuDataContent = () => {
   const searchParams = useSearchParams();
   // const id = searchParams.get("id");
   // const type = searchParams.get("type");
@@ -163,6 +163,14 @@ const MenuData = () => {
         <p>Colocar diálogo de erro aqui</p>
       )}
     </>
+  );
+};
+
+const MenuData = () => {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <MenuDataContent />
+    </Suspense>
   );
 };
 
