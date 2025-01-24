@@ -24,9 +24,11 @@ import {
 const RecipeDialog = ({
   recipe,
   teaching_modality = null,
+  textButton,
 }: {
   recipe: any;
   teaching_modality?: any;
+  textButton?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -248,7 +250,7 @@ const RecipeDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Ficha Técnica de Preparo</Button>
+        <Button>{textButton}</Button>
       </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="m-auto">

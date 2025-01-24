@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useGetById } from "@/hook/useGetById";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -147,6 +147,13 @@ const MenuDataContent = () => {
                                     Porções: {items[0].estimated_portions}
                                   </div>
                                 )}
+                                {getRecipeId(
+                                  items[0].recipe_id,
+                                  items[0].estimated_portions,
+                                  items[0].school_id,
+                                  items[0].teaching_modality
+                                )}
+                                {/* <Button talves put /> */}
                               </div>
                             )}
                           </td>
@@ -171,6 +178,31 @@ const MenuData = () => {
     <Suspense fallback={<div>Carregando...</div>}>
       <MenuDataContent />
     </Suspense>
+  );
+};
+
+const getRecipeId = (
+  recipeId: number,
+  estimatedPortions: number,
+  schoolId: number,
+  teaching_modality?: string
+) => {
+  return (
+    <>
+      <Link
+        href={`/admin/menus/menudetails/${recipeId}?data=${encodeURIComponent(
+          JSON.stringify({
+            recipeId,
+            estimatedPortions,
+            schoolId,
+            teaching_modality,
+          })
+        )}`}
+        className="text-orange-500 hover:text-orange-600"
+      >
+        <Eye />
+      </Link>
+    </>
   );
 };
 

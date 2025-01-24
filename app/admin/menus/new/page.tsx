@@ -42,6 +42,8 @@ const mealType = [
   { label: "Lanche Extra", value: "ExtraSnack" },
 ];
 
+//TODO ajustar para poder alterar aqui as receitas
+
 const NewMenu = () => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
