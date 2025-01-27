@@ -147,6 +147,7 @@ const CreateMenuPage = () => {
   }, [selectedSchool]);
 
   console.log("menu fora", menu);
+  console.log("menu", dataPost);
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">

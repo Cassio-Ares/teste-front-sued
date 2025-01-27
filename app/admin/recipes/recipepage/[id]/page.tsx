@@ -210,8 +210,21 @@ const RecipeView = () => {
             >
               Recalcular
             </Button>
-            <RecipeDialog textButton="Ficha Tecnica PNAE" recipe={recipe} />
-            <RecipeDialog textButton="Ficha Tecnica Cozinha" recipe={recipe} />
+            <RecipeDialog
+              type="PNAE"
+              textButton="Ficha Tecnica PNAE"
+              recipe={recipe}
+            />
+            <RecipeDialog
+              type="KITCHEN"
+              textButton="Ficha Tecnica Cozinha"
+              recipe={recipe}
+            />
+            <RecipeDialog
+              type="STOCK_REQUISITION"
+              textButton="Ficha Tecnica Cozinha"
+              recipe={recipe}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">

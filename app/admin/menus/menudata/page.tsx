@@ -1,6 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useGetById } from "@/hook/useGetById";
+import { useSearch } from "@/hook/useSearch";
+import { useUpdate } from "@/hook/useUpdate";
 import { ArrowLeft, Eye } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -32,15 +34,6 @@ const MenuDataContent = () => {
   const id = searchParams.get("id");
   const type = searchParams.get("type");
   const [formattedData, setFormattedData] = useState<any[]>([]);
-
-  // let id: any;
-  // let type: string | null;
-  // const [formattedData, setFormattedData] = useState<any[]>([]);
-
-  // useEffect(() => {
-  //   id = searchParams.get("id");
-  //   type = searchParams.get("type");
-  // }, [searchParams]);
 
   const idList = id ? id.split(",").map(Number).filter(Boolean) : [];
 
@@ -87,7 +80,63 @@ const MenuDataContent = () => {
     return items;
   };
 
-  console.log("formattedData", formattedData);
+  //update menu_items
+  const [recipeSearch, setRecipeSearch] = useState("");
+  const {
+    data: searchRecipe,
+    loading: searchRecipeLoading,
+    error: searchRecipeError,
+    setQuery: setQueryRecipe,
+  } = useSearch<any>("recipes", recipeSearch);
+  const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
+  const [resetRecipeInput, setResetRecipeInput] = useState(false);
+  const [selections, setSelections] = useState<Record<string, any>>({});
+
+  const handleRecipeSelect = (recipeId: number) => {
+    if (recipeId === null) {
+      const newSelections = { ...selections };
+      setSelections(newSelections);
+      return;
+    }
+
+    const recipe = searchRecipe?.find((r) => r.id === recipeId);
+    if (recipe) {
+      setSelections((prev) => ({
+        ...prev,
+        recipe_id: recipe.id,
+      }));
+    }
+  };
+
+  const {
+    data: updateData,
+    loading: updateLoading,
+    error: updateError,
+    upDate: upDate,
+  } = useUpdate("menu_items");
+
+  /**
+   * inpu para buscar receitas
+   *  <InputSelect
+                       options={searchMenu}
+                       value={menuItems.menu_id}
+                       onChange={selectedSchool ? handleMenuSelect : undefined}
+                       onSearchChange={
+                         selectedSchool
+                           ? (searchTerm) => setMenu(searchTerm)
+                           : undefined
+                       }
+                       placeholder="Selecione um Mês ex: 10"
+                       forceReset={resetMenuInput}
+                       field="formattedLabel"
+                       disabled={!selectedSchool}
+                     />
+   */
+
+  /**
+   * criar um botão para editar usando update e select de receitas e feath data permitir editar só receitas
+   * alterar tabela para dados não preenchidos colocar receita não preenchida
+   */
 
   return (
     <>
@@ -153,7 +202,7 @@ const MenuDataContent = () => {
                                   items[0].school_id,
                                   items[0].teaching_modality
                                 )}
-                                {/* <Button talves put /> */}
+                                <Button />
                               </div>
                             )}
                           </td>

@@ -197,6 +197,7 @@ const RecipeMenuDetails = () => {
               Recalcular
             </Button>
             <RecipeDialog
+              type="PNAE"
               textButton="Ficha tecnica PNAE"
               recipe={recipe}
               teaching_modality={
@@ -204,6 +205,15 @@ const RecipeMenuDetails = () => {
               }
             />
             <RecipeDialog
+              type="KITCHEN"
+              textButton="Ficha tecnica Cozinha"
+              recipe={recipe}
+              teaching_modality={
+                menuData.teaching_modality || "Não foi informado"
+              }
+            />
+            <RecipeDialog
+              type="STOCK_REQUISITION"
               textButton="Ficha tecnica Cozinha"
               recipe={recipe}
               teaching_modality={
