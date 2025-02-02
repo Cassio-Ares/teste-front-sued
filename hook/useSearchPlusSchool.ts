@@ -1,12 +1,16 @@
+import { informationError } from "@/components/informationError";
+import { api } from "@/connect/api";
 import { useEffect, useState } from "react";
-import { informationError } from "../components/informationError";
-import { api } from "../connect/api";
 
-interface ApiResponse<T> {
-  data: T[];
+interface SearchOptions {
+  school_id: string | number; // Agora é obrigatório
 }
 
-export const useSearch = <T>(endpoint: string, initialQuery: string = "") => {
+export const useSearchPlusSchool = <T>(
+  endpoint: string,
+  initialQuery: string = "",
+  options: SearchOptions
+) => {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,13 +21,15 @@ export const useSearch = <T>(endpoint: string, initialQuery: string = "") => {
     setError(null);
     try {
       const response = await api.get(
-        query ? `${endpoint}/search/${query}` : `${endpoint}/search`
+        query
+          ? `${endpoint}/${options.school_id}/search/${query}`
+          : `${endpoint}/${options.school_id}/search`
       );
 
-      // setData(response.data || response.data.data);
       setData(response.data.data);
-    } catch (error) {
+    } catch (error: any) {
       informationError(error);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -31,7 +37,7 @@ export const useSearch = <T>(endpoint: string, initialQuery: string = "") => {
 
   useEffect(() => {
     fetchData();
-  }, [endpoint, query]);
+  }, [endpoint, query, options.school_id]);
 
   return { data, loading, error, setQuery, refetch: fetchData };
 };

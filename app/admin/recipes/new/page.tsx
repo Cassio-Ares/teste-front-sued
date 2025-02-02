@@ -44,6 +44,7 @@ interface Ingredient {
   cooked_weight?: number;
   gross_weight?: number;
   unit_of_measure: Unit;
+  homemade_measure?: string;
   description?: string;
 }
 
@@ -121,9 +122,9 @@ const NewRecipe = () => {
   const addIngredient = () => {
     const ingredientToAdd: Ingredient = {
       ingredient_id: newIngredient.ingredient_id ?? 0,
-      cooked_weight: newIngredient.cooked_weight,
       gross_weight: newIngredient.gross_weight,
       unit_of_measure: newIngredient.unit_of_measure || "g",
+      homemade_measure: newIngredient.homemade_measure,
     };
 
     if (editingIngredient !== null) {
@@ -150,6 +151,7 @@ const NewRecipe = () => {
       cooked_weight: undefined,
       gross_weight: undefined,
       unit_of_measure: "g",
+      homemade_measure: undefined,
     });
     setEditingIngredient(null);
     setIsOpen(false);
@@ -162,6 +164,7 @@ const NewRecipe = () => {
       cooked_weight: undefined,
       gross_weight: undefined,
       unit_of_measure: "g",
+      homemade_measure: undefined,
     });
     setIsOpen(true);
   };
@@ -451,20 +454,20 @@ const NewRecipe = () => {
                           }
                         />
                       </div>
-                      {/* <div className="flex w-full flex-col gap-2">
-                        <Label>Peso Cozido</Label>
+                      <div className="flex w-full flex-col gap-2">
+                        <Label>Medida Caseira</Label>
                         <Input
-                          placeholder="Peso Cozido"
-                          type="number"
-                          value={newIngredient.cooked_weight ?? undefined}
+                          placeholder="1 colher de farinha"
+                          type="text"
+                          value={newIngredient.homemade_measure ?? undefined}
                           onChange={(e) =>
                             setNewIngredient((prev) => ({
                               ...prev,
-                              cooked_weight: Number(e.target.value),
+                              homemade_measure: e.target.value,
                             }))
                           }
                         />
-                      </div> */}
+                      </div>
                     </div>
                   </DialogDescription>
                 </DialogHeader>

@@ -2,22 +2,8 @@ import { formatValue } from "@/lib/utils/formatValue";
 import jsPDF from "jspdf";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
 // import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
 
@@ -34,6 +20,8 @@ const RecipeDialog = ({
   textButton?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  console.log("recipe", recipe);
 
   const handleExportToPDF = () => {
     const doc = new jsPDF({
@@ -64,11 +52,7 @@ const RecipeDialog = ({
     doc.setFontSize(12);
     doc.text(`Custo Total: R$ ${recipe?.total_cost}`, margin, yPosition);
     yPosition += 8;
-    doc.text(
-      `Custo por Porção: R$ ${recipe?.metrics?.cost_per_serving.toFixed(2)}`,
-      margin,
-      yPosition
-    );
+    doc.text(`Custo por Porção: R$ ${recipe?.metrics?.cost_per_serving.toFixed(2)}`, margin, yPosition);
     yPosition += 8;
     doc.text(`Número de Porções: ${recipe?.servings}`, margin, yPosition);
     yPosition += 15;
@@ -78,10 +62,7 @@ const RecipeDialog = ({
     yPosition += 10;
 
     doc.setFontSize(12);
-    const utensilsText = doc.splitTextToSize(
-      recipe?.required_utensils || "Nenhum utensílio informado",
-      170
-    );
+    const utensilsText = doc.splitTextToSize(recipe?.required_utensils || "Nenhum utensílio informado", 170);
     utensilsText.forEach((line: string) => {
       doc.text(line, margin, yPosition);
       yPosition += 6;
@@ -98,6 +79,7 @@ const RecipeDialog = ({
       "Uni.med",
       "Líquido",
       "Uni.med",
+      "Med. caseira",
       "Fator Correção",
       "Custo Unitário (R$)",
       "kcal",
@@ -112,9 +94,7 @@ const RecipeDialog = ({
       "Sódio (mg)",
       "Custo Total (R$)",
     ];
-    const columnWidths = [
-      40, 30, 15, 30, 15, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
-    ];
+    const columnWidths = [40, 30, 15, 30, 15, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30];
 
     doc.setFontSize(10);
     let xPosition = margin;
@@ -132,17 +112,12 @@ const RecipeDialog = ({
       const rowData = [
         ingredient.ingredient_description || ingredient.description,
         ingredient?.gross_weight || ingredient?.adjusted_quantity || "N/A",
-        ingredient?.unit_of_measure ||
-          ingredient?.unit_of_measure_gross_weight ||
-          "N/A",
+        ingredient?.unit_of_measure || ingredient?.unit_of_measure_gross_weight || "N/A",
         ingredient?.cooked_weight || ingredient?.ajustedCookedWeight || "N/A",
-        ingredient?.unit_of_measure ||
-          ingredient?.unit_of_measure_cooked_weight ||
-          "N/A",
+        ingredient?.unit_of_measure || ingredient?.unit_of_measure_cooked_weight || "N/A",
+        ingredient?.homemade_measure || "N/A",
         ingredient?.correction_factor || "N/A",
-        `R$ ${
-          ingredient?.cost_per_serving || ingredient?.adjusted_cost || "0"
-        }`,
+        `R$ ${ingredient?.cost_per_serving || ingredient?.adjusted_cost || "0"}`,
         ingredient?.kcal || "0",
         ingredient?.kj || "0",
         ingredient?.protein || "0",
@@ -183,10 +158,7 @@ const RecipeDialog = ({
     yPosition += 10;
 
     doc.setFontSize(12);
-    const preparationText = doc.splitTextToSize(
-      recipe?.preparation_method || "Método de preparo não informado",
-      170
-    );
+    const preparationText = doc.splitTextToSize(recipe?.preparation_method || "Método de preparo não informado", 170);
     preparationText.forEach((line: string) => {
       doc.text(line, margin, yPosition);
       yPosition += 6;
@@ -197,10 +169,7 @@ const RecipeDialog = ({
     yPosition += 10;
 
     doc.setFontSize(12);
-    const preparationText2 = doc.splitTextToSize(
-      recipe?.home_measurements || "Medidas caseiras não informadas",
-      170
-    );
+    const preparationText2 = doc.splitTextToSize(recipe?.home_measurements || "Medidas caseiras não informadas", 170);
     preparationText2.forEach((line: string) => {
       doc.text(line, margin, yPosition);
       yPosition += 6;
@@ -211,11 +180,7 @@ const RecipeDialog = ({
     yPosition += 10;
 
     doc.setFontSize(12);
-    doc.text(
-      `${recipe?.prep_time || "Tempo de preparo não informado"} minutos`,
-      margin,
-      yPosition
-    );
+    doc.text(`${recipe?.prep_time || "Tempo de preparo não informado"} minutos`, margin, yPosition);
     yPosition += 15;
 
     // Salvar o PDF
@@ -229,10 +194,7 @@ const RecipeDialog = ({
   };
 
   //ajuste do nome da tabela (lembrar de reorganizar)
-  const schoolName =
-    recipe?.recipe?.school_name ||
-    recipe?.school_name ||
-    "Escola não informada";
+  const schoolName = recipe?.recipe?.school_name || recipe?.school_name || "Escola não informada";
   const isMunicipal = schoolName.toLowerCase().includes("municipal");
   const isEstadual = schoolName.toLowerCase().includes("estadual");
 
@@ -256,12 +218,8 @@ const RecipeDialog = ({
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="m-auto">
             <DialogTitle className="text-4xl flex flex-col justify-center items-center">
-              {teaching_modality !== null
-                ? getSecretaryTitle()
-                : getSecretaryTitle() || "Escola não informada"}
-              <div className="text-2xl items-center">
-                PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE
-              </div>
+              {teaching_modality !== null ? getSecretaryTitle() : getSecretaryTitle() || "Escola não informada"}
+              <div className="text-2xl items-center">PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE</div>
             </DialogTitle>
             <DialogDescription className="text-center text-lg">
               {teaching_modality !== null
@@ -274,9 +232,7 @@ const RecipeDialog = ({
               <h3 className="font-semibold">Informações da Receita</h3>
               <p>
                 Custo Total: R${" "}
-                {recipe?.recipe?.metrics?.total_cost.toFixed(2) ||
-                  recipe?.metrics?.total_cost?.toFixed(2) ||
-                  "0,00"}
+                {recipe?.recipe?.metrics?.total_cost.toFixed(2) || recipe?.metrics?.total_cost?.toFixed(2) || "0,00"}
               </p>
               <p>
                 Custo por Porção: R${" "}
@@ -284,10 +240,7 @@ const RecipeDialog = ({
                   recipe?.metrics?.cost_per_serving?.toFixed(2) ||
                   "0,00"}
               </p>
-              <p>
-                Número de Porções:{" "}
-                {recipe.recipe?.servings || recipe?.servings || "0"}
-              </p>
+              <p>Número de Porções: {recipe.recipe?.servings || recipe?.servings || "0"}</p>
             </div>
             <div>
               <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
@@ -295,11 +248,7 @@ const RecipeDialog = ({
             </div>
             <div>
               <h3 className="font-semibold">Utensílios Necessários</h3>
-              <p>
-                {recipe?.recipe?.required_utensils ||
-                  recipe?.required_utensils ||
-                  "Não informado"}
-              </p>
+              <p>{recipe?.recipe?.required_utensils || recipe?.required_utensils || "Não informado"}</p>
             </div>
           </div>
           <h3 className="text-lg font-bold mb-2">Ingredientes</h3>
@@ -311,6 +260,7 @@ const RecipeDialog = ({
                 <TableHead>Unid.Med</TableHead>
                 <TableHead>Per capita (liquído)</TableHead>
                 <TableHead>Unid.Med</TableHead>
+                <TableHead>Med. Caseira</TableHead>
                 <TableHead>Fator de correção</TableHead>
                 <TableHead>Custo unitário R$</TableHead>
                 <TableHead>(kcal)</TableHead>
@@ -329,33 +279,19 @@ const RecipeDialog = ({
             <TableBody>
               {recipe?.ingredients?.map((ingredient, index) => (
                 <TableRow key={index}>
+                  <TableCell>{ingredient.ingredient_description || ingredient?.description}</TableCell>
                   <TableCell>
-                    {ingredient.ingredient_description ||
-                      ingredient?.description}
+                    {formatValue(ingredient?.gross_weight) || formatValue(ingredient.adjusted_quantity)}
                   </TableCell>
+                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
                   <TableCell>
-                    {formatValue(ingredient?.gross_weight) ||
-                      formatValue(ingredient.adjusted_quantity)}
+                    {formatValue(ingredient?.cooked_weight) || formatValue(ingredient?.ajustedCookedWeight)}
                   </TableCell>
+                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
+                  <TableCell>{formatValue(ingredient?.homemade_measure)}</TableCell>
+                  <TableCell>{formatValue(ingredient?.correction_factor)}</TableCell>
                   <TableCell>
-                    {ingredient.unit_of_measure ||
-                      ingredient.unit_of_measure_gross_weight}
-                  </TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.cooked_weight) ||
-                      formatValue(ingredient?.ajustedCookedWeight)}
-                  </TableCell>
-                  <TableCell>
-                    {ingredient.unit_of_measure ||
-                      ingredient.unit_of_measure_gross_weight}
-                  </TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.correction_factor)}
-                  </TableCell>
-                  <TableCell>
-                    R${" "}
-                    {formatValue(ingredient?.cost_per_serving) ||
-                      formatValue(ingredient?.adjusted_cost)}
+                    R$ {formatValue(ingredient?.cost_per_serving) || formatValue(ingredient?.adjusted_cost)}
                   </TableCell>
                   <TableCell>{formatValue(ingredient?.kcal)}</TableCell>
                   <TableCell>{formatValue(ingredient?.kj)}</TableCell>
@@ -375,47 +311,25 @@ const RecipeDialog = ({
           {/* <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
           <p>{recipe.recipe?.name}</p> */}{" "}
           <h3 className="text-lg font-bold mt-4">Método de Preparo</h3>
-          <p>
-            {recipe?.recipe?.preparation_method ||
-              recipe?.preparation_method ||
-              "Não informado"}
-          </p>
+          <p>{recipe?.recipe?.preparation_method || recipe?.preparation_method || "Não informado"}</p>
           <h3 className="text-lg font-bold mt-4">Medida Caseira</h3>
-          <p>
-            {recipe?.recipe?.home_measurements ||
-              recipe?.home_measurements ||
-              "Não informado"}
-          </p>
+          <p>{recipe?.recipe?.home_measurements || recipe?.home_measurements || "Não informado"}</p>
           <h3 className="text-lg font-bold mt-4">Tempo de Cocçõa</h3>
-          <p>
-            {recipe?.recipe?.timeOfCoccao || recipe?.timeOfCoccao || "0"} min
-          </p>
+          <p>{recipe?.recipe?.timeOfCoccao || recipe?.timeOfCoccao || "0"} min</p>
           <h3 className="text-lg font-bold mt-4">Tempo de Preparo</h3>
           <p>{recipe?.recipe?.prep_time || recipe?.prep_time || "0"} min</p>
           <h3 className="text-lg font-bold mt-4">Descrições de Preparo</h3>
-          <p>
-            {recipe?.recipe?.description_of_recipe ||
-              recipe?.description_of_recipe ||
-              "Não informado"}
-          </p>
+          <p>{recipe?.recipe?.description_of_recipe || recipe?.description_of_recipe || "Não informado"}</p>
           <h3 className="text-lg font-bold mt-4">Observações</h3>
-          <p>
-            {recipe?.recipe?.observations ||
-              recipe?.observations ||
-              "Não informado"}
-          </p>
+          <p>{recipe?.recipe?.observations || recipe?.observations || "Não informado"}</p>
           <Button onClick={handleExportToPDF}>Exportar para PDF</Button>
         </DialogContent>
       ) : type === "KITCHEN" ? (
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="m-auto">
             <DialogTitle className="text-4xl flex flex-col justify-center items-center">
-              {teaching_modality !== null
-                ? getSecretaryTitle()
-                : getSecretaryTitle() || "Escola não informada"}
-              <div className="text-2xl items-center">
-                FICHA TÉCNICA DE COZINHA
-              </div>
+              {teaching_modality !== null ? getSecretaryTitle() : getSecretaryTitle() || "Escola não informada"}
+              <div className="text-2xl items-center">FICHA TÉCNICA DE COZINHA</div>
             </DialogTitle>
             <DialogDescription className="text-center text-lg">
               {teaching_modality !== null
@@ -426,10 +340,7 @@ const RecipeDialog = ({
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
               <h3 className="font-semibold">Informações da Receita</h3>
-              <p>
-                Número de Porções:{" "}
-                {recipe.recipe?.servings || recipe?.servings || "0"}
-              </p>
+              <p>Número de Porções: {recipe.recipe?.servings || recipe?.servings || "0"}</p>
             </div>
             <div>
               <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
@@ -437,11 +348,7 @@ const RecipeDialog = ({
             </div>
             <div>
               <h3 className="font-semibold">Utensílios Necessários</h3>
-              <p>
-                {recipe?.recipe?.required_utensils ||
-                  recipe?.required_utensils ||
-                  "Não informado"}
-              </p>
+              <p>{recipe?.recipe?.required_utensils || recipe?.required_utensils || "Não informado"}</p>
             </div>
           </div>
           <h3 className="text-lg font-bold mb-2">Ingredientes</h3>
@@ -453,6 +360,7 @@ const RecipeDialog = ({
                 <TableHead>Unid.Med</TableHead>
                 <TableHead>Per capita (liquído)</TableHead>
                 <TableHead>Unid.Med</TableHead>
+                <TableHead>Med. Caseira</TableHead>
                 <TableHead>Fator de correção</TableHead>
                 <TableHead>(kcal)</TableHead>
                 <TableHead>(kJ)</TableHead>
@@ -469,29 +377,17 @@ const RecipeDialog = ({
             <TableBody>
               {recipe?.ingredients?.map((ingredient, index) => (
                 <TableRow key={index}>
+                  <TableCell>{ingredient.ingredient_description || ingredient?.description}</TableCell>
                   <TableCell>
-                    {ingredient.ingredient_description ||
-                      ingredient?.description}
+                    {formatValue(ingredient?.gross_weight) || formatValue(ingredient.adjusted_quantity)}
                   </TableCell>
+                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
                   <TableCell>
-                    {formatValue(ingredient?.gross_weight) ||
-                      formatValue(ingredient.adjusted_quantity)}
+                    {formatValue(ingredient?.cooked_weight) || formatValue(ingredient?.ajustedCookedWeight)}
                   </TableCell>
-                  <TableCell>
-                    {ingredient.unit_of_measure ||
-                      ingredient.unit_of_measure_gross_weight}
-                  </TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.cooked_weight) ||
-                      formatValue(ingredient?.ajustedCookedWeight)}
-                  </TableCell>
-                  <TableCell>
-                    {ingredient.unit_of_measure ||
-                      ingredient.unit_of_measure_gross_weight}
-                  </TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.correction_factor)}
-                  </TableCell>
+                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
+                  <TableCell>{ingredient?.homemade_measure}</TableCell>
+                  <TableCell>{formatValue(ingredient?.correction_factor)}</TableCell>
                   <TableCell>{formatValue(ingredient?.kcal)}</TableCell>
                   <TableCell>{formatValue(ingredient?.kj)}</TableCell>
                   <TableCell>{formatValue(ingredient?.protein)}</TableCell>
@@ -509,53 +405,29 @@ const RecipeDialog = ({
           {/* <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
           <p>{recipe.recipe?.name}</p> */}{" "}
           <h3 className="text-lg font-bold mt-4">Método de Preparo</h3>
-          <p>
-            {recipe?.recipe?.preparation_method ||
-              recipe?.preparation_method ||
-              "Não informado"}
-          </p>
+          <p>{recipe?.recipe?.preparation_method || recipe?.preparation_method || "Não informado"}</p>
           <h3 className="text-lg font-bold mt-4">Medida Caseira</h3>
-          <p>
-            {recipe?.recipe?.home_measurements ||
-              recipe?.home_measurements ||
-              "Não informado"}
-          </p>
+          <p>{recipe?.recipe?.home_measurements || recipe?.home_measurements || "Não informado"}</p>
           <h3 className="text-lg font-bold mt-4">Tempo de Cocçõa</h3>
-          <p>
-            {recipe?.recipe?.timeOfCoccao || recipe?.timeOfCoccao || "0"} min
-          </p>
+          <p>{recipe?.recipe?.timeOfCoccao || recipe?.timeOfCoccao || "0"} min</p>
           <h3 className="text-lg font-bold mt-4">Tempo de Preparo</h3>
           <p>{recipe?.recipe?.prep_time || recipe?.prep_time || "0"} min</p>
           <h3 className="text-lg font-bold mt-4">Descrições de Preparo</h3>
-          <p>
-            {recipe?.recipe?.description_of_recipe ||
-              recipe?.description_of_recipe ||
-              "Não informado"}
-          </p>
+          <p>{recipe?.recipe?.description_of_recipe || recipe?.description_of_recipe || "Não informado"}</p>
           <h3 className="text-lg font-bold mt-4">Observações</h3>
-          <p>
-            {recipe?.recipe?.observations ||
-              recipe?.observations ||
-              "Não informado"}
-          </p>
+          <p>{recipe?.recipe?.observations || recipe?.observations || "Não informado"}</p>
           <Button onClick={handleExportToPDF}>Exportar para PDF</Button>
         </DialogContent>
       ) : (
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="m-auto">
             <DialogTitle className="text-4xl flex flex-col justify-center items-center">
-              {teaching_modality !== null
-                ? getSecretaryTitle()
-                : getSecretaryTitle() || "Escola não informada"}
-              <div className="text-2xl items-center">
-                FICHA DE INGREDIENTES PARA PREPARO
-              </div>
+              {teaching_modality !== null ? getSecretaryTitle() : getSecretaryTitle() || "Escola não informada"}
+              <div className="text-2xl items-center">FICHA DE INGREDIENTES PARA PREPARO</div>
             </DialogTitle>
             <DialogDescription className="text-center text-lg">
               {teaching_modality !== null
-                ? `${
-                    recipe.recipe?.name || recipe?.name
-                  } - ${teaching_modality}`
+                ? `${recipe.recipe?.name || recipe?.name} - ${teaching_modality}`
                 : `${recipe.recipe?.name || recipe?.name}`}
             </DialogDescription>
           </DialogHeader>
@@ -572,18 +444,11 @@ const RecipeDialog = ({
             <TableBody>
               {recipe?.ingredients?.map((ingredient, index) => (
                 <TableRow key={index}>
+                  <TableCell>{ingredient.ingredient_description || ingredient?.description}</TableCell>
                   <TableCell>
-                    {ingredient.ingredient_description ||
-                      ingredient?.description}
+                    {formatValue(ingredient?.gross_weight) || formatValue(ingredient.adjusted_quantity)}
                   </TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.gross_weight) ||
-                      formatValue(ingredient.adjusted_quantity)}
-                  </TableCell>
-                  <TableCell>
-                    {ingredient.unit_of_measure ||
-                      ingredient.unit_of_measure_gross_weight}
-                  </TableCell>
+                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
