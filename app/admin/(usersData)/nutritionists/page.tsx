@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -12,21 +13,71 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { usePost } from "@/hook/usePost";
+import { useSearch } from "@/hook/useSearch";
 import { Search, Trash } from "lucide-react";
-import { ToastContainer } from "react-toastify";
+import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
-const nutritionistData = [
-  {
-    id: 1,
-    full_name: "Nutricionista 1",
-    email: "email@email",
-    phone: "51 99999-9999",
-    crn: "123456789",
-    registration_date: "01/01/2023",
-  },
-];
+// const nutritionistData = [
+//   {
+//     id: 1,
+//     full_name: "Nutricionista 1",
+//     email: "email@email",
+//     phone: "51 99999-9999",
+//     crn: "123456789",
+//     registration_date: "01/01/2023",
+//   },
+// ];
 
 const NutritionistPage = () => {
+  const [inputData, setInputData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    crn: "",
+    registration_date: "",
+  });
+
+  const [queryNutritionist, setQueryNutritionist] = useState("");
+
+  const {
+    data: nutritionistData,
+    loading,
+    error,
+    setQuery,
+    refetch: fetchData,
+  } = useSearch<any>("nutritionists", queryNutritionist);
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setQueryNutritionist(value);
+    setQuery(value);
+  };
+
+  const { postData: createPost } = usePost<any>("nutritionists");
+
+  console.log("inputData", inputData);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      const response = await createPost(inputData);
+      toast.success(response?.message);
+
+      setInputData({
+        full_name: "",
+        email: "",
+        phone: "",
+        crn: "",
+        registration_date: "",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const removeItem = async (id: number) => {};
   return (
     <div className="flex flex-col justify-start gap-4">
@@ -44,59 +95,58 @@ const NutritionistPage = () => {
               <DialogTitle>Cadastrar nova Nutricionista</DialogTitle>
               <DialogDescription>Adicione um novo Nutricionista</DialogDescription>
             </DialogHeader>
-            <form>
-              <form onSubmit={"handleSubmitState"}>
-                <div className="flex justify-start items-center w-[400px] gap-4">
-                  <Label>Nome Completo</Label>
+
+            <form onSubmit={handleSubmit}>
+              <div className="flex justify-start items-center w-[400px] gap-4">
+                <Label>Nome Completo</Label>
+                <Input
+                  type="text"
+                  value={inputData.full_name}
+                  onChange={(e) => setInputData({ ...inputData, full_name: e.target.value })}
+                />
+              </div>
+              <div className="flex w-full gap-4 mt-4 text-start">
+                <div className="flex w-full flex-col gap-2">
+                  <Label>E-mail</Label>
                   <Input
-                    type="text"
-                    // value={inputData.state_hall_email}
-                    //onChange={(e) => setInputData({ ...inputData, state_hall_email: e.target.value })}
+                    type="email"
+                    value={inputData.email}
+                    onChange={(e) => setInputData({ ...inputData, email: e.target.value })}
                   />
                 </div>
-                <div className="flex w-full gap-4 mt-4 text-start">
-                  <div className="flex w-full flex-col gap-2">
-                    <Label>E-mail</Label>
-                    <Input
-                      type="email"
-                      // value={inputData.state_hall_email}
-                      //onChange={(e) => setInputData({ ...inputData, state_hall_email: e.target.value })}
-                    />
-                  </div>
-                  <div className="flex w-full flex-col gap-2">
-                    <Label>Telefone</Label>
-                    <Input
-                      type="text"
-                      placeholder="51 99999-9999"
-                      //  value={inputData.state_hall_phone}
-                      //  onChange={(e) => setInputData({ ...inputData, state_hall_phone: e.target.value })}
-                    />
-                  </div>
+                <div className="flex w-full flex-col gap-2">
+                  <Label>Telefone</Label>
+                  <Input
+                    type="text"
+                    placeholder="51 99999-9999"
+                    value={inputData.phone}
+                    onChange={(e) => setInputData({ ...inputData, phone: e.target.value })}
+                  />
                 </div>
-                <div className="flex w-full gap-4 mt-4 text-start">
-                  <div className="flex w-full flex-col gap-2">
-                    <Label>CRN</Label>
-                    <Input
-                      type="text"
-                      placeholder="Digite o CRN"
-                      // value={inputData.state_hall_email}
-                      //onChange={(e) => setInputData({ ...inputData, state_hall_email: e.target.value })}
-                    />
-                  </div>
-                  <div className="flex w-full flex-col gap-2">
-                    <Label>Data de Registro</Label>
-                    <Input
-                      type="date"
-                      placeholder="01/01/2023"
-                      //  value={inputData.state_hall_phone}
-                      //  onChange={(e) => setInputData({ ...inputData, state_hall_phone: e.target.value })}
-                    />
-                  </div>
+              </div>
+              <div className="flex w-full gap-4 mt-4 text-start">
+                <div className="flex w-full flex-col gap-2">
+                  <Label>CRN</Label>
+                  <Input
+                    type="text"
+                    placeholder="Digite o CRN"
+                    value={inputData.crn}
+                    onChange={(e) => setInputData({ ...inputData, crn: e.target.value })}
+                  />
                 </div>
-                <DialogFooter>
-                  <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Adicionar</Button>
-                </DialogFooter>
-              </form>
+                <div className="flex w-full flex-col gap-2">
+                  <Label>Data de Registro</Label>
+                  <Input
+                    type="date"
+                    placeholder="01/01/2023"
+                    value={inputData.registration_date}
+                    onChange={(e) => setInputData({ ...inputData, registration_date: e.target.value })}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Adicionar</Button>
+              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
@@ -104,7 +154,7 @@ const NutritionistPage = () => {
       <div className="flex justify-evenly items-center">
         <div className="flex justify-start items-center w-[300px] gap-4">
           <Search size={16} />
-          <Input placeholder="Pesquisar..." />
+          <Input onChange={handleSearch} placeholder="Pesquisar..." />
         </div>
       </div>
       <div className="flex">

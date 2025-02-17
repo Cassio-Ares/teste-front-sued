@@ -78,7 +78,7 @@ const StatePage = () => {
     }
   };
 
-  const [search, setSearch] = useState<string>();
+  const [search, setSearch] = useState<string>("");
 
   const {
     data: searchState,
