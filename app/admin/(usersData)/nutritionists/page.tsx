@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Trash } from "lucide-react";
 import { ToastContainer } from "react-toastify";
@@ -43,7 +44,60 @@ const NutritionistPage = () => {
               <DialogTitle>Cadastrar nova Nutricionista</DialogTitle>
               <DialogDescription>Adicione um novo Nutricionista</DialogDescription>
             </DialogHeader>
-            <form></form>
+            <form>
+              <form onSubmit={"handleSubmitState"}>
+                <div className="flex justify-start items-center w-[400px] gap-4">
+                  <Label>Nome Completo</Label>
+                  <Input
+                    type="text"
+                    // value={inputData.state_hall_email}
+                    //onChange={(e) => setInputData({ ...inputData, state_hall_email: e.target.value })}
+                  />
+                </div>
+                <div className="flex w-full gap-4 mt-4 text-start">
+                  <div className="flex w-full flex-col gap-2">
+                    <Label>E-mail</Label>
+                    <Input
+                      type="email"
+                      // value={inputData.state_hall_email}
+                      //onChange={(e) => setInputData({ ...inputData, state_hall_email: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex w-full flex-col gap-2">
+                    <Label>Telefone</Label>
+                    <Input
+                      type="text"
+                      placeholder="51 99999-9999"
+                      //  value={inputData.state_hall_phone}
+                      //  onChange={(e) => setInputData({ ...inputData, state_hall_phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="flex w-full gap-4 mt-4 text-start">
+                  <div className="flex w-full flex-col gap-2">
+                    <Label>CRN</Label>
+                    <Input
+                      type="text"
+                      placeholder="Digite o CRN"
+                      // value={inputData.state_hall_email}
+                      //onChange={(e) => setInputData({ ...inputData, state_hall_email: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex w-full flex-col gap-2">
+                    <Label>Data de Registro</Label>
+                    <Input
+                      type="date"
+                      placeholder="01/01/2023"
+                      //  value={inputData.state_hall_phone}
+                      //  onChange={(e) => setInputData({ ...inputData, state_hall_phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Adicionar</Button>
+                </DialogFooter>
+              </form>
+            </form>
           </DialogContent>
         </Dialog>
       </div>

@@ -1,3 +1,6 @@
+"use client";
+
+import InputSelect from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,20 +13,165 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Trash } from "lucide-react";
+import { useState } from "react";
 import { ToastContainer } from "react-toastify";
 
-const inventoryData = [
+const userData = [
+  {
+    id: 1,
+    name: "Nutricionista 1",
+    email: "email@email",
+    phone: "51 99999-9999",
+    user_type: "123456789", //['adm', 'state', 'city', 'school', 'nutri']
+    state_id: "123456789",
+    city_id: "123456789",
+    school_id: "123456789",
+  },
+];
+//"adm", "state", "city", "school", "nutri"
+interface UserData {
+  id: number;
+  value: string;
+  user_type: string;
+}
+const userTypeData: UserData[] = [
+  {
+    id: 1,
+    value: "Administrador",
+    user_type: "adm",
+  },
+  {
+    id: 2,
+    value: "Nutricionista",
+    user_type: "nutri",
+  },
+  {
+    id: 3,
+    value: "Estado",
+    user_type: "state",
+  },
+  {
+    id: 4,
+    value: "Municipio/ Cidade",
+    user_type: "city",
+  },
+  {
+    id: 5,
+    value: "Instituição",
+    user_type: "school",
+  },
+];
+
+const statesData = [
   {
     id: 1,
     name: "Estados",
-    description: "Estados",
-    quantity: 0,
+    uf: "Es",
+    state_hall_phone: "55555555555",
+    state_hall_email: "state@email",
+  },
+];
+const cityData = [
+  {
+    id: 1,
+    uf: "RS",
+    name: "Mostardas",
+    city_hall_phone: "55555555555",
+    city_hall_email: "aihbcj@skn",
+    address: "Bairro da Mostarda, 520 - Centro",
+  },
+];
+const schoolData = [
+  {
+    id: 1,
+    uf: "RS",
+    city: "Mostardas",
+    name: "nome da escola da mostarda",
+    total_students_morning: 0,
+    teaching_modality_morning: "Presencial",
+    total_students_afternoon: 0,
+    teaching_modality_afternoon: "Presencial",
+    total_students_nigth: 0,
+    teaching_modality_nigth: "Presencial",
+    total_students_integral: 0,
+    teaching_modality_integral: "Presencial",
+    phone: "51 99999-9999",
+    email: "email@email",
+    address: "Rua da Mostarda, 520 - Centro",
   },
 ];
 
 const StatePage = () => {
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    user_type: "",
+    state_id: "",
+    city_id: "",
+    school_id: "",
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+
+  //user_type
+  const [selectedUserType, setSelectedUserType] = useState<UserData | null>(null);
+
+  const handleUserTypeSelect = (selectedId: number) => {
+    const userType = userTypeData.find((item) => item.id === selectedId);
+    setSelectedUserType(userType || null);
+  };
+
+  //state
+  const [selectedState, setSelectedState] = useState<any | null>(null);
+  const handleState = (stateId: number) => {
+    const state = statesData.find((item) => item.id === stateId);
+    setSelectedState(state || null);
+  };
+
+  //city
+
+  //school
+  //  const [schoolSearch, setSchoolSearch] = useState<string>("");
+
+  //   const {
+  //     data: searchSchool,
+  //     loading: schoolLoading,
+  //     error: schoolError,
+  //     setQuery: setQuerySchool,
+  //   } = useSearch<any>("schools", schoolSearch);
+
+  const [selectedSchool, setSelectedSchool] = useState<any>(null);
+  console.log("selectedSchool", selectedSchool?.id);
+
+  // const handleSchoolSelect = (schoolId: number | null) => {
+  //   if (schoolId === null) {
+  //     setSelectedSchool(null);
+  //     setStock({
+  //       ...stock,
+  //       state_id: "",
+  //       city_id: "",
+  //       school_id: "",
+  //     });
+  //     return;
+  //   }
+
+  //   const school = searchSchool?.find((s) => s.id === schoolId);
+  //   if (school) {
+  //     setSelectedSchool(school);
+  //     setStock({
+  //       ...stock,
+  //       state_id: school.state_id,
+  //       city_id: school.city_id,
+  //       school_id: school.id,
+  //     });
+  //   }
+  // };
+
+  const handleSchoolSelect = () => {};
+
   return (
     <div className="flex flex-col justify-start gap-4">
       <h1 className="font-bold text-xl">Estados</h1>
@@ -37,121 +185,90 @@ const StatePage = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Cadastrar novo Estado</DialogTitle>
-              <DialogDescription>Adicione um novo item ao seu estoque</DialogDescription>
+              <DialogTitle>Cadastrar novo Usuario</DialogTitle>
+              <DialogDescription>Adicione um novo usuario</DialogDescription>
             </DialogHeader>
-            {/* <form onSubmit={}>
-            <div className="flex justify-start items-center w-[300px] gap-4">
-              <Label>Nome da Instituição</Label>
-              <InputSelect
-                options={searchSchool}
-                value={selectedSchool?.id}
-                onChange={handleSchoolSelect}
-                onSearchChange={(query) => setQuerySchool(query)}
-                placeholder="Selecione uma Instituição"
-                forceReset={resetSchoolInput}
-                field="name"
-              />
-            </div>
-            <div className="flex w-full gap-4 mt-4 text-start">
-              <div className="flex w-full flex-col gap-2">
-                <Label>Nome do ingrediente</Label>
-                <InputSelect
-                  options={ingredientData}
-                  value={selectedIngredient?.id}
-                  onChange={handleIngredientSelect}
-                  onSearchChange={(query) => setQueryIngredient(query)}
-                  placeholder="Selecione um ingrediente"
-                  forceReset={resetIngredientInput}
-                  field="description"
-                />
-              </div>
-              <div className="flex w-full flex-col gap-2">
-                <Label>Nome da marca</Label>
+            <form onSubmit={"handleSubmitState"}>
+              <div className="flex justify-start items-center w-[400px] gap-4">
+                <Label>Nome Completo</Label>
                 <Input
-                  value={stock.brand || ""}
-                  onChange={(event) => setStock({ ...stock, brand: event.target.value })}
-                  placeholder="Marca"
+                  type="text"
+                  // value={inputData.state_hall_email}
+                  //onChange={(e) => setInputData({ ...inputData, state_hall_email: e.target.value })}
                 />
               </div>
-            </div>
-            <div className="flex w-full gap-4 mt-4 text-start">
-              <div className="flex w-full flex-col gap-2">
-                <Label>Contém na embalagem</Label>
-                <Input
-                  type="number"
-                  value={stock.quantity_min || ""}
-                  onChange={(event) =>
-                    setStock({
-                      ...stock,
-                      quantity_min: parseFloat(event.target.value),
-                    })
-                  }
-                  placeholder="Quantidade"
-                />
+              <div className="flex w-full gap-4 mt-4 text-start">
+                <div className="flex w-full flex-col gap-2">
+                  <Label>E-mail</Label>
+                  <Input
+                    type="email"
+                    // value={inputData.state_hall_email}
+                    //onChange={(e) => setInputData({ ...inputData, state_hall_email: e.target.value })}
+                  />
+                </div>
+                <div className="flex w-full flex-col gap-2">
+                  <Label>Telefone</Label>
+                  <Input
+                    type="text"
+                    placeholder="51 99999-9999"
+                    //  value={inputData.state_hall_phone}
+                    //  onChange={(e) => setInputData({ ...inputData, state_hall_phone: e.target.value })}
+                  />
+                </div>
               </div>
-              <div className="flex w-full flex-col gap-2">
-                <Label>Unidade de medida da unidade minima</Label>
-                <Select
-                  value={stock.unit_of_measure}
-                  onValueChange={(value) => setStock({ ...stock, unit_of_measure: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecionar medida" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kg">Quilogramas (Kg)</SelectItem>
-                    <SelectItem value="g">Gramas (g)</SelectItem>
-                    <SelectItem value="L">Litros (L)</SelectItem>
-                    <SelectItem value="ml">Mililitros (ml)</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex w-full gap-4 mt-4 text-start">
+                <div className="flex flex-col justify-start mb-2 w-1/2 gap-4">
+                  <Label>Tipo de usuario</Label>
+                  <InputSelect
+                    options={userTypeData}
+                    value={selectedUserType}
+                    onChange={handleUserTypeSelect}
+                    onSearchChange={setSearchQuery}
+                    placeholder="Selecione um tipo de usuário"
+                    field="value"
+                  />
+                </div>
+                <div className="flex flex-col justify-start mb-2 w-1/2 gap-4">
+                  <Label>Estado</Label>
+                  <InputSelect
+                    options={userTypeData}
+                    value={selectedUserType}
+                    onChange={handleUserTypeSelect}
+                    onSearchChange={setSearchQuery}
+                    placeholder="Selecione um tipo de usuário"
+                    field="value"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex w-full gap-4 mt-4 text-start">
-              <div className="flex w-full flex-col gap-2">
-                <Label>Preço por unidade</Label>
-                <Input value={formatMoney(unitPrice)} onChange={handleChange} placeholder="Preço da unidade mínima" />
+              <div className="flex w-full gap-4 mt-4 text-start">
+                <div className="flex flex-col justify-start mb-2 w-1/2 gap-4">
+                  <Label>Municipio / Cidade</Label>
+                  <InputSelect
+                    options={userTypeData}
+                    value={selectedUserType}
+                    onChange={handleUserTypeSelect}
+                    onSearchChange={setSearchQuery}
+                    placeholder="Selecione um tipo de usuário"
+                    field="value"
+                  />
+                </div>
+                <div className="flex flex-col justify-start mb-2 w-1/2 gap-4">
+                  <Label>Instituição</Label>
+                  <InputSelect
+                    options={userTypeData}
+                    value={selectedUserType}
+                    onChange={handleUserTypeSelect}
+                    onSearchChange={setSearchQuery}
+                    placeholder="Selecione um tipo de usuário"
+                    field="value"
+                  />
+                </div>
               </div>
-              <div className="flex w-full flex-col gap-2">
-                <Label>Quantidade total comprada</Label>
-                <Input
-                  type="number"
-                  value={stock.total_quantity || ""}
-                  onChange={(event) =>
-                    setStock({
-                      ...stock,
-                      total_quantity: parseFloat(event.target.value),
-                    })
-                  }
-                  placeholder="Quantidade total"
-                />
-              </div>
-            </div>
-            <div className="flex w-full gap-4 mt-4 text-start">
-              <div className="flex w-full flex-col gap-2">
-                <Label>Data de validade</Label>
-                <Input
-                  type="date"
-                  value={
-                    stock.expiration_date instanceof Date
-                      ? stock.expiration_date.toISOString().split("T")[0]
-                      : stock.expiration_date
-                  }
-                  onChange={(event) =>
-                    setStock({
-                      ...stock,
-                      expiration_date: event.target.value,
-                    })
-                  }
-                  placeholder="Data de validade"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Adicionar</Button>
-            </DialogFooter>
-          </form> */}
+
+              <DialogFooter>
+                <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Adicionar</Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
@@ -179,23 +296,27 @@ const StatePage = () => {
             <TableCaption className="mt-10 text-gray-400">Lista com todos os itens cadastrados.</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px] font-bold">Ingredientes</TableHead>
-                <TableHead className="font-bold">Marca</TableHead>
-                <TableHead className="font-bold">Pacote ou unidade minima</TableHead>
-                <TableHead className="font-bold">Unid. med.</TableHead>
-                <TableHead className="font-bold">Preço por unidade</TableHead>
-                <TableHead className="font-bold">Quantidade total comprada</TableHead>
-                <TableHead className="font-bold">Total de investimento</TableHead>
+                <TableHead className="w-[200px] font-bold">Nome</TableHead>
+                <TableHead className="font-bold">Email</TableHead>
+                <TableHead className="font-bold">Telefone</TableHead>
+                <TableHead className="font-bold">Tipo</TableHead>
+                <TableHead className="font-bold">Estado</TableHead>
+                <TableHead className="font-bold">Cidade</TableHead>
+                <TableHead className="font-bold">Instituição</TableHead>
                 <TableHead className="font-bold text-center">Data de validade</TableHead>
                 <TableHead className="font-bold text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {inventoryData?.map((stock) => (
-                <TableRow key={stock.id}>
-                  <TableCell>{stock.description}</TableCell>
-                  <TableCell>{stock.name}</TableCell>
-
+              {userData?.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.phone}</TableCell>
+                  <TableCell>{user.user_type}</TableCell>
+                  <TableCell>{user.state_id}</TableCell>
+                  <TableCell>{user.city_id}</TableCell>
+                  <TableCell>{user.school_id}</TableCell>
                   <TableCell className="font-medium text-center">
                     <Dialog>
                       <DialogTrigger>
