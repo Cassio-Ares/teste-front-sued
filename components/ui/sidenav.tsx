@@ -187,7 +187,7 @@ const Sidenav = () => {
             </li>
           </ul>
         </div>
-        <div className="hidden md:block px-4 py-3 border-t">
+        <div className="fixed bottom-0 hidden md:block w-1/6 px-4 py-3 border-t">
           <Link
             className="hover:bg-red-400 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-bold text-sm text-red-400 flex gap-2"
             href="/admin"
