@@ -33,6 +33,7 @@ const SchoolsData = [
 const InstituitionsPage = () => {
   const [inputData, setInputData] = useState({
     name: "",
+    state_id: null as number | null,
     city_id: null as number | null, //pego só a cidade aqui e o estado no backend
     total_students_morning: null as number | null,
     teaching_modality_morning: "",
@@ -48,16 +49,65 @@ const InstituitionsPage = () => {
   });
 
   //buscar useState
+  const [stateQuery, setStateQuery] = useState("");
   const [selectState, setSelectState] = useState<any>(null);
-  const { data: stateData, error: stateError, loading: stateLoading, setQuery: setQueryState } = useSearch("state");
+  const {
+    data: stateData,
+    error: stateError,
+    loading: stateLoading,
+    setQuery: setQueryState,
+  } = useSearch<any>("state", stateQuery);
 
-  const handleState = () => {};
+  const handleState = (stateId: number) => {
+    if (stateId === null) {
+      setSelectState(null);
+      setInputData((inputData) => ({
+        ...inputData,
+        state_id: 0,
+      }));
+
+      return null;
+    }
+
+    const state = stateData.find((i) => i.id === stateId);
+
+    if (state) {
+      setSelectState(state);
+      setInputData((inputData) => ({
+        ...inputData,
+        state_id: state.id,
+      }));
+    }
+  };
 
   //buscar city
+  const [cityQuery, setCityQuery] = useState("");
   const [selectCity, setSelectCity] = useState<any>(null);
-  const { data: cityData, error: cityError, loading: cityLoading, setQuery: setQueryCity } = useSearch("cities");
+  const { data: cityData, error: cityError, loading: cityLoading, setQuery: setQueryCity } = useSearch<any>("cities");
 
-  const handleCity = () => {};
+  const handleCity = (cityId: number) => {
+    if (cityId === null) {
+      setSelectCity(null);
+      setInputData((inputData) => ({
+        ...inputData,
+        city_id: 0,
+      }));
+
+      return null;
+    }
+
+    const city = cityData.find((i) => i.id === cityId);
+
+    if (city) {
+      setSelectCity(city);
+      setInputData((inputData) => ({
+        ...inputData,
+        city_id: city.id,
+      }));
+    }
+  };
+
+  console.log(inputData);
 
   //receber os estado do backend
   const { postData } = usePost<any>("school");
@@ -70,6 +120,7 @@ const InstituitionsPage = () => {
 
       setInputData({
         name: "",
+        state_id: null as number | null,
         city_id: null as number | null, //pego só a cidade aqui e o estado no backend
         total_students_morning: null as number | null,
         teaching_modality_morning: "",
@@ -120,7 +171,7 @@ const InstituitionsPage = () => {
                     options={stateData}
                     value={selectState?.id}
                     onChange={handleState}
-                    onSearchChange={(query) => setQueryState(query)}
+                    onSearchChange={(query) => setStateQuery(query)}
                     placeholder="Selecione uma Instituição"
                     // forceReset={resetSchoolInput}
                     field="name"
@@ -132,7 +183,7 @@ const InstituitionsPage = () => {
                     options={cityData}
                     value={selectCity?.id}
                     onChange={handleCity}
-                    onSearchChange={(query) => setQueryCity(query)}
+                    onSearchChange={(query) => setCityQuery(query)}
                     placeholder="Selecione uma Instituição"
                     // forceReset={resetSchoolInput}
                     field="name"
@@ -164,6 +215,11 @@ const InstituitionsPage = () => {
                   value={inputData.total_students_morning || ""}
                   className="w-1/4"
                   onChange={(e) => setInputData({ ...inputData, total_students_morning: Number(e.target.value) })}
+                  disabled={
+                    inputData?.teaching_modality_morning === "" ||
+                    inputData?.teaching_modality_morning ===
+                      "Escola não tem aula neste turno ou não possui esta modalidade"
+                  }
                 />
               </div>
             </div>
@@ -194,6 +250,11 @@ const InstituitionsPage = () => {
                   value={inputData.total_students_afternoon || ""}
                   className="w-1/4"
                   onChange={(e) => setInputData({ ...inputData, total_students_afternoon: Number(e.target.value) })}
+                  disabled={
+                    inputData?.teaching_modality_afternoon === "" ||
+                    inputData?.teaching_modality_afternoon ===
+                      "Escola não tem aula neste turno ou não possui esta modalidade"
+                  }
                 />
               </div>
             </div>
@@ -224,6 +285,11 @@ const InstituitionsPage = () => {
                   type="number"
                   value={inputData.total_students_nigth || ""}
                   onChange={(e) => setInputData({ ...inputData, total_students_nigth: Number(e.target.value) })}
+                  disabled={
+                    inputData?.teaching_modality_nigth === "" ||
+                    inputData?.teaching_modality_nigth ===
+                      "Escola não tem aula neste turno ou não possui esta modalidade"
+                  }
                 />
               </div>
             </div>
@@ -254,6 +320,11 @@ const InstituitionsPage = () => {
                   type="number"
                   value={inputData.total_students_integral || ""}
                   onChange={(e) => setInputData({ ...inputData, total_students_integral: Number(e.target.value) })}
+                  disabled={
+                    inputData?.teaching_modality_integral === "" ||
+                    inputData?.teaching_modality_integral ===
+                      "Escola não tem aula neste turno ou não possui esta modalidade"
+                  }
                 />
               </div>
             </div>
