@@ -44,15 +44,14 @@ interface Ingredient {
   cooked_weight?: number;
   gross_weight?: number;
   unit_of_measure: Unit;
+  homemade_measure?: string;
   description?: string;
 }
 
 const units: string[] = ["g", "ml"];
 
 const NewRecipe = () => {
-  const [editingIngredient, setEditingIngredient] = useState<number | null>(
-    null
-  );
+  const [editingIngredient, setEditingIngredient] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [newRecipe, setNewRecipe] = useState<Partial<RecipeTypes>>({
     name: "",
@@ -121,9 +120,9 @@ const NewRecipe = () => {
   const addIngredient = () => {
     const ingredientToAdd: Ingredient = {
       ingredient_id: newIngredient.ingredient_id ?? 0,
-      cooked_weight: newIngredient.cooked_weight,
       gross_weight: newIngredient.gross_weight,
       unit_of_measure: newIngredient.unit_of_measure || "g",
+      homemade_measure: newIngredient.homemade_measure,
     };
 
     if (editingIngredient !== null) {
@@ -150,6 +149,7 @@ const NewRecipe = () => {
       cooked_weight: undefined,
       gross_weight: undefined,
       unit_of_measure: "g",
+      homemade_measure: undefined,
     });
     setEditingIngredient(null);
     setIsOpen(false);
@@ -162,6 +162,7 @@ const NewRecipe = () => {
       cooked_weight: undefined,
       gross_weight: undefined,
       unit_of_measure: "g",
+      homemade_measure: undefined,
     });
     setIsOpen(true);
   };
@@ -174,20 +175,13 @@ const NewRecipe = () => {
 
   //post
 
-  const {
-    data: dataPost,
-    loading: postLoading,
-    error: postError,
-    postData: createPost,
-  } = usePost<any>("recipes");
+  const { data: dataPost, loading: postLoading, error: postError, postData: createPost } = usePost<any>("recipes");
 
   console.log(dataPost);
 
   //colocar form
   //const createNewRecipe = async (event: React.FormEvent<HTMLFormElement>) => {
-  const createNewRecipe = async (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
+  const createNewRecipe = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
     try {
@@ -227,10 +221,7 @@ const NewRecipe = () => {
         </div>
         <div className="flex justify-start gap-4 md:justify-end mb-4">
           <Link href="/admin/recipes">
-            <Button
-              variant="outline"
-              className="text-orange-500 hover:text-orange-600 font-bold"
-            >
+            <Button variant="outline" className="text-orange-500 hover:text-orange-600 font-bold">
               <ArrowLeft /> Voltar
             </Button>
           </Link>
@@ -254,14 +245,10 @@ const NewRecipe = () => {
             />
           </div> */}
           <div className="flex w-full flex-col gap-2">
-            <Label className="text-base mb-2 font-semibold">
-              Nome da refeição
-            </Label>
+            <Label className="text-base mb-2 font-semibold">Nome da refeição</Label>
             <Input
               value={newRecipe.name}
-              onChange={(e) =>
-                setNewRecipe({ ...newRecipe, name: e.target.value })
-              }
+              onChange={(e) => setNewRecipe({ ...newRecipe, name: e.target.value })}
               placeholder="Nome do prato"
             />
           </div>
@@ -269,9 +256,7 @@ const NewRecipe = () => {
           {/* Servings and Prep Time */}
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex w-full flex-col gap-2">
-              <Label className="text-base mb-2 font-semibold">
-                Atende quantas pessoas?
-              </Label>
+              <Label className="text-base mb-2 font-semibold">Atende quantas pessoas?</Label>
               <Input
                 type="number"
                 value={(newRecipe.servings = 1)}
@@ -287,9 +272,7 @@ const NewRecipe = () => {
             </div>
 
             <div className="flex w-full flex-col gap-2">
-              <Label className="text-base mb-2 font-semibold">
-                Tempo de Cocção (min)
-              </Label>
+              <Label className="text-base mb-2 font-semibold">Tempo de Cocção (min)</Label>
               <Input
                 type="text"
                 value={newRecipe.timeOfCoccao || ""}
@@ -303,9 +286,7 @@ const NewRecipe = () => {
               />
             </div>
             <div className="flex w-full flex-col gap-2">
-              <Label className="text-base mb-2 font-semibold">
-                Tempo de Preparo(min)
-              </Label>
+              <Label className="text-base mb-2 font-semibold">Tempo de Preparo(min)</Label>
               <Input
                 type="text"
                 value={newRecipe.prep_time || ""}
@@ -327,29 +308,21 @@ const NewRecipe = () => {
                 <h4 className="font-semibold">Ingredientes adicionados</h4>
                 <ul className="list-disc pl-5 marker:text-gray-500">
                   {ingredients.map((ingredient, index) => (
-                    <li
-                      key={index}
-                      className="flex justify-between items-center"
-                    >
+                    <li key={index} className="flex justify-between items-center">
                       <span>
                         -{" "}
                         <span className="font-bold">
-                          {ingredient.cooked_weight || ingredient.gross_weight}{" "}
-                          {ingredient.unit_of_measure}
+                          {ingredient.cooked_weight || ingredient.gross_weight} {ingredient.unit_of_measure}
                         </span>{" "}
                         de{" "}
-                        {ingredientData?.find(
-                          (i) => i.id === ingredient.ingredient_id
-                        )?.description || "Ingrediente"}
+                        {ingredientData?.find((i) => i.id === ingredient.ingredient_id)?.description || "Ingrediente"}
                       </span>
                       <div className="flex gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
                           className="text-black"
-                          onClick={() =>
-                            handleEditIngredient(index, ingredient)
-                          }
+                          onClick={() => handleEditIngredient(index, ingredient)}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -358,9 +331,7 @@ const NewRecipe = () => {
                           size="sm"
                           className="text-red-500 hover:text-red-700"
                           onClick={() => {
-                            setIngredients((prev) =>
-                              prev.filter((_, i) => i !== index)
-                            );
+                            setIngredients((prev) => prev.filter((_, i) => i !== index));
                             toast.success("Ingrediente removido com sucesso!");
                           }}
                         >
@@ -389,9 +360,7 @@ const NewRecipe = () => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    {editingIngredient !== null
-                      ? "Editar ingrediente"
-                      : "Adicionar ingrediente"}
+                    {editingIngredient !== null ? "Editar ingrediente" : "Adicionar ingrediente"}
                   </DialogTitle>
                   <DialogDescription>
                     <div className="flex w-full gap-4 mt-4 text-start">
@@ -414,8 +383,7 @@ const NewRecipe = () => {
                           onValueChange={(value) =>
                             setNewIngredient((prev) => ({
                               ...prev,
-                              unit_of_measure:
-                                value as Ingredient["unit_of_measure"],
+                              unit_of_measure: value as Ingredient["unit_of_measure"],
                             }))
                           }
                         >
@@ -451,28 +419,25 @@ const NewRecipe = () => {
                           }
                         />
                       </div>
-                      {/* <div className="flex w-full flex-col gap-2">
-                        <Label>Peso Cozido</Label>
+                      <div className="flex w-full flex-col gap-2">
+                        <Label>Medida Caseira</Label>
                         <Input
-                          placeholder="Peso Cozido"
-                          type="number"
-                          value={newIngredient.cooked_weight ?? undefined}
+                          placeholder="1 colher de farinha"
+                          type="text"
+                          value={newIngredient.homemade_measure ?? undefined}
                           onChange={(e) =>
                             setNewIngredient((prev) => ({
                               ...prev,
-                              cooked_weight: Number(e.target.value),
+                              homemade_measure: e.target.value,
                             }))
                           }
                         />
-                      </div> */}
+                      </div>
                     </div>
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                  <Button
-                    className="bg-orange-500 hover:bg-orange-600 font-bold"
-                    onClick={addIngredient}
-                  >
+                  <Button className="bg-orange-500 hover:bg-orange-600 font-bold" onClick={addIngredient}>
                     {editingIngredient !== null ? "Atualizar" : "Adicionar"}
                   </Button>
                 </DialogFooter>
@@ -484,9 +449,7 @@ const NewRecipe = () => {
         {/* Preparation Method and Utensils */}
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-col">
-            <Label className="text-base mb-2 font-semibold">
-              Modo de preparo
-            </Label>
+            <Label className="text-base mb-2 font-semibold">Modo de preparo</Label>
             <Card className="p-4">
               <Textarea
                 value={newRecipe.preparation_method || ""}
@@ -503,9 +466,7 @@ const NewRecipe = () => {
             </Card>
           </div>
           <div className="flex flex-col mt-2">
-            <Label className="text-base mb-2 font-semibold">
-              Utensílios e equipamentos
-            </Label>
+            <Label className="text-base mb-2 font-semibold">Utensílios e equipamentos</Label>
             <Card className="p-4">
               <Textarea
                 value={newRecipe.required_utensils || ""}
@@ -521,11 +482,11 @@ const NewRecipe = () => {
               />
             </Card>
           </div>
-          <div className="flex flex-col mt-2">
+          {/* <div className="flex flex-col mt-2">
             <Label className="text-base mb-2 font-semibold">
               Medidas caseiras
             </Label>
-            <Card className="p-4">
+            {/* <Card className="p-4">
               <Textarea
                 value={newRecipe.home_measurements || ""}
                 onChange={(e) =>
@@ -538,8 +499,8 @@ const NewRecipe = () => {
                 rows={6}
                 placeholder="Descreva medidas caseiras para os ingredientes..."
               />
-            </Card>
-          </div>
+            </Card> 
+          </div> */}
           <div className="flex flex-col mt-2">
             <Label className="text-base mb-2 font-semibold">
               Cardápio (descreva como você quer a descrição do cardápio)
@@ -584,8 +545,7 @@ const NewRecipe = () => {
               onClick={createNewRecipe}
               disabled={postLoading}
             >
-              <Plus className="mr-2" />{" "}
-              {postLoading ? "Salvando..." : "Salvar cardápio"}
+              <Plus className="mr-2" /> {postLoading ? "Salvando..." : "Salvar cardápio"}
             </Button>
           </div>
         </div>

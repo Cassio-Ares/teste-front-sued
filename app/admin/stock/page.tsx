@@ -39,6 +39,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { usePost } from "@/hook/usePost";
 import { useRemove } from "@/hook/useRemove";
 import { useSearch } from "@/hook/useSearch";
+import { useSearchPlusSchool } from "@/hook/useSearchPlusSchool";
 
 //types
 // import { SchoolTypes, SchoolBasictypes } from "../../../lib/@types/school.types";
@@ -62,20 +63,6 @@ const Stock = () => {
 
   const [search, setSearch] = useState<string>();
 
-  const {
-    data: inventoryData,
-    loading: inventoryLoading,
-    error: inventoryError,
-    setQuery: setQueryInventory,
-    refetch: refetchInventory,
-  } = useSearch<any>("inventory", search);
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setSearch(value);
-    setQueryInventory(value);
-  };
-
   //busca para post
   const [schoolSearch, setSchoolSearch] = useState<string>("");
 
@@ -87,6 +74,7 @@ const Stock = () => {
   } = useSearch<any>("schools", schoolSearch);
 
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
+  console.log("selectedSchool", selectedSchool?.id);
 
   const handleSchoolSelect = (schoolId: number | null) => {
     if (schoolId === null) {
@@ -142,6 +130,24 @@ const Stock = () => {
         ingredient_id: ingredient.id,
       });
     }
+  };
+
+  const {
+    data: inventoryData,
+    loading: inventoryLoading,
+    error: inventoryError,
+    setQuery: setQueryInventory,
+    refetch: refetchInventory,
+  } = useSearchPlusSchool<any>("inventory", search, {
+    school_id: selectedSchool?.id,
+  });
+
+  console.log("inventoryData", inventoryData);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearch(value);
+    setQueryInventory(value);
   };
 
   //post
@@ -403,9 +409,23 @@ const Stock = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="flex justify-start items-center w-[300px] gap-4">
-        <Search size={16} />
-        <Input placeholder="Pesquisar..." onChange={handleSearchChange} />
+      <div className="flex justify-evenly items-center">
+        <div className="flex justify-start items-center w-[300px] gap-4">
+          <Label>Nome da Instituição</Label>
+          <InputSelect
+            options={searchSchool}
+            value={selectedSchool?.id}
+            onChange={handleSchoolSelect}
+            onSearchChange={(query) => setQuerySchool(query)}
+            placeholder="Selecione uma Instituição"
+            forceReset={resetSchoolInput}
+            field="name"
+          />
+        </div>
+        <div className="flex justify-start items-center w-[300px] gap-4">
+          <Search size={16} />
+          <Input placeholder="Pesquisar..." onChange={handleSearchChange} />
+        </div>
       </div>
       <div className="flex">
         <Card className="w-full p-4">

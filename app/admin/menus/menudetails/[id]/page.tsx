@@ -46,7 +46,7 @@ const RecipeMenuDetails = () => {
 
   //pega dados da url e decodifica
   useEffect(() => {
-    const data = searchParams.get("data");
+    const data = searchParams.get("data"); //{"recipeId":2,"estimatedPortions":80,"schoolId":2}
     if (data) {
       try {
         const decodedData = JSON.parse(decodeURIComponent(data));
@@ -98,6 +98,7 @@ const RecipeMenuDetails = () => {
           setRecipe(response.data.data || response.data);
         }
 
+        console.log("Full API Response:", response);
         // setRecipe(response.data.data || response.data);
         if (desiredServings) setServings(desiredServings);
       } catch (error) {
@@ -109,21 +110,23 @@ const RecipeMenuDetails = () => {
     []
   );
 
+  // Verifica se `menuData` e `items` estão definidos
   useEffect(() => {
     const recipeId = params.id;
 
-    // Verifica se `menuData` e `items` estão definidos
+    console.log("menuData", menuData);
+
     if (
-      recipeId &&
-      menuData &&
-      menuData.schoolId &&
-      menuData.items &&
-      menuData.items.length > 0
+      (recipeId &&
+        menuData &&
+        menuData?.schoolId &&
+        menuData.estimatedPortions) ||
+      1
     ) {
       fetchRecipeDetails(
         Number(recipeId),
-        menuData.schoolId,
-        menuData.items[0].estimated_portions // Acessa o primeiro item
+        menuData?.schoolId,
+        menuData?.estimatedPortions
       );
     }
   }, [params.id, menuData]);
@@ -138,13 +141,7 @@ const RecipeMenuDetails = () => {
 
       const recipeId = params.id;
 
-      if (
-        recipeId &&
-        menuData &&
-        menuData.schoolId &&
-        menuData.items &&
-        menuData.items.length > 0
-      ) {
+      if (recipeId && menuData && menuData.schoolId) {
         fetchRecipeDetails(Number(recipeId), menuData.schoolId, newServings);
       }
     },
@@ -154,7 +151,7 @@ const RecipeMenuDetails = () => {
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>Erro: {error}</div>;
 
-  console.log("menuData", menuData.items[0].teaching_modality);
+  console.log("recipe", recipe);
 
   return (
     <div className="container mx-auto p-4">
@@ -194,14 +191,34 @@ const RecipeMenuDetails = () => {
               className="w-20 p-2 border rounded"
             />
             <Button
-              className="mr-10"
+              className="bg-orange-500 hover:bg-orange-600 font-bold"
               onClick={() => handleServingsChange(servings)}
             >
               Recalcular
             </Button>
             <RecipeDialog
+              type="PNAE"
+              textButton="Ficha tecnica PNAE"
               recipe={recipe}
-              teaching_modality={menuData?.items[0]?.teaching_modality}
+              teaching_modality={
+                menuData.teaching_modality || "Não foi informado"
+              }
+            />
+            <RecipeDialog
+              type="KITCHEN"
+              textButton="Ficha tecnica Cozinha"
+              recipe={recipe}
+              teaching_modality={
+                menuData.teaching_modality || "Não foi informado"
+              }
+            />
+            <RecipeDialog
+              type="STOCK_REQUISITION"
+              textButton="Ficha tecnica Cozinha"
+              recipe={recipe}
+              teaching_modality={
+                menuData.teaching_modality || "Não foi informado"
+              }
             />
           </div>
 

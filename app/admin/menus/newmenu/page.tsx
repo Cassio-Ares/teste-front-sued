@@ -41,7 +41,7 @@ interface Menu {
   school_id: number;
   month: number;
   year: number;
-  month_weeks: string;
+  week_type: string;
   observations: string;
 }
 
@@ -52,7 +52,7 @@ const CreateMenuPage = () => {
     school_id: 0,
     month: 0,
     year: new Date().getFullYear(),
-    month_weeks: "",
+    week_type: "",
     observations: "",
   });
 
@@ -116,7 +116,7 @@ const CreateMenuPage = () => {
         school_id: 0,
         month: 0,
         year: new Date().getFullYear(),
-        month_weeks: "",
+        week_type: "",
         observations: "",
       });
 
@@ -140,12 +140,14 @@ const CreateMenuPage = () => {
         city_id: 0,
         school_id: 0,
         month_weeks: "",
+        week_type: "",
         observations: "",
       }));
     }
   }, [selectedSchool]);
 
   console.log("menu fora", menu);
+  console.log("menu", dataPost);
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
@@ -203,10 +205,10 @@ const CreateMenuPage = () => {
         <div className="flex w-full flex-col gap-2">
           <Label>Semanas</Label>
           <Select
-            value={menu.month_weeks}
+            value={menu.week_type}
             onValueChange={
               selectedSchool
-                ? (value) => setMenu({ ...menu, month_weeks: value })
+                ? (value) => setMenu({ ...menu, week_type: value })
                 : undefined
             }
           >
@@ -218,10 +220,8 @@ const CreateMenuPage = () => {
             </SelectTrigger>
             <SelectContent>
               {/* <SelectItem value="ALL_WEEKS">Todas as Semanas</SelectItem> */}
-              <SelectItem value="FIRST_THIRD_AND_FIFTH">
-                Semanas Impares
-              </SelectItem>
-              <SelectItem value="SECOND_AND_FOURTH">Semanas Pares</SelectItem>
+              <SelectItem value="ODD">Semanas Impares</SelectItem>
+              <SelectItem value="EVEN">Semanas Pares</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -240,7 +240,11 @@ const CreateMenuPage = () => {
           </Card>
         </div>
 
-        <Button type="submit" disabled={postLoading} className="w-full">
+        <Button
+          type="submit"
+          disabled={postLoading}
+          className="bg-orange-500 hover:bg-orange-600 font-bold"
+        >
           {postLoading ? "Criando..." : "Criar Menu"}
         </Button>
       </form>

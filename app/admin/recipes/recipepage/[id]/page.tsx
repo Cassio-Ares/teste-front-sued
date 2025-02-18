@@ -205,12 +205,26 @@ const RecipeView = () => {
               disabled={!selectedSchool}
             />
             <Button
-              className="mr-10"
+              className="bg-orange-500 hover:bg-orange-600 font-bold"
               onClick={() => handleServingsChange(servings)}
             >
               Recalcular
             </Button>
-            <RecipeDialog recipe={recipe} />
+            <RecipeDialog
+              type="PNAE"
+              textButton="Ficha Tecnica PNAE"
+              recipe={recipe}
+            />
+            <RecipeDialog
+              type="KITCHEN"
+              textButton="Ficha Tecnica Cozinha"
+              recipe={recipe}
+            />
+            <RecipeDialog
+              type="STOCK_REQUISITION"
+              textButton="Ficha Tecnica Cozinha"
+              recipe={recipe}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
