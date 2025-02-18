@@ -1,12 +1,14 @@
 "use client";
 import { teachingModalities } from "@/app/mock/teaching_modality.mock";
+import InputSelect from "@/components/inputSelect";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { usePost } from "@/hook/usePost";
+import { useSearch } from "@/hook/useSearch";
 import { useState } from "react";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const SchoolsData = [
   {
@@ -31,6 +33,7 @@ const SchoolsData = [
 const InstituitionsPage = () => {
   const [inputData, setInputData] = useState({
     name: "",
+    state_id: null as number | null,
     city_id: null as number | null, //pego só a cidade aqui e o estado no backend
     total_students_morning: null as number | null,
     teaching_modality_morning: "",
@@ -45,11 +48,95 @@ const InstituitionsPage = () => {
     address: "",
   });
 
-  //receber os estado do backend    teachingModalities
+  //buscar useState
+  const [stateQuery, setStateQuery] = useState("");
+  const [selectState, setSelectState] = useState<any>(null);
+  const {
+    data: stateData,
+    error: stateError,
+    loading: stateLoading,
+    setQuery: setQueryState,
+  } = useSearch<any>("state", stateQuery);
 
-  const handleSubmitSchool = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleState = (stateId: number) => {
+    if (stateId === null) {
+      setSelectState(null);
+      setInputData((inputData) => ({
+        ...inputData,
+        state_id: 0,
+      }));
+
+      return null;
+    }
+
+    const state = stateData.find((i) => i.id === stateId);
+
+    if (state) {
+      setSelectState(state);
+      setInputData((inputData) => ({
+        ...inputData,
+        state_id: state.id,
+      }));
+    }
+  };
+
+  //buscar city
+  const [cityQuery, setCityQuery] = useState("");
+  const [selectCity, setSelectCity] = useState<any>(null);
+  const { data: cityData, error: cityError, loading: cityLoading, setQuery: setQueryCity } = useSearch<any>("cities");
+
+  const handleCity = (cityId: number) => {
+    if (cityId === null) {
+      setSelectCity(null);
+      setInputData((inputData) => ({
+        ...inputData,
+        city_id: 0,
+      }));
+
+      return null;
+    }
+
+    const city = cityData.find((i) => i.id === cityId);
+
+    if (city) {
+      setSelectCity(city);
+      setInputData((inputData) => ({
+        ...inputData,
+        city_id: city.id,
+      }));
+    }
+  };
+
+  console.log(inputData);
+
+  //receber os estado do backend
+  const { postData } = usePost<any>("school");
+
+  const handleSubmitSchool = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    //logica com backend
+    try {
+      const response = await postData(inputData);
+      toast.success(response.message);
+
+      setInputData({
+        name: "",
+        state_id: null as number | null,
+        city_id: null as number | null, //pego só a cidade aqui e o estado no backend
+        total_students_morning: null as number | null,
+        teaching_modality_morning: "",
+        total_students_afternoon: null as number | null,
+        teaching_modality_afternoon: "",
+        total_students_nigth: null as number | null,
+        teaching_modality_nigth: "",
+        total_students_integral: null as number | null,
+        teaching_modality_integral: "",
+        phone: "",
+        email: "",
+        address: "",
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const removeItem = async (id: number) => {};
@@ -67,12 +154,6 @@ const InstituitionsPage = () => {
           </DialogTrigger>
         </Dialog> */}
       </div>
-      <div className="flex justify-evenly items-center">
-        <div className="flex justify-start items-center w-[300px] gap-4">
-          <Search size={16} />
-          <Input placeholder="Pesquisar..." />
-        </div>
-      </div>
       <div className="flex flex-col ">
         <Card className="w-full p-4">
           <form onSubmit={handleSubmitSchool} className="space-y-4">
@@ -83,6 +164,32 @@ const InstituitionsPage = () => {
               onChange={(e) => setInputData({ ...inputData, name: e.target.value })}
             />
             <div>
+              <div className="flex flex-row w-full gap-2">
+                <div className="flex flex-col  w-1/2 ">
+                  <Label className="font-bold text-lg">Nome da Cidade</Label>
+                  <InputSelect
+                    options={stateData}
+                    value={selectState?.id}
+                    onChange={handleState}
+                    onSearchChange={(query) => setStateQuery(query)}
+                    placeholder="Selecione uma Instituição"
+                    // forceReset={resetSchoolInput}
+                    field="name"
+                  />
+                </div>
+                <div className="flex flex-col  w-1/2 ">
+                  <Label className="font-bold text-lg">Nome da Cidade</Label>
+                  <InputSelect
+                    options={cityData}
+                    value={selectCity?.id}
+                    onChange={handleCity}
+                    onSearchChange={(query) => setCityQuery(query)}
+                    placeholder="Selecione uma Instituição"
+                    // forceReset={resetSchoolInput}
+                    field="name"
+                  />
+                </div>
+              </div>
               <Label className="font-bold text-lg">Turno da Manhã</Label>
               <div className="flex justify-start items-center gap-4">
                 <Select
@@ -108,6 +215,11 @@ const InstituitionsPage = () => {
                   value={inputData.total_students_morning || ""}
                   className="w-1/4"
                   onChange={(e) => setInputData({ ...inputData, total_students_morning: Number(e.target.value) })}
+                  disabled={
+                    inputData?.teaching_modality_morning === "" ||
+                    inputData?.teaching_modality_morning ===
+                      "Escola não tem aula neste turno ou não possui esta modalidade"
+                  }
                 />
               </div>
             </div>
@@ -138,6 +250,11 @@ const InstituitionsPage = () => {
                   value={inputData.total_students_afternoon || ""}
                   className="w-1/4"
                   onChange={(e) => setInputData({ ...inputData, total_students_afternoon: Number(e.target.value) })}
+                  disabled={
+                    inputData?.teaching_modality_afternoon === "" ||
+                    inputData?.teaching_modality_afternoon ===
+                      "Escola não tem aula neste turno ou não possui esta modalidade"
+                  }
                 />
               </div>
             </div>
@@ -168,6 +285,11 @@ const InstituitionsPage = () => {
                   type="number"
                   value={inputData.total_students_nigth || ""}
                   onChange={(e) => setInputData({ ...inputData, total_students_nigth: Number(e.target.value) })}
+                  disabled={
+                    inputData?.teaching_modality_nigth === "" ||
+                    inputData?.teaching_modality_nigth ===
+                      "Escola não tem aula neste turno ou não possui esta modalidade"
+                  }
                 />
               </div>
             </div>
@@ -198,6 +320,11 @@ const InstituitionsPage = () => {
                   type="number"
                   value={inputData.total_students_integral || ""}
                   onChange={(e) => setInputData({ ...inputData, total_students_integral: Number(e.target.value) })}
+                  disabled={
+                    inputData?.teaching_modality_integral === "" ||
+                    inputData?.teaching_modality_integral ===
+                      "Escola não tem aula neste turno ou não possui esta modalidade"
+                  }
                 />
               </div>
             </div>
@@ -214,18 +341,6 @@ const InstituitionsPage = () => {
               placeholder="e-mail"
               onChange={(e) => setInputData({ ...inputData, email: e.target.value })}
             />
-            {/*  <div className="flex justify-start items-center w-[300px] gap-4">
-              <Label>Nome da Cidade</Label>
-              <InputSelect
-                options={searchSchool}
-                value={selectedSchool?.id}
-                onChange={handleSchoolSelect}
-                onSearchChange={(query) => setQuerySchool(query)}
-                placeholder="Selecione uma Instituição"
-                forceReset={resetSchoolInput}
-                field="name"
-              />
-            </div> */}
             <Label className="font-bold text-lg">Endereço</Label>
             <Input
               value={inputData.address}

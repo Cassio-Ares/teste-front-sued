@@ -1,4 +1,5 @@
 "use client";
+import InputSelect from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -13,9 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { usePost } from "@/hook/usePost";
+import { useSearch } from "@/hook/useSearch";
 import { Search, Trash } from "lucide-react";
 import { useState } from "react";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const cityData = [
   {
@@ -37,12 +40,86 @@ const CitiesPage = () => {
     address: "",
   });
 
-  //receber os estado do backend
+  //buscar state
+  const [stateQuery, setStateQuery] = useState("");
+  const [selectedState, setSelectedState] = useState<any>(null);
 
-  const handleSubmitCity = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    //logica com backend
+  const {
+    data: searchState,
+    loading: stateLoading,
+    error: stateError,
+    setQuery: setQueryState,
+  } = useSearch<any>("states", stateQuery);
+
+  console.log(searchState);
+
+  const handleStateSelect = (stateId: number) => {
+    if (stateId === null) {
+      setSelectedState(null);
+      setInputData((inputData) => ({
+        ...inputData,
+        state_id: 0,
+      }));
+
+      return;
+    }
+
+    const state = searchState.find((i) => i.id === stateId);
+
+    if (state) {
+      setSelectedState(state);
+      setInputData((inputData) => ({
+        ...inputData,
+        state_id: state.id,
+      }));
+    }
   };
+
+  //receber os estado do backend
+  const [query, setQuery] = useState<string>("");
+  const [resetState, setResetState] = useState(false);
+
+  const {
+    data: searchCity,
+    loading: cityLoading,
+    error: cityError,
+    setQuery: setQueryCity,
+  } = useSearch<any>("cities", query);
+
+  const { data, loading, error, postData } = usePost<any>("cities");
+
+  const handleSubmitCity = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const response = await postData(inputData);
+
+      console.log("Response city", response);
+      toast.success(response?.message);
+
+      setInputData({
+        state_id: 0,
+        name: "",
+        city_hall_phone: "",
+        city_hall_email: "",
+        address: "",
+      });
+
+      setSelectedState(null);
+      setResetState(true);
+      setTimeout(() => setResetState(false));
+      setStateQuery("");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setQuery(value);
+    setQueryCity(value);
+  };
+
+  console.log("searchCity", searchCity);
 
   const removeItem = async (id: number) => {};
 
@@ -63,27 +140,25 @@ const CitiesPage = () => {
               <DialogDescription>Adicione um nova cidade</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmitCity}>
-              {/*  <div className="flex justify-start items-center w-[300px] gap-4">
-              <Label>Nome do Estado</Label>
-              <InputSelect
-                options={searchSchool}
-                value={selectedSchool?.id}
-                onChange={handleSchoolSelect}
-                onSearchChange={(query) => setQuerySchool(query)}
-                placeholder="Selecione uma Instituição"
-                forceReset={resetSchoolInput}
-                field="name"
-              />
-            </div> */}
-              <Label>Nome do Estado</Label>
-              <Input value={inputData.state_id} placeholder="Estado" />
+              <div className="flex justify-start items-center w-[300px] gap-4">
+                <Label>Nome do Estado</Label>
+                <InputSelect
+                  options={searchState}
+                  value={selectedState?.id}
+                  onChange={handleStateSelect}
+                  onSearchChange={(query) => setStateQuery(query)}
+                  placeholder="Selecione uma Instituição"
+                  forceReset={resetState}
+                  field="name"
+                />
+              </div>
               <Label>Nome da Cidade</Label>
               <Input
                 value={inputData.name}
                 placeholder="Cidade"
                 onChange={(e) => setInputData({ ...inputData, name: e.target.value })}
               />
-              <Label>Nome da Telefone</Label>
+              <Label>Telefone</Label>
               <Input
                 value={inputData.city_hall_phone}
                 placeholder="51 99999-9999"
@@ -95,12 +170,15 @@ const CitiesPage = () => {
                 placeholder="e-mail"
                 onChange={(e) => setInputData({ ...inputData, city_hall_email: e.target.value })}
               />
-              <Label>Nome da Endereço</Label>
+              <Label>Endereço</Label>
               <Input
                 value={inputData.address}
                 placeholder="rua ou avenida e numero - bairro"
                 onChange={(e) => setInputData({ ...inputData, address: e.target.value })}
               />
+              <DialogFooter>
+                <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Adicionar</Button>
+              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
@@ -108,7 +186,7 @@ const CitiesPage = () => {
       <div className="flex justify-evenly items-center">
         <div className="flex justify-start items-center w-[300px] gap-4">
           <Search size={16} />
-          <Input placeholder="Pesquisar..." />
+          <Input onChange={handleSearch} placeholder="Pesquisar..." />
         </div>
       </div>
       <div className="flex">
@@ -118,42 +196,45 @@ const CitiesPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="font-bold">Cidade</TableHead>
-                <TableHead className="font-bold">Estado</TableHead>
+                {/* <TableHead className="font-bold">Estado</TableHead> */}
                 <TableHead className="font-bold">Telefone</TableHead>
                 <TableHead className="font-bold">E-mail</TableHead>
                 <TableHead className="font-bold">Endereço</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {cityData?.map((city) => (
-                <TableRow key={city.id}>
-                  <TableCell>{city.name}</TableCell>
-                  <TableCell>{city.uf}</TableCell>
-                  <TableCell>{city.city_hall_phone}</TableCell>
-                  <TableCell>{city.city_hall_email}</TableCell>
-                  <TableCell>{city.address}</TableCell>
-                  <TableCell className="font-medium text-center">
-                    <Dialog>
-                      <DialogTrigger>
-                        <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
-                          <Trash />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Deseja remover o item do estoque?</DialogTitle>
-                          <DialogDescription>Essa ação não poderá ser desfeita.</DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <Button variant="destructive" onClick={() => removeItem(city.id || 0)}>
-                            Remover
+              {searchCity?.map((city) => {
+                console.log("city", city);
+                return (
+                  <TableRow key={city.id}>
+                    <TableCell>{city.name}</TableCell>
+                    {/* <TableCell>{city.uf}</TableCell> */}
+                    <TableCell>{city.city_hall_phone}</TableCell>
+                    <TableCell>{city.city_hall_email}</TableCell>
+                    <TableCell>{city.address}</TableCell>
+                    <TableCell className="font-medium text-center">
+                      <Dialog>
+                        <DialogTrigger>
+                          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                            <Trash />
                           </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Deseja remover o item do estoque?</DialogTitle>
+                            <DialogDescription>Essa ação não poderá ser desfeita.</DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <Button variant="destructive" onClick={() => removeItem(city.id || 0)}>
+                              Remover
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </Card>

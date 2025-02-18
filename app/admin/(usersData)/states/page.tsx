@@ -15,9 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { usePost } from "@/hook/usePost";
+import { useSearch } from "@/hook/useSearch";
 import { Search, Trash } from "lucide-react";
 import { useState } from "react";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const dataState = [
   {
@@ -38,18 +40,61 @@ const StatePage = () => {
     state_hall_email: "",
   });
 
-  const handleStateOnChange = () => {
-    const selectedState = states.find((state) => state.name === state.name && state.uf === state.uf);
+  const handleStateOnChange = (uf: string) => {
+    const selectedState = states.find((state) => state.uf === uf);
+
     if (selectedState) {
       setStateData(selectedState);
+
+      setInputData((prevData) => ({
+        ...prevData,
+        name: selectedState.name,
+        uf: selectedState.uf,
+      }));
     }
   };
 
-  const handleSubmitState = (event: React.FormEvent<HTMLFormElement>) => {
+  const { data, loading, error, postData } = usePost<any>("states");
+
+  console.log(inputData);
+
+  const handleSubmitState = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    //logica com backend
+    try {
+      const response = await postData(inputData);
+      toast.success(response?.message);
+
+      setInputData({
+        name: stateData.name,
+        uf: stateData.uf,
+        state_hall_phone: "",
+        state_hall_email: "",
+      });
+
+      searchRefetch();
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  const [search, setSearch] = useState<string>("");
+
+  const {
+    data: searchState,
+    loading: searchLoading,
+    error: searchError,
+    setQuery,
+    refetch: searchRefetch,
+  } = useSearch<any>("states", search);
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearch(value);
+    setQuery(value);
+  };
+
+  console.log("oiii", search);
 
   const removeItem = async (id: number) => {};
 
@@ -117,7 +162,7 @@ const StatePage = () => {
       <div className="flex justify-evenly items-center">
         <div className="flex justify-start items-center w-[300px] gap-4">
           <Search size={16} />
-          <Input placeholder="Pesquisar..." />
+          <Input onChange={handleSearch} placeholder="Pesquisar..." />
         </div>
       </div>
       <div className="flex">
@@ -134,7 +179,7 @@ const StatePage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dataState?.map((state) => (
+              {searchState?.map((state) => (
                 <TableRow key={state.id}>
                   <TableCell>{state.name}</TableCell>
                   <TableCell>{state.uf}</TableCell>
