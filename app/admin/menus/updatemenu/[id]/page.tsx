@@ -281,9 +281,11 @@ const UpdateMenuPage = () => {
                   <th className="p-2 border">
                     <InputSelect
                       options={searchMenu}
-                      value={menuItems.menu_id}
-                      onChange={() => {}} // No change needed - it's display only
-                      onSearchChange={() => {}} // No search needed - it's display only
+                      value=""
+                      onChange={() => {}}
+                      //value={menuItems.menu_id}
+                      // onChange={() => {}}
+                      onSearchChange={() => {}} //futuro permitir mudar tipo de semana
                       placeholder=""
                       forceReset={resetMenuInput}
                       field="formattedLabel"
