@@ -1,8 +1,8 @@
 "use client";
 import InputSelect from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { api } from "@/connect/api";
+import { useGetById } from "@/hook/useGetById";
 import { usePost } from "@/hook/usePost";
 import { useSearch } from "@/hook/useSearch";
 import { ArrowLeft } from "lucide-react";
@@ -13,6 +13,8 @@ import { toast, ToastContainer } from "react-toastify";
 
 /**
  * completar update ver como dados ve
+ *
+ * rota http://localhost:3001/menus/:id
  */
 
 interface MenuItems {
@@ -37,9 +39,6 @@ const mealType = [
 ];
 
 const UpdateMenuPage = () => {
-  const params = useParams();
-
-  const id = params.id;
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -52,38 +51,40 @@ const UpdateMenuPage = () => {
     additional_notes: "",
   });
 
-  // School states and handlers
-  const [schoolSearch, setSchoolSearch] = useState<string>("");
+  //buscando menus por id
+  const params = useParams<{ id: string }>();
+
   const {
-    data: searchSchool,
+    data: menuData,
+    loading: menuLoading,
+    error: menuError,
+    fetchData: fetchDataMenuId,
+  } = useGetById<any>(`menus`);
+
+  useEffect(() => {
+    const id = params.id;
+
+    if (id) {
+      fetchDataMenuId(id);
+    }
+  }, [params.id]);
+
+  const {
+    data: dataSchoolbyId,
     loading: schoolLoading,
     error: schoolError,
-    setQuery: setQuerySchool,
-  } = useSearch<any>("schools", schoolSearch);
-  const [selectedSchool, setSelectedSchool] = useState<any>(null);
-  const [resetSchoolInput, setResetSchoolInput] = useState(false);
+    fetchData: fetchDataSchoolById,
+  } = useGetById<any>("schools");
 
-  const handleSchoolSelect = (schoolId: number) => {
-    if (schoolId === null) {
-      setSelectedSchool(null);
-      setMenuItems((prevMenuItems) => ({
-        ...prevMenuItems,
-        school_id: "",
-      }));
-      return;
+  useEffect(() => {
+    const id = (menuData as any)?.menu?.school_id;
+
+    if (menuData) {
+      fetchDataSchoolById(id);
     }
+  }, [menuData]);
 
-    const school = searchSchool?.find((s) => s.id === schoolId);
-    if (school) {
-      setSelectedSchool(school);
-      setMenuItems((prevMenuItems) => ({
-        ...prevMenuItems,
-        school_id: school.id,
-      }));
-    }
-  };
-
-  ///buscar menus
+  console.log("dataSchoolbyId", dataSchoolbyId);
 
   // Menu states and handlers
   const [menu, setMenu] = useState<string>("");
@@ -104,7 +105,7 @@ const UpdateMenuPage = () => {
     try {
       const response = await api.get("/menus", {
         params: {
-          school_id: String(selectedSchool?.id),
+          // school_id: String(selectedSchool?.id),
           month: menu,
           year: new Date().getFullYear(),
         },
@@ -125,7 +126,7 @@ const UpdateMenuPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [menu, selectedSchool]);
+  }, [menu]);
 
   console.log("searchMenu", searchMenu);
   console.log("menu", menu);
@@ -221,40 +222,26 @@ const UpdateMenuPage = () => {
         additional_notes: "",
       });
 
-      setSelectedSchool(null);
       setSelectedRecipe(null);
       setSelectedMenu(null);
       setSelections({});
 
       // Reset inputs
-      setResetSchoolInput(true);
+
       setResetRecipeInput(true);
       setResetMenuInput(true);
 
       setTimeout(() => {
-        setResetSchoolInput(false);
         setResetRecipeInput(false);
         setResetMenuInput(false);
       }, 100);
 
-      setSchoolSearch("");
       setRecipeSearch("");
       setMenu("");
     } catch (error: any) {
       toast.error("Erro ao criar menu: " + error.message);
     }
   };
-
-  // Effect to reset menu when school changes
-  useEffect(() => {
-    if (!selectedSchool) {
-      setMenuItems((prevMenu) => ({
-        ...prevMenu,
-        menu_id: "",
-      }));
-      setSelections({});
-    }
-  }, [selectedSchool]);
 
   console.log("menuItems", menuItems);
   //rota "menu_items"
@@ -274,8 +261,13 @@ const UpdateMenuPage = () => {
 
       <form onSubmit={createMenuItem} className="space-y-4">
         <div className="flex flex-col gap-2">
-          <Label>Nome da Instituição</Label>
-          <InputSelect
+          <h2 className="text-lg font-bold">{dataSchoolbyId[0]?.name}</h2>
+          <p>
+            Mês: {(menuData as any)?.menu?.month}{" "}
+            <span className="ml-2">Semana: {(menuData as any)?.menu?.week === "even" ? "Par" : "Impar"}</span>
+          </p>
+          {/* <Label>Nome da Instituição</Label> */}
+          {/* <InputSelect
             options={searchSchool}
             value={selectedSchool?.id}
             onChange={handleSchoolSelect}
@@ -283,7 +275,7 @@ const UpdateMenuPage = () => {
             placeholder="Selecione uma Instituição"
             forceReset={resetSchoolInput}
             field="name"
-          />
+          /> */}
         </div>
 
         <div className="overflow-x-auto mb-4">
@@ -294,9 +286,9 @@ const UpdateMenuPage = () => {
                   <InputSelect
                     options={searchMenu}
                     value={menuItems.menu_id}
-                    onChange={selectedSchool ? handleMenuSelect : undefined}
-                    onSearchChange={selectedSchool ? (searchTerm) => setMenu(searchTerm) : undefined}
-                    placeholder="Selecione um Mês ex: 10"
+                    onChange={handleMenuSelect}
+                    onSearchChange={(searchTerm) => setMenu(searchTerm)}
+                    placeholder=""
                     forceReset={resetMenuInput}
                     field="formattedLabel"
                     disabled
@@ -323,7 +315,7 @@ const UpdateMenuPage = () => {
                         onSearchChange={(query) => setQueryRecipe(query)}
                         placeholder="Selecione uma Receita"
                         forceReset={resetRecipeInput}
-                        disabled={!selectedSchool || !menuItems.menu_id}
+                        //  disabled={!selectedSchool || !menuItems.menu_id}
                         field="name"
                       />
                     </td>
