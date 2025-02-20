@@ -1,14 +1,14 @@
 "use client";
 import InputSelect from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
-import { api } from "@/connect/api";
 import { useGetById } from "@/hook/useGetById";
 import { usePost } from "@/hook/usePost";
 import { useSearch } from "@/hook/useSearch";
+import { useUpdate } from "@/hook/useUpdate";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
 /**
@@ -51,9 +51,9 @@ const UpdateMenuPage = () => {
     additional_notes: "",
   });
 
-  //buscando menus por id
   const params = useParams<{ id: string }>();
 
+  // buscando menu por Id
   const {
     data: menuData,
     loading: menuLoading,
@@ -63,12 +63,12 @@ const UpdateMenuPage = () => {
 
   useEffect(() => {
     const id = params.id;
-
     if (id) {
       fetchDataMenuId(id);
     }
   }, [params.id]);
 
+  // buscando school por Id
   const {
     data: dataSchoolbyId,
     loading: schoolLoading,
@@ -78,75 +78,16 @@ const UpdateMenuPage = () => {
 
   useEffect(() => {
     const id = (menuData as any)?.menu?.school_id;
-
     if (menuData) {
       fetchDataSchoolById(id);
     }
   }, [menuData]);
 
-  console.log("dataSchoolbyId", dataSchoolbyId);
-
-  // Menu states and handlers
   const [menu, setMenu] = useState<string>("");
   const [searchMenu, setSearchMenu] = useState<any[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<any>(null);
   const [resetMenuInput, setResetMenuInput] = useState(false);
 
-  useEffect(() => {
-    if (menu.length >= 1) {
-      fetchDataMenu();
-    }
-  }, [menu]);
-
-  const fetchDataMenu = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await api.get("/menus", {
-        params: {
-          // school_id: String(selectedSchool?.id),
-          month: menu,
-          year: new Date().getFullYear(),
-        },
-      });
-
-      console.log("Response menus", response);
-
-      const formattedData = response.data.data.map((item: any) => ({
-        id: item.id,
-        formattedLabel: `Mês: ${item.month}, Tipo: ${item.week_type === "ODD" ? "Ímpar" : "Par"}`,
-        week_type: item.week_type,
-      }));
-
-      setSearchMenu(formattedData);
-    } catch (error: any) {
-      setError(error.message);
-      toast.error("Erro ao buscar menus");
-    } finally {
-      setLoading(false);
-    }
-  }, [menu]);
-
-  console.log("searchMenu", searchMenu);
-  console.log("menu", menu);
-
-  const handleMenuSelect = (selectedId: number) => {
-    if (!selectedId) {
-      setMenuItems((prev) => ({ ...prev, menu_id: "" }));
-      return;
-    }
-
-    const selectedMenuItem = searchMenu.find((item) => item.id === selectedId);
-    if (selectedMenuItem) {
-      setMenuItems((prev) => ({
-        ...prev,
-        menu_id: selectedMenuItem.id,
-      }));
-    }
-  };
-
-  // Recipe states and handlers
   const [recipeSearch, setRecipeSearch] = useState("");
   const {
     data: searchRecipe,
@@ -158,6 +99,50 @@ const UpdateMenuPage = () => {
   const [resetRecipeInput, setResetRecipeInput] = useState(false);
   const [selections, setSelections] = useState<Record<string, any>>({});
 
+  // Initialize selections when menu data loads
+  useEffect(() => {
+    if ((menuData as any)?.menuItems && Array.isArray((menuData as any).menuItems)) {
+      const initialSelections = {};
+
+      (menuData as any).menuItems.forEach((item) => {
+        // Convert weekday string to index
+        // Assuming weekDay is defined elsewhere as weekDay = ["domingo", "segunda", "terca", etc.]
+        const weekdayIndex = weekDay.findIndex((day) => day.toLowerCase() === item.weekday.toLowerCase());
+
+        if (weekdayIndex !== -1) {
+          initialSelections[`${weekdayIndex}-${item.meal_type}`] = {
+            recipe_id: item.recipe_id,
+            weekday: weekdayIndex,
+            meal_type: item.meal_type,
+          };
+        }
+      });
+
+      setSelections(initialSelections);
+
+      // Also set the menu_id in menuItems
+      setMenuItems((prev) => ({
+        ...prev,
+        menu_id: (menuData as any).menu.id,
+        school_id: (menuData as any).menu.school_id,
+      }));
+
+      // Also populate the searchMenu with the current menu
+      if ((menuData as any).menu) {
+        setSearchMenu([
+          {
+            id: (menuData as any).menu.id,
+            formattedLabel: `Mês: ${(menuData as any).menu.month}, Tipo: ${
+              (menuData as any).menu.week_type === "ODD" ? "Ímpar" : "Par"
+            }`,
+            week_type: (menuData as any).menu.week_type,
+          },
+        ]);
+      }
+    }
+  }, [menuData]);
+
+  // Handle recipe selection
   const handleRecipeSelect = (recipeId: number, weekdayIndex: number, mealType: string) => {
     if (recipeId === null) {
       const newSelections = { ...selections };
@@ -179,73 +164,91 @@ const UpdateMenuPage = () => {
     }
   };
 
+  // Prepare menu items for submission
   const prepareMenuItems = (): MenuItems[] => {
+    // return Object.values(selections).map((selection) => ({
+    //   school_id: String((menuData as any)?.menu?.school_id || menuItems.school_id),
+    //   menu_id: String((menuData as any)?.menu?.id || menuItems.menu_id),
+    //   recipe_id: String(selection.recipe_id),
+    //   weekday: weekDay[selection.weekday].toLowerCase(),
+    //   meal_type: selection.meal_type,
+    //   additional_notes: menuItems.additional_notes || "",
+    // }));
     return Object.values(selections).map((selection) => ({
-      school_id: String(menuItems.school_id),
-      menu_id: String(menuItems.menu_id),
+      school_id: String((menuData as any)?.menu?.school_id || menuItems.school_id),
+      menu_id: String((menuData as any)?.menu?.id || menuItems.menu_id),
       recipe_id: String(selection.recipe_id),
-      weekday: selection.weekday,
+      weekday: selection.weekday, // Changed this line
       meal_type: selection.meal_type,
       additional_notes: menuItems.additional_notes || "",
     }));
   };
 
-  // API Post hook
-  const { data: dataPost, loading: postLoading, error: postError, postData: createPost } = usePost<any>("menu_items");
+  // API hooks for creating and updating
+  const { postData: createPost } = usePost<any>("menu_items");
+  const { upDate: updateData } = useUpdate<any>("menu_items");
+  // const { deleteData } = useRemove<any>("menu_items");
 
-  const createMenuItem = async (event: React.FormEvent<HTMLFormElement>) => {
+  // Handle form submission for update
+  const updateMenuItem = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
       const menuItemsToSend = prepareMenuItems();
-
-      console.log("menuItemsToSend", menuItemsToSend);
 
       if (menuItemsToSend.length === 0) {
         toast.warning("Por favor, selecione pelo menos uma receita");
         return;
       }
 
-      for (const item of menuItemsToSend) {
-        await createPost(item);
+      // Track existing items from the backend
+      const existingItemIds = new Map();
+      if ((menuData as any)?.menuItems) {
+        (menuData as any).menuItems.forEach((item) => {
+          const key = `${item.weekday}-${item.meal_type}`;
+          existingItemIds.set(key, item.id);
+        });
       }
 
-      toast.success("Menu criado com sucesso!");
+      const itemsToDelete = [];
+      if ((menuData as any)?.menuItems) {
+        (menuData as any).menuItems.forEach((item) => {
+          const weekdayIndex = weekDay.findIndex((day) => day.toLowerCase() === item.weekday.toLowerCase());
 
-      // Reset form
-      setMenuItems({
-        school_id: "",
-        menu_id: "",
-        recipe_id: "",
-        weekday: "",
-        meal_type: "",
-        additional_notes: "",
-      });
+          // if (weekdayIndex !== -1) {
+          //   const key = `${weekdayIndex}-${item.meal_type}`;
+          //   if (!selections[key]) {
+          //     itemsToDelete.push(item?.id);
+          //   }
+          // }
+        });
+      }
 
-      setSelectedRecipe(null);
-      setSelectedMenu(null);
-      setSelections({});
+      for (const item of menuItemsToSend) {
+        const key = `${item.weekday}-${item.meal_type}`;
 
-      // Reset inputs
+        if (existingItemIds.has(key)) {
+          // Update existing item
+          const itemId = existingItemIds.get(key);
+          await updateData(itemId, [item]);
+        } else {
+          // Create new item
+          await createPost(item);
+        }
+      }
 
-      setResetRecipeInput(true);
-      setResetMenuInput(true);
+      toast.success("Menu atualizado com sucesso!");
 
-      setTimeout(() => {
-        setResetRecipeInput(false);
-        setResetMenuInput(false);
-      }, 100);
-
-      setRecipeSearch("");
-      setMenu("");
+      // Refresh data after update
+      if (params.id) {
+        fetchDataMenuId(params.id);
+      }
     } catch (error: any) {
-      toast.error("Erro ao criar menu: " + error.message);
+      toast.error("Erro ao atualizar menu: " + error.message);
     }
   };
 
-  console.log("menuItems", menuItems);
-  //rota "menu_items"
-
+  // Render the form
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
@@ -257,81 +260,90 @@ const UpdateMenuPage = () => {
         <ToastContainer />
       </div>
 
-      <h1 className="text-3xl font-bold">Atualizar menu Menu</h1>
+      <h1 className="text-3xl font-bold">Atualizar Menu</h1>
 
-      <form onSubmit={createMenuItem} className="space-y-4">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-bold">{dataSchoolbyId[0]?.name}</h2>
-          <p>
-            Mês: {(menuData as any)?.menu?.month}{" "}
-            <span className="ml-2">Semana: {(menuData as any)?.menu?.week === "even" ? "Par" : "Impar"}</span>
-          </p>
-          {/* <Label>Nome da Instituição</Label> */}
-          {/* <InputSelect
-            options={searchSchool}
-            value={selectedSchool?.id}
-            onChange={handleSchoolSelect}
-            onSearchChange={(query) => setQuerySchool(query)}
-            placeholder="Selecione uma Instituição"
-            forceReset={resetSchoolInput}
-            field="name"
-          /> */}
-        </div>
+      {menuLoading ? (
+        <div>Carregando dados do menu...</div>
+      ) : (
+        <form onSubmit={updateMenuItem} className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-lg font-bold">{dataSchoolbyId?.[0]?.name}</h2>
+            <p>
+              Mês: {(menuData as any)?.menu?.month}{" "}
+              <span className="ml-2">Semana: {(menuData as any)?.menu?.week_type === "EVEN" ? "Par" : "Ímpar"}</span>
+            </p>
+          </div>
 
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="p-2 border">
-                  <InputSelect
-                    options={searchMenu}
-                    value={menuItems.menu_id}
-                    onChange={handleMenuSelect}
-                    onSearchChange={(searchTerm) => setMenu(searchTerm)}
-                    placeholder=""
-                    forceReset={resetMenuInput}
-                    field="formattedLabel"
-                    disabled
-                    // disabled={!selectedSchool}
-                  />
-                </th>
-                {weekDay.map((day, index) => (
-                  <th key={day} className="p-2 border bg-gray-100 font-medium">
-                    {day}
+          <div className="overflow-x-auto mb-4">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="p-2 border">
+                    <InputSelect
+                      options={searchMenu}
+                      value={menuItems.menu_id}
+                      onChange={() => {}} // No change needed - it's display only
+                      onSearchChange={() => {}} // No search needed - it's display only
+                      placeholder=""
+                      forceReset={resetMenuInput}
+                      field="formattedLabel"
+                      disabled={true}
+                    />
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mealType.map((meal) => (
-                <tr key={meal.value}>
-                  <td className="p-2 border bg-gray-50 font-medium">{meal.label}</td>
                   {weekDay.map((day, index) => (
-                    <td key={`${day}-${meal.value}`} className="p-2 border">
-                      <InputSelect
-                        options={searchRecipe}
-                        value={selections[`${index}-${meal.value}`]?.recipe_id || ""}
-                        onChange={(recipeId) => handleRecipeSelect(recipeId, index, meal.value)}
-                        onSearchChange={(query) => setQueryRecipe(query)}
-                        placeholder="Selecione uma Receita"
-                        forceReset={resetRecipeInput}
-                        //  disabled={!selectedSchool || !menuItems.menu_id}
-                        field="name"
-                      />
-                    </td>
+                    <th key={day} className="p-2 border bg-gray-100 font-medium">
+                      {day}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {mealType.map((meal) => (
+                  <tr key={meal.value}>
+                    <td className="p-2 border bg-gray-50 font-medium">{meal.label}</td>
+                    {weekDay.map((day, index) => {
+                      // Look for existing recipe in this cell
+                      const existingRecipe = (menuData as any)?.menuItems?.find(
+                        (item) => item.weekday.toLowerCase() === day.toLowerCase() && item.meal_type === meal.value
+                      );
 
-        <div className="flex justify-end">
-          <Button type="submit" className="bg-orange-500 hover:bg-orange-600 font-bold" disabled={postLoading}>
-            {postLoading ? "Salvando..." : "Salvar"}
-          </Button>
-        </div>
-      </form>
+                      return (
+                        <td key={`${day}-${meal.value}`} className="p-2 border">
+                          {/* <InputSelect
+                            options={searchRecipe}
+                            value={selections[`${index}-${meal.value}`]?.recipe_id || ""}
+                            onChange={(recipeId) => handleRecipeSelect(recipeId, index, meal.value)}
+                            onSearchChange={(query) => setQueryRecipe(query)}
+                            placeholder="Selecione uma Receita"
+                            forceReset={resetRecipeInput}
+                            field="name"
+                            defaultValue={existingRecipe?.recipe_name}
+                          /> */}
+                          <InputSelect
+                            options={searchRecipe}
+                            value={selections[`${index}-${meal.value}`]?.recipe_id || ""}
+                            onChange={(recipeId) => handleRecipeSelect(recipeId, index, meal.value)}
+                            onSearchChange={(query) => setQueryRecipe(query)}
+                            placeholder="Selecione uma Receita"
+                            forceReset={resetRecipeInput}
+                            field="name"
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex justify-end">
+            <Button type="submit" className="bg-orange-500 hover:bg-orange-600 font-bold">
+              {loading ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 };
