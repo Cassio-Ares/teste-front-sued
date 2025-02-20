@@ -165,7 +165,7 @@ const Menus = () => {
                               Cardápio Ímpar
                             </Button>
                           </Link>
-                          <Link href={`/adm/menus/update/${oddWeek?.id}`}>
+                          <Link href={`/admin/menus/updatemenu/${oddWeek?.id}`}>
                             <Button variant="ghost" size="sm" className="text-black">
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -209,7 +209,8 @@ const Menus = () => {
                               Cardápio Par
                             </Button>
                           </Link>
-                          <Link href={`/admin/menu/update/${evenWeek?.id}`}>
+
+                          <Link href={`/admin/menus/updatemenu/${evenWeek?.id}`}>
                             <Button variant="ghost" size="sm" className="text-black">
                               <Pencil className="h-4 w-4" />
                             </Button>
