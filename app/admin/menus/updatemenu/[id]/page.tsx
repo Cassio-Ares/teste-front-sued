@@ -26,7 +26,7 @@ interface MenuItems {
   additional_notes: string;
 }
 
-const weekDay = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+const weekDay = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"];
 
 const mealType = [
   { label: "Lanche da Manhã", value: "MorningSnack" },
@@ -188,16 +188,16 @@ const UpdateMenuPage = () => {
   };
 
   // Preparação de menuItems para envio
-  const prepareMenuItems = (): MenuItems[] => {
-    return Object.values(selections).map((selection) => ({
-      school_id: String((menuData as any)?.menu?.school_id || menuItems.school_id),
-      menu_id: String((menuData as any)?.menu?.id || menuItems.menu_id),
-      recipe_id: String(selection.recipe_id),
-      weekday: weekDay[selection.weekday].toLowerCase(), // Converter índice para nome do dia
-      meal_type: selection.meal_type,
-      additional_notes: menuItems.additional_notes || "",
-    }));
-  };
+  // const prepareMenuItems = (): MenuItems[] => {
+  //   return Object.values(selections).map((selection) => ({
+  //     school_id: String((menuData as any)?.menu?.school_id || menuItems.school_id),
+  //     menu_id: String((menuData as any)?.menu?.id || menuItems.menu_id),
+  //     recipe_id: String(selection.recipe_id),
+  //     weekday: weekDay[selection.weekday].toLowerCase(), // Converter índice para nome do dia
+  //     meal_type: selection.meal_type,
+  //     additional_notes: menuItems.additional_notes || "",
+  //   }));
+  // };
 
   // API hooks for creating and updating
   const { postData: createPost } = usePost<any>("menu_items");
@@ -438,7 +438,7 @@ const UpdateMenuPage = () => {
             const itemId = existingItemIds.get(key);
             console.log("MATCH! Updating item with ID:", itemId, "Data:", item);
             // Passa o item como objeto (não como array) se a API espera isso
-            await updateData(itemId, item);
+            await updateData(itemId, item as any); //mudei   await updateData(itemId, item);
           } else {
             console.log("No match. Creating new item:", item);
             await createPost(item);
