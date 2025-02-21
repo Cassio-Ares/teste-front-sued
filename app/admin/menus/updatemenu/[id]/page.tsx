@@ -39,7 +39,7 @@ const mealType = [
 ];
 
 const UpdateMenuPage = () => {
-  const [open, setOpen] = useState(false);
+  //const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [menuItems, setMenuItems] = useState<any>({
@@ -83,6 +83,8 @@ const UpdateMenuPage = () => {
     }
   }, [menuData]);
 
+  // Busca e seleção de menus e receitas
+
   const [menu, setMenu] = useState<string>("");
   const [searchMenu, setSearchMenu] = useState<any[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<any>(null);
@@ -95,18 +97,37 @@ const UpdateMenuPage = () => {
     error: searchRecipeError,
     setQuery: setQueryRecipe,
   } = useSearch<any>("recipes", recipeSearch);
+
   const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
   const [resetRecipeInput, setResetRecipeInput] = useState(false);
-  const [selections, setSelections] = useState<Record<string, any>>({});
+  const [selections, setSelections] = useState<Record<string, any>>({}); //mapear as seleções de receitas
 
-  // Initialize selections when menu data loads
+  /**
+   * ex:
+   * {
+    "0-Lunch": {
+        "recipe_id": 1,
+        "weekday": 0,
+        "meal_type": "Lunch"
+    },
+    "0-MorningSnack": {
+        "recipe_id": 1,
+        "weekday": 0,
+        "meal_type": "MorningSnack"
+    },
+    "2-MorningSnack": {
+        "recipe_id": 1,
+        "weekday": 2,
+        "meal_type": "MorningSnack"
+    }
+}
+   */
+
   useEffect(() => {
     if ((menuData as any)?.menuItems && Array.isArray((menuData as any).menuItems)) {
       const initialSelections = {};
 
       (menuData as any).menuItems.forEach((item) => {
-        // Convert weekday string to index
-        // Assuming weekDay is defined elsewhere as weekDay = ["domingo", "segunda", "terca", etc.]
         const weekdayIndex = weekDay.findIndex((day) => day.toLowerCase() === item.weekday.toLowerCase());
 
         if (weekdayIndex !== -1) {
@@ -120,14 +141,13 @@ const UpdateMenuPage = () => {
 
       setSelections(initialSelections);
 
-      // Also set the menu_id in menuItems
+      //coloca menu_id e school_id no menuItems
       setMenuItems((prev) => ({
         ...prev,
         menu_id: (menuData as any).menu.id,
         school_id: (menuData as any).menu.school_id,
       }));
 
-      // Also populate the searchMenu with the current menu
       if ((menuData as any).menu) {
         setSearchMenu([
           {
@@ -137,12 +157,15 @@ const UpdateMenuPage = () => {
             }`,
             week_type: (menuData as any).menu.week_type,
           },
+          // ...searchMenu coloca mes e o tipo de menu
+          //{id: 1, formattedLabel: 'Mês: 2, Tipo: Par', week_type: 'EVEN'}
         ]);
       }
     }
   }, [menuData]);
 
-  // Handle recipe selection
+  ////??? handleRecipeSelect ???
+  //manipula a seleção de receitas
   const handleRecipeSelect = (recipeId: number, weekdayIndex: number, mealType: string) => {
     if (recipeId === null) {
       const newSelections = { ...selections };
@@ -164,21 +187,13 @@ const UpdateMenuPage = () => {
     }
   };
 
-  // Prepare menu items for submission
+  // Preparação de menuItems para envio
   const prepareMenuItems = (): MenuItems[] => {
-    // return Object.values(selections).map((selection) => ({
-    //   school_id: String((menuData as any)?.menu?.school_id || menuItems.school_id),
-    //   menu_id: String((menuData as any)?.menu?.id || menuItems.menu_id),
-    //   recipe_id: String(selection.recipe_id),
-    //   weekday: weekDay[selection.weekday].toLowerCase(),
-    //   meal_type: selection.meal_type,
-    //   additional_notes: menuItems.additional_notes || "",
-    // }));
     return Object.values(selections).map((selection) => ({
       school_id: String((menuData as any)?.menu?.school_id || menuItems.school_id),
       menu_id: String((menuData as any)?.menu?.id || menuItems.menu_id),
       recipe_id: String(selection.recipe_id),
-      weekday: selection.weekday, // Changed this line
+      weekday: weekDay[selection.weekday].toLowerCase(), // Converter índice para nome do dia
       meal_type: selection.meal_type,
       additional_notes: menuItems.additional_notes || "",
     }));
@@ -189,51 +204,248 @@ const UpdateMenuPage = () => {
   const { upDate: updateData } = useUpdate<any>("menu_items");
   // const { deleteData } = useRemove<any>("menu_items");
 
-  // Handle form submission for update
+  // submit
+  // const updateMenuItem = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+
+  //   try {
+  //     const menuItemsToSend = prepareMenuItems();
+
+  //     console.log("menuItemsToSend", menuItemsToSend); //falta menuItemId???
+
+  //     if (menuItemsToSend.length === 0) {
+  //       toast.warning("Por favor, selecione pelo menos uma receita");
+  //       return;
+  //     }
+
+  //     //rastreia os itens existentes no backend
+  //     // const existingItemIds = new Map();
+  //     // if ((menuData as any)?.menuItems) {
+  //     //   (menuData as any).menuItems.forEach((item) => {
+  //     //     const key = `${item.weekday}-${item.meal_type}`;
+  //     //     existingItemIds.set(key, item.id);
+  //     //   });
+  //     // }
+  //     const existingItemIds = new Map();
+  //     if ((menuData as any)?.menuItems) {
+  //       (menuData as any).menuItems.forEach((item) => {
+  //         const weekdayIndex = weekDay.findIndex((day) => day.toLowerCase() === item.weekday.toLowerCase());
+  //         const key = `${weekdayIndex}-${item.meal_type}`;
+  //         existingItemIds.set(key, item.id);
+  //       });
+  //     }
+
+  //     const itemsToDelete = [];
+  //     if ((menuData as any)?.menuItems) {
+  //       (menuData as any).menuItems.forEach((item) => {
+  //         const weekdayIndex = weekDay.findIndex((day) => day.toLowerCase() === item.weekday.toLowerCase());
+
+  //         if (weekdayIndex !== -1) {
+  //           const key = `${weekdayIndex}-${item.meal_type}`;
+  //           if (!selections[key]) {
+  //             itemsToDelete.push(item?.id);
+  //           }
+  //         }
+  //       });
+  //     }
+
+  //     for (const item of menuItemsToSend) {
+  //       const key = `${item.weekday}-${item.meal_type}`;
+  //       // Update existing item
+  //       if (existingItemIds.has(key)) {
+  //         const itemId = existingItemIds.get(key);
+
+  //         console.log("Updating item with ID:", itemId);
+  //         await updateData(itemId, [item]);
+  //       } else {
+  //         // Create new item
+  //         console.log("Creating new item:", item);
+  //         await createPost(item);
+  //       }
+  //     }
+
+  //     toast.success("Menu atualizado com sucesso!");
+
+  //     // Refresh data after update
+  //     if (params.id) {
+  //       fetchDataMenuId(params.id);
+  //     }
+  //   } catch (error: any) {
+  //     toast.error("Erro ao atualizar menu: " + error.message);
+  //   }
+  // };
+
+  // const updateMenuItem = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+
+  //   try {
+  //     // 1. Primeiro, precisamos garantir que prepareMenuItems() retorna o formato correto
+  //     // Modifique temporariamente para este teste:
+  //     const menuItemsToSend = Object.values(selections).map((selection) => {
+  //       // Converte índice numérico para o nome do dia
+  //       const weekdayName = weekDay[selection.weekday].toLowerCase();
+
+  //       return {
+  //         school_id: String((menuData as any)?.menu?.school_id || menuItems.school_id),
+  //         menu_id: String((menuData as any)?.menu?.id || menuItems.menu_id),
+  //         recipe_id: String(selection.recipe_id),
+  //         weekday: weekdayName, // Usando o NOME do dia
+  //         meal_type: selection.meal_type,
+  //         additional_notes: menuItems.additional_notes || "",
+  //       };
+  //     });
+
+  //     if (menuItemsToSend.length === 0) {
+  //       toast.warning("Por favor, selecione pelo menos uma receita");
+  //       return;
+  //     }
+
+  //     // 2. Constrói o mapa de itens existentes
+  //     const existingItemIds = new Map();
+  //     if ((menuData as any)?.menuItems) {
+  //       (menuData as any).menuItems.forEach((item) => {
+  //         // Cria a chave com o NOME do dia
+  //         const key = `${item.weekday}-${item.meal_type}`;
+  //         console.log("Mapped existing item:", key, item.id);
+  //         existingItemIds.set(key, item.id);
+  //       });
+  //     }
+
+  //     // DEPURAÇÃO: Imprime todas as chaves do mapa para verificar
+  //     console.log("Existing item keys:", Array.from(existingItemIds.keys()));
+
+  //     // 3. Processa cada item
+  //     for (const item of menuItemsToSend) {
+  //       // Usa o mesmo formato de chave (com NOME do dia)
+  //       const key = `${item.weekday}-${item.meal_type}`;
+  //       console.log("Checking key:", key);
+
+  //       if (existingItemIds.has(key)) {
+  //         const itemId = existingItemIds.get(key);
+  //         console.log("MATCH! Updating item with ID:", itemId);
+  //         await updateData(itemId, [item]);
+  //       } else {
+  //         console.log("No match. Creating new item:", item);
+  //         await createPost(item);
+  //       }
+  //     }
+
+  //     toast.success("Menu atualizado com sucesso!");
+
+  //     // Refresh data after update
+  //     if (params.id) {
+  //       fetchDataMenuId(params.id);
+  //     }
+  //   } catch (error: any) {
+  //     toast.error("Erro ao atualizar menu: " + error.message);
+  //   }
+  // };
+
   const updateMenuItem = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
-      const menuItemsToSend = prepareMenuItems();
+      // Depuração dos dados fundamentais
+      console.log("Menu data:", menuData);
+      console.log("Current selections:", selections);
+      console.log("weekDay array:", weekDay);
 
-      if (menuItemsToSend.length === 0) {
-        toast.warning("Por favor, selecione pelo menos uma receita");
+      // Verifica se temos os dados necessários
+      if (!menuData || !(menuData as any)?.menu) {
+        toast.error("Dados do menu não encontrados");
         return;
       }
 
-      // Track existing items from the backend
+      // Verifica se selections tem conteúdo
+      if (Object.keys(selections).length === 0) {
+        toast.warning("Nenhuma receita selecionada");
+        return;
+      }
+
+      // Preparação com verificações extremamente robustas
+      const menuItemsToSend = Object.entries(selections)
+        .map(([key, selection]) => {
+          console.log(`Processing selection for key ${key}:`, selection);
+
+          // Extrai os valores necessários com verificações
+          const menuId = (menuData as any)?.menu?.id;
+          const schoolId = (menuData as any)?.menu?.school_id;
+          const recipeId = selection?.recipe_id;
+          const weekdayIndex = selection?.weekday;
+          const mealType = selection?.meal_type;
+
+          // Verifica se todos os valores necessários existem
+          if (!menuId || !schoolId || !recipeId || weekdayIndex === undefined || !mealType) {
+            console.error("Dados incompletos para esta seleção:", {
+              menuId,
+              schoolId,
+              recipeId,
+              weekdayIndex,
+              mealType,
+            });
+            return null;
+          }
+
+          // Converte índice para nome do dia com verificação
+          let weekdayName;
+          if (Array.isArray(weekDay) && weekdayIndex >= 0 && weekdayIndex < weekDay.length) {
+            weekdayName = weekDay[weekdayIndex].toLowerCase();
+          } else {
+            console.error("Índice de dia inválido:", weekdayIndex);
+            return null;
+          }
+
+          // Retorna o objeto completo
+          return {
+            school_id: String(schoolId),
+            menu_id: String(menuId),
+            recipe_id: String(recipeId),
+            weekday: weekdayName,
+            meal_type: mealType,
+            additional_notes: menuItems.additional_notes || "",
+          };
+        })
+        .filter((item) => item !== null); // Remove itens nulos
+
+      console.log("Items to send after filtering:", menuItemsToSend);
+
+      if (menuItemsToSend.length === 0) {
+        toast.warning("Nenhum item válido para enviar");
+        return;
+      }
+
+      // Mapa de itens existentes
       const existingItemIds = new Map();
-      if ((menuData as any)?.menuItems) {
+      if ((menuData as any)?.menuItems && Array.isArray((menuData as any).menuItems)) {
         (menuData as any).menuItems.forEach((item) => {
-          const key = `${item.weekday}-${item.meal_type}`;
-          existingItemIds.set(key, item.id);
+          if (item && item.weekday && item.meal_type && item.id) {
+            const key = `${item.weekday}-${item.meal_type}`;
+            console.log("Mapped existing item:", key, item.id);
+            existingItemIds.set(key, item.id);
+          }
         });
       }
 
-      const itemsToDelete = [];
-      if ((menuData as any)?.menuItems) {
-        (menuData as any).menuItems.forEach((item) => {
-          const weekdayIndex = weekDay.findIndex((day) => day.toLowerCase() === item.weekday.toLowerCase());
+      console.log("Existing item keys:", Array.from(existingItemIds.keys()));
 
-          // if (weekdayIndex !== -1) {
-          //   const key = `${weekdayIndex}-${item.meal_type}`;
-          //   if (!selections[key]) {
-          //     itemsToDelete.push(item?.id);
-          //   }
-          // }
-        });
-      }
-
+      // Processa cada item
       for (const item of menuItemsToSend) {
         const key = `${item.weekday}-${item.meal_type}`;
+        console.log("Checking key:", key);
 
-        if (existingItemIds.has(key)) {
-          // Update existing item
-          const itemId = existingItemIds.get(key);
-          await updateData(itemId, [item]);
-        } else {
-          // Create new item
-          await createPost(item);
+        try {
+          if (existingItemIds.has(key)) {
+            const itemId = existingItemIds.get(key);
+            console.log("MATCH! Updating item with ID:", itemId, "Data:", item);
+            // Passa o item como objeto (não como array) se a API espera isso
+            await updateData(itemId, item);
+          } else {
+            console.log("No match. Creating new item:", item);
+            await createPost(item);
+          }
+        } catch (err) {
+          console.error("Error processing item with key:", key, err);
+          // Continue com o próximo item em vez de interromper todo o processo
         }
       }
 
@@ -244,6 +456,7 @@ const UpdateMenuPage = () => {
         fetchDataMenuId(params.id);
       }
     } catch (error: any) {
+      console.error("Main error:", error);
       toast.error("Erro ao atualizar menu: " + error.message);
     }
   };

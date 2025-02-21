@@ -3,20 +3,11 @@
 import { InputSelect } from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { api } from "@/connect/api";
 import { useSearch } from "@/hook/useSearch";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
@@ -76,9 +67,9 @@ const Menus = () => {
     }
   }, [selectedSchool]);
 
-  const removeItem = (menu_id: string) => {
-    //logica com back
-  };
+  // const removeItem = (menu_id: string) => {
+  //   //logica com back
+  // };
 
   return (
     <div className="flex flex-col justify-start gap-4 h-full">
@@ -171,7 +162,7 @@ const Menus = () => {
                             </Button>
                           </Link>
 
-                          <Dialog>
+                          {/* <Dialog>
                             <DialogTrigger>
                               <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
                                 <Trash />
@@ -188,7 +179,7 @@ const Menus = () => {
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
-                          </Dialog>
+                          </Dialog> */}
                         </>
                       )}
                     </TableCell>
@@ -216,7 +207,7 @@ const Menus = () => {
                             </Button>
                           </Link>
 
-                          <Dialog>
+                          {/* <Dialog>
                             <DialogTrigger>
                               <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
                                 <Trash />
@@ -233,7 +224,7 @@ const Menus = () => {
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
-                          </Dialog>
+                          </Dialog> */}
                         </>
                       )}
                     </TableCell>
