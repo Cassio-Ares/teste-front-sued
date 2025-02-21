@@ -1,6 +1,7 @@
 "use client";
 import { teachingModalities } from "@/app/mock/teaching_modality.mock";
 import InputSelect from "@/components/inputSelect";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,7 +57,7 @@ const InstituitionsPage = () => {
     error: stateError,
     loading: stateLoading,
     setQuery: setQueryState,
-  } = useSearch<any>("state", stateQuery);
+  } = useSearch<any>("states", stateQuery);
 
   const handleState = (stateId: number) => {
     if (stateId === null) {
@@ -110,7 +111,7 @@ const InstituitionsPage = () => {
   console.log(inputData);
 
   //receber os estado do backend
-  const { postData } = usePost<any>("school");
+  const { postData } = usePost<any>("schools");
 
   const handleSubmitSchool = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -166,25 +167,25 @@ const InstituitionsPage = () => {
             <div>
               <div className="flex flex-row w-full gap-2">
                 <div className="flex flex-col  w-1/2 ">
-                  <Label className="font-bold text-lg">Nome da Cidade</Label>
+                  <Label className="font-bold text-lg">Estado</Label>
                   <InputSelect
                     options={stateData}
                     value={selectState?.id}
                     onChange={handleState}
                     onSearchChange={(query) => setStateQuery(query)}
-                    placeholder="Selecione uma Instituição"
+                    placeholder="Selecione o Estado da Instituição"
                     // forceReset={resetSchoolInput}
                     field="name"
                   />
                 </div>
                 <div className="flex flex-col  w-1/2 ">
-                  <Label className="font-bold text-lg">Nome da Cidade</Label>
+                  <Label className="font-bold text-lg">Cidade</Label>
                   <InputSelect
                     options={cityData}
                     value={selectCity?.id}
                     onChange={handleCity}
                     onSearchChange={(query) => setCityQuery(query)}
-                    placeholder="Selecione uma Instituição"
+                    placeholder="Selecione a cidade da uma Instituição"
                     // forceReset={resetSchoolInput}
                     field="name"
                   />
@@ -344,9 +345,10 @@ const InstituitionsPage = () => {
             <Label className="font-bold text-lg">Endereço</Label>
             <Input
               value={inputData.address}
-              placeholder="rua ou avenida e numero"
+              placeholder="Rua ou avenida e numero"
               onChange={(e) => setInputData({ ...inputData, address: e.target.value })}
             />
+            <Button className="bg-orange-500 hover:bg-orange-600 font-bold ">Adicionar</Button>
           </form>
         </Card>
       </div>
