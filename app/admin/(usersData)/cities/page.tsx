@@ -84,6 +84,7 @@ const CitiesPage = () => {
     loading: cityLoading,
     error: cityError,
     setQuery: setQueryCity,
+    refetch: refetchCity,
   } = useSearch<any>("cities", query);
 
   const { data, loading, error, postData } = usePost<any>("cities");
@@ -108,6 +109,7 @@ const CitiesPage = () => {
       setResetState(true);
       setTimeout(() => setResetState(false));
       setStateQuery("");
+      refetchCity();
     } catch (error) {
       console.log(error);
     }
