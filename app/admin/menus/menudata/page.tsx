@@ -9,15 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 
-const weekDay = [
-  "Segunda",
-  "Terça",
-  "Quarta",
-  "Quinta",
-  "Sexta",
-  "Sábado",
-  "Domingo",
-];
+const weekDay = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
 const mealType = [
   { label: "Lanche da Manhã", value: "MorningSnack" },
@@ -50,9 +42,7 @@ const MenuDataContent = () => {
   useEffect(() => {
     if (data && "menu" in data) {
       setFormattedData((prev) => {
-        const duplicate = prev.find(
-          (item) => item.menu.id === (data.menu as any).id
-        );
+        const duplicate = prev.find((item) => item.menu.id === (data.menu as any).id);
         if (!duplicate) {
           return [...prev, data];
         }
@@ -72,9 +62,7 @@ const MenuDataContent = () => {
     if (formattedData.length === 0) return [];
     const items = formattedData.flatMap((menuData) =>
       menuData.menuItems.filter(
-        (item) =>
-          normalizeWeekday(item.weekday) === normalizeWeekday(day) &&
-          item.meal_type === mealTypeValue
+        (item) => normalizeWeekday(item.weekday) === normalizeWeekday(day) && item.meal_type === mealTypeValue
       )
     );
     return items;
@@ -108,12 +96,7 @@ const MenuDataContent = () => {
     }
   };
 
-  const {
-    data: updateData,
-    loading: updateLoading,
-    error: updateError,
-    upDate: upDate,
-  } = useUpdate("menu_items");
+  const { data: updateData, loading: updateLoading, error: updateError, upDate: upDate } = useUpdate("menu_items");
 
   /**
    * inpu para buscar receitas
@@ -142,32 +125,21 @@ const MenuDataContent = () => {
     <>
       <div className="flex justify-start gap-4 md:justify-end mb-4">
         <Link href="/admin/menus">
-          <Button
-            variant="outline"
-            className="text-orange-500 hover:text-orange-600 font-bold"
-          >
+          <Button variant="outline" className="text-orange-500 hover:text-orange-600 font-bold">
             <ArrowLeft /> Voltar
           </Button>
         </Link>
       </div>
       {idList.length > 0 ? (
         idList.map((itemId) => (
-          <div
-            key={itemId}
-            className="flex w-full flex-col justify-start gap-4"
-          >
+          <div key={itemId} className="flex w-full flex-col justify-start gap-4">
             <div className="overflow-x-auto mb-4">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    <th className="p-2 border bg-gray-100 font-medium">
-                      Refeição
-                    </th>
+                    <th className="p-2 border bg-gray-100 font-medium">Refeição</th>
                     {weekDay.map((day) => (
-                      <th
-                        key={day}
-                        className="p-2 border bg-gray-100 font-medium"
-                      >
+                      <th key={day} className="p-2 border bg-gray-100 font-medium">
                         {day}
                       </th>
                     ))}
@@ -176,25 +148,16 @@ const MenuDataContent = () => {
                 <tbody>
                   {mealType.map((meal) => (
                     <tr key={meal.value}>
-                      <td className="p-2 border bg-gray-50 font-medium">
-                        {meal.label}
-                      </td>
+                      <td className="p-2 border bg-gray-50 font-medium">{meal.label}</td>
                       {weekDay.map((day) => {
                         const items = getMenuItems(day, meal.value);
                         return (
-                          <td
-                            key={`${day}-${meal.value}`}
-                            className="p-2 border"
-                          >
+                          <td key={`${day}-${meal.value}`} className="p-2 border">
                             {items.length > 0 && (
                               <div className="text-sm">
-                                <div className="font-medium">
-                                  {items[0].recipe_name}
-                                </div>
+                                <div className="font-medium">{items[0].recipe_name}</div>
                                 {items[0].estimated_portions && (
-                                  <div className="text-gray-600">
-                                    Porções: {items[0].estimated_portions}
-                                  </div>
+                                  <div className="text-gray-600">Porções: {items[0].estimated_portions}</div>
                                 )}
                                 {getRecipeId(
                                   items[0].recipe_id,
@@ -202,7 +165,6 @@ const MenuDataContent = () => {
                                   items[0].school_id,
                                   items[0].teaching_modality
                                 )}
-                                <Button />
                               </div>
                             )}
                           </td>
@@ -230,12 +192,7 @@ const MenuData = () => {
   );
 };
 
-const getRecipeId = (
-  recipeId: number,
-  estimatedPortions: number,
-  schoolId: number,
-  teaching_modality?: string
-) => {
+const getRecipeId = (recipeId: number, estimatedPortions: number, schoolId: number, teaching_modality?: string) => {
   return (
     <>
       <Link

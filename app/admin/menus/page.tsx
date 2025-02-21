@@ -83,9 +83,9 @@ const Menus = () => {
           </Link>
         </div>
         <div className="flex">
-          <Link href="/admin/menus/new">
+          {/* <Link href="/admin/menus/new">
             <Button className="bg-orange-500 hover:bg-orange-600 font-bold">+ Cardápio Menu</Button>
-          </Link>
+          </Link> */}
         </div>
       </div>
       <div className="flex justify-center items-center w-full h-full">
