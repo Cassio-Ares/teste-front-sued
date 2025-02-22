@@ -229,7 +229,7 @@ const RegisterUserPage = () => {
     }
   };
 
-  //users
+  //users any
   const [searchUser, setSearchUser] = useState("");
   const { data: userData, data, error, loading, setQuery, refetch } = useSearch<any>("users");
 
