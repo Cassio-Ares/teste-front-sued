@@ -112,7 +112,6 @@ const RegisterUserPage = () => {
   };
 
   //state
-  const [selectedState, setSelectedState] = useState<any | null>(null);
 
   //buscar useState
   const [stateQuery, setStateQuery] = useState("");
@@ -136,7 +135,6 @@ const RegisterUserPage = () => {
     }
 
     const state = stateData.find((i) => i.id === stateId);
-
     if (state) {
       setSelectState(state);
       setInputData((inputData) => ({
@@ -232,12 +230,22 @@ const RegisterUserPage = () => {
         city_id: null as number | null,
         school_id: null as number | null,
       });
-
-      refetch();
     } catch (error) {
       console.log(error);
     }
   };
+
+  //users
+
+  const [searchUser, setSearchUser] = useState("");
+  const {
+    // data: userData,
+    data,
+    error,
+    loading,
+    setQuery,
+    refetch,
+  } = useSearch("users");
 
   const handleUser = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -307,9 +315,9 @@ const RegisterUserPage = () => {
                     options={stateData}
                     value={selectState?.id}
                     onChange={handleState}
-                    onSearchChange={setStateQuery}
+                    onSearchChange={(query) => setStateQuery(query)}
                     placeholder="Selecione o estado"
-                    field="value"
+                    field="name"
                     disabled={inputData.user_type !== "state" ? true : false}
                   />
                 </div>
@@ -323,7 +331,7 @@ const RegisterUserPage = () => {
                     onChange={handleCity}
                     onSearchChange={setCityQuery}
                     placeholder="Selecione o municipio / cidade"
-                    field="value"
+                    field="name"
                     disabled={inputData.user_type !== "city" ? true : false}
                   />
                 </div>
@@ -335,7 +343,7 @@ const RegisterUserPage = () => {
                     onChange={handleSchoolSelect}
                     onSearchChange={setSchoolSearch}
                     placeholder="Selecione um tipo de usuário"
-                    field="value"
+                    field="name"
                     disabled={inputData.user_type !== "school" ? true : false}
                   />
                 </div>
