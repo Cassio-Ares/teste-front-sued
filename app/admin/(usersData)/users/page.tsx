@@ -23,18 +23,18 @@ import { Search, Trash } from "lucide-react";
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
-const userData = [
-  {
-    id: 1,
-    name: "Nutricionista 1",
-    email: "email@email",
-    phone: "51 99999-9999",
-    user_type: "123456789", //['adm', 'state', 'city', 'school', 'nutri']
-    state_id: null,
-    city_id: "123456789",
-    school_id: "123456789",
-  },
-];
+// const userData = [
+//   {
+//     id: 1,
+//     name: "Nutricionista 1",
+//     email: "email@email",
+//     phone: "51 99999-9999",
+//     user_type: "123456789", //['adm', 'state', 'city', 'school', 'nutri']
+//     state_id: null,
+//     city_id: "123456789",
+//     school_id: "123456789",
+//   },
+// ];
 //"adm", "state", "city", "school", "nutri"
 
 const statesData = [
@@ -112,7 +112,6 @@ const RegisterUserPage = () => {
   };
 
   //state
-  const [selectedState, setSelectedState] = useState<any | null>(null);
 
   //buscar useState
   const [stateQuery, setStateQuery] = useState("");
@@ -122,7 +121,7 @@ const RegisterUserPage = () => {
     error: stateError,
     loading: stateLoading,
     setQuery: setQueryState,
-  } = useSearch<any>("state", stateQuery);
+  } = useSearch<any>("states", stateQuery);
 
   const handleState = (stateId: number) => {
     if (stateId === null) {
@@ -136,7 +135,6 @@ const RegisterUserPage = () => {
     }
 
     const state = stateData.find((i) => i.id === stateId);
-
     if (state) {
       setSelectState(state);
       setInputData((inputData) => ({
@@ -225,6 +223,7 @@ const RegisterUserPage = () => {
         city_id: null as number | null,
         school_id: null as number | null,
       });
+      refetch();
     } catch (error) {
       console.log(error);
     }
@@ -233,14 +232,7 @@ const RegisterUserPage = () => {
   //users
 
   const [searchUser, setSearchUser] = useState("");
-  const {
-    // data: userData,
-    data,
-    error,
-    loading,
-    setQuery,
-    refetch,
-  } = useSearch("users");
+  const { data: userData, data, error, loading, setQuery, refetch } = useSearch<any>("users");
 
   const handleUser = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -250,13 +242,13 @@ const RegisterUserPage = () => {
 
   return (
     <div className="flex flex-col justify-start gap-4">
-      <h1 className="font-bold text-xl">Estados</h1>
+      <h1 className="font-bold text-xl">Usuarios</h1>
       <div className="flex justify-end">
         <ToastContainer />
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="ghost" className="bg-orange-500 hover:bg-orange-600 text-white hover:text-white font-bold">
-              + Novo Estado
+              + Novo Usuario
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -310,9 +302,9 @@ const RegisterUserPage = () => {
                     options={stateData}
                     value={selectState?.id}
                     onChange={handleState}
-                    onSearchChange={setStateQuery}
+                    onSearchChange={(query) => setStateQuery(query)}
                     placeholder="Selecione o estado"
-                    field="value"
+                    field="name"
                     disabled={inputData.user_type !== "state" ? true : false}
                   />
                 </div>
@@ -326,7 +318,7 @@ const RegisterUserPage = () => {
                     onChange={handleCity}
                     onSearchChange={setCityQuery}
                     placeholder="Selecione o municipio / cidade"
-                    field="value"
+                    field="name"
                     disabled={inputData.user_type !== "city" ? true : false}
                   />
                 </div>
@@ -338,7 +330,7 @@ const RegisterUserPage = () => {
                     onChange={handleSchoolSelect}
                     onSearchChange={setSchoolSearch}
                     placeholder="Selecione um tipo de usuário"
-                    field="value"
+                    field="name"
                     disabled={inputData.user_type !== "school" ? true : false}
                   />
                 </div>
