@@ -230,6 +230,7 @@ const RegisterUserPage = () => {
         city_id: null as number | null,
         school_id: null as number | null,
       });
+      refetch();
     } catch (error) {
       console.log(error);
     }
@@ -238,14 +239,7 @@ const RegisterUserPage = () => {
   //users
 
   const [searchUser, setSearchUser] = useState("");
-  const {
-    // data: userData,
-    data,
-    error,
-    loading,
-    setQuery,
-    refetch,
-  } = useSearch("users");
+  const { data: userData, data, error, loading, setQuery, refetch } = useSearch<any>("users");
 
   const handleUser = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
