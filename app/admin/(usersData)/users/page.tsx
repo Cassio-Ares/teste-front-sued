@@ -236,7 +236,6 @@ const RegisterUserPage = () => {
   };
 
   //users
-
   const [searchUser, setSearchUser] = useState("");
   const {
     // data: userData,
