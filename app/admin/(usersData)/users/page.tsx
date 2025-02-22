@@ -112,7 +112,6 @@ const RegisterUserPage = () => {
   };
 
   //state
-
   //buscar useState
   const [stateQuery, setStateQuery] = useState("");
   const [selectState, setSelectState] = useState<any>(null);
