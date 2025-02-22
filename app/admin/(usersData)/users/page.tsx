@@ -23,18 +23,18 @@ import { Search, Trash } from "lucide-react";
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
-const userData = [
-  {
-    id: 1,
-    name: "Nutricionista 1",
-    email: "email@email",
-    phone: "51 99999-9999",
-    user_type: "123456789", //['adm', 'state', 'city', 'school', 'nutri']
-    state_id: null,
-    city_id: "123456789",
-    school_id: "123456789",
-  },
-];
+// const userData = [
+//   {
+//     id: 1,
+//     name: "Nutricionista 1",
+//     email: "email@email",
+//     phone: "51 99999-9999",
+//     user_type: "123456789", //['adm', 'state', 'city', 'school', 'nutri']
+//     state_id: null,
+//     city_id: "123456789",
+//     school_id: "123456789",
+//   },
+// ];
 //"adm", "state", "city", "school", "nutri"
 
 const statesData = [
@@ -122,7 +122,7 @@ const RegisterUserPage = () => {
     error: stateError,
     loading: stateLoading,
     setQuery: setQueryState,
-  } = useSearch<any>("state", stateQuery);
+  } = useSearch<any>("states", stateQuery);
 
   const handleState = (stateId: number) => {
     if (stateId === null) {
@@ -209,6 +209,13 @@ const RegisterUserPage = () => {
     }
   };
 
+  //users
+
+  const [searchUser, setSearchUser] = useState("");
+  const { data: userData, data, error, loading, setQuery, refetch } = useSearch("users", searchUser);
+
+  console.log("users", userData);
+
   const { postData } = usePost<any>("users");
   const handleSubmit = async (event: React.FocusEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -225,22 +232,12 @@ const RegisterUserPage = () => {
         city_id: null as number | null,
         school_id: null as number | null,
       });
+
+      refetch();
     } catch (error) {
       console.log(error);
     }
   };
-
-  //users
-
-  const [searchUser, setSearchUser] = useState("");
-  const {
-    // data: userData,
-    data,
-    error,
-    loading,
-    setQuery,
-    refetch,
-  } = useSearch("users");
 
   const handleUser = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -250,13 +247,13 @@ const RegisterUserPage = () => {
 
   return (
     <div className="flex flex-col justify-start gap-4">
-      <h1 className="font-bold text-xl">Estados</h1>
+      <h1 className="font-bold text-xl">Usuarios</h1>
       <div className="flex justify-end">
         <ToastContainer />
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="ghost" className="bg-orange-500 hover:bg-orange-600 text-white hover:text-white font-bold">
-              + Novo Estado
+              + Novo Usuario
             </Button>
           </DialogTrigger>
           <DialogContent>
