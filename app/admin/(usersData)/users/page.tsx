@@ -207,6 +207,13 @@ const RegisterUserPage = () => {
     }
   };
 
+  //users
+
+  const [searchUser, setSearchUser] = useState("");
+  const { data: userData, data, error, loading, setQuery, refetch } = useSearch("users", searchUser);
+
+  console.log("users", userData);
+
   const { postData } = usePost<any>("users");
   const handleSubmit = async (event: React.FocusEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -231,7 +238,8 @@ const RegisterUserPage = () => {
 
   //users search
   const [searchUser, setSearchUser] = useState("");
-  const { data: userData, data, error, loading, setQuery, refetch } = useSearch<any>("users");
+  const { data: userData, data, error, loading, setQuery, refetch } = useSearch<any>("users")
+
 
   const handleUser = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
