@@ -236,9 +236,9 @@ const RegisterUserPage = () => {
     }
   };
 
-  //users
-  const [searchUser, setSearchUser] = useState("");
-  const { data: userData, data, error, loading, setQuery, refetch } = useSearch<any>("users");
+  //users aaaa
+  // const [searchUser, setSearchUser] = useState("");
+  // const { data: userData, data, error, loading, setQuery, refetch } = useSearch<any>("users");
 
   const handleUser = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
