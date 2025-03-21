@@ -1,5 +1,5 @@
 "use client";
-import { teachingModalities } from "@/app/mock/teaching_modality.mock";
+import { teachingModalities, teachingModalitiesEJA } from "@/app/mock/teaching_modality.mock";
 import InputSelect from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -116,7 +116,35 @@ const InstituitionsPage = () => {
   const handleSubmitSchool = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const response = await postData(inputData);
+      //convertendo dados de null para valores para conter erro zod verificar melhor depois
+      const adjustedInputData = {
+        ...inputData,
+        total_students_morning: inputData.total_students_morning === null ? 0 : inputData.total_students_morning,
+        teaching_modality_morning:
+          inputData.teaching_modality_morning === ""
+            ? "Escola não tem aula neste turno ou não possui esta modalidade"
+            : inputData.teaching_modality_morning,
+
+        total_students_afternoon: inputData.total_students_afternoon === null ? 0 : inputData.total_students_afternoon,
+        teaching_modality_afternoon:
+          inputData.teaching_modality_afternoon === ""
+            ? "Escola não tem aula neste turno ou não possui esta modalidade"
+            : inputData.teaching_modality_afternoon,
+
+        total_students_nigth: inputData.total_students_nigth === null ? 0 : inputData.total_students_nigth,
+        teaching_modality_nigth:
+          inputData.teaching_modality_nigth === ""
+            ? "Escola não tem aula neste turno ou não possui esta modalidade"
+            : inputData.teaching_modality_nigth,
+
+        total_students_integral: inputData.total_students_integral === null ? 0 : inputData.total_students_integral,
+        teaching_modality_integral:
+          inputData.teaching_modality_integral === ""
+            ? "Escola não tem aula neste turno ou não possui esta modalidade"
+            : inputData.teaching_modality_integral,
+      };
+
+      const response = await postData(adjustedInputData);
       toast.success(response.message);
 
       setInputData({
@@ -271,7 +299,7 @@ const InstituitionsPage = () => {
                     <SelectValue placeholder="Selecione uma modalidade" />
                   </SelectTrigger>
                   <SelectContent>
-                    {teachingModalities.map((modality) => {
+                    {teachingModalitiesEJA.map((modality) => {
                       return (
                         <SelectItem key={modality} value={modality}>
                           {modality}
