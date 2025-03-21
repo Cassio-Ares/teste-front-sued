@@ -172,10 +172,10 @@ const CitiesPage = () => {
                 placeholder="e-mail"
                 onChange={(e) => setInputData({ ...inputData, city_hall_email: e.target.value })}
               />
-              <Label>Endereço</Label>
+              <Label>Endereço da Prefeitura</Label>
               <Input
                 value={inputData.address}
-                placeholder="rua ou avenida e numero - bairro"
+                placeholder="rua/avenida, 999 - bairro"
                 onChange={(e) => setInputData({ ...inputData, address: e.target.value })}
               />
               <DialogFooter>
@@ -201,7 +201,7 @@ const CitiesPage = () => {
                 {/* <TableHead className="font-bold">Estado</TableHead> */}
                 <TableHead className="font-bold">Telefone</TableHead>
                 <TableHead className="font-bold">E-mail</TableHead>
-                <TableHead className="font-bold">Endereço</TableHead>
+                <TableHead className="font-bold">Endereço da Prefeitura</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
