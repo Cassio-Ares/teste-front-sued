@@ -46,6 +46,7 @@ const Stock = () => {
     unit_price: null,
     total_quantity: null,
     expiration_date: "",
+    movement_type: "",
     observation: "", //optional
   });
 
@@ -164,6 +165,7 @@ const Stock = () => {
         unit_price: stock.unit_price,
         total_quantity: stock.total_quantity,
         expiration_date: stock.expiration_date,
+        movement_type: "INPUT",
         observation: stock.observation,
       };
 
@@ -182,6 +184,7 @@ const Stock = () => {
         unit_price: null,
         total_quantity: null,
         expiration_date: "",
+        movement_type: "",
         observation: "",
       });
 
