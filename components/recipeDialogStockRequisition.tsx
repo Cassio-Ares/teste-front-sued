@@ -128,7 +128,7 @@ const RecipeDialogStockRequisition = ({ recipe, textButton }) => {
                 <div key={idx} className="mt-2">
                   <h4 className="font-semibold">{ing.description || ing.ingredient_description}</h4>
                   <p className="whitespace-pre-line">
-                    {ing.allocations_summary || ing.allocations_description || "Sem alocações"}
+                    {ing.allocations_summary_stock_requisition || ing.allocations_description || "Sem alocações"}
                   </p>
                 </div>
               ))}

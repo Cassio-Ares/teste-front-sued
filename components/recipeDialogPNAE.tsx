@@ -36,6 +36,8 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
   // Normalize the recipe data structure
   const recipe = normalizeRecipeData(rawRecipeData);
 
+  console.log("recipe PNAE", recipe);
+
   const handleExportToPDF = () => {
     const doc = new jsPDF({
       orientation: "landscape",
