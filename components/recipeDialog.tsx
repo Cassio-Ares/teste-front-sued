@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
 // import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
-
+//versão antes do inventory_history
 type RecipeType = "PNAE" | "KITCHEN" | "STOCK_REQUISITION";
 const RecipeDialog = ({
   recipe,
@@ -21,7 +21,7 @@ const RecipeDialog = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  console.log("recipe", recipe);
+  console.log("recipe", recipe); //inventory_id, inventory_data = [{ingredient_id, quantity= [gross_weight || adjusted_quantity, unit_of_measure || unit_of_measure_gross_weight] , movement_type="OUTPUT"}]
 
   const handleExportToPDF = () => {
     const doc = new jsPDF({
@@ -454,7 +454,7 @@ const RecipeDialog = ({
             </TableBody>
           </Table>
 
-          <Button onClick={handleExportToPDF}>Exportar para PDF</Button>
+          <Button onClick={handleExportToPDF}>Exportar para PDF req</Button>
         </DialogContent>
       )}
     </Dialog>

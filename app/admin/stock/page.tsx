@@ -14,28 +14,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Trash } from "lucide-react";
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 //hooks personalizados
+import { Textarea } from "@/components/ui/textarea";
 import { usePost } from "@/hook/usePost";
 import { useRemove } from "@/hook/useRemove";
 import { useSearch } from "@/hook/useSearch";
@@ -59,6 +46,8 @@ const Stock = () => {
     unit_price: null,
     total_quantity: null,
     expiration_date: "",
+    movement_type: "",
+    observation: "", //optional
   });
 
   const [search, setSearch] = useState<string>();
@@ -176,6 +165,8 @@ const Stock = () => {
         unit_price: stock.unit_price,
         total_quantity: stock.total_quantity,
         expiration_date: stock.expiration_date,
+        movement_type: "INPUT",
+        observation: stock.observation,
       };
 
       const responseData = await createPost(stockPayload);
@@ -193,6 +184,8 @@ const Stock = () => {
         unit_price: null,
         total_quantity: null,
         expiration_date: "",
+        movement_type: "",
+        observation: "",
       });
 
       // Resetar os estados de seleção
@@ -253,10 +246,7 @@ const Stock = () => {
   };
 
   //delete
-  const { data, loading, error, removeData } = useRemove(
-    `inventory`,
-    refetchInventory
-  );
+  const { data, loading, error, removeData } = useRemove(`inventory`, refetchInventory);
   const removeItem = async (id: number) => {
     await removeData(id);
 
@@ -270,19 +260,14 @@ const Stock = () => {
         <ToastContainer />
         <Dialog>
           <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              className="bg-orange-500 hover:bg-orange-600 text-white hover:text-white font-bold"
-            >
+            <Button variant="ghost" className="bg-orange-500 hover:bg-orange-600 text-white hover:text-white font-bold">
               + Novo item
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Cadastrar item no estoque</DialogTitle>
-              <DialogDescription>
-                Adicione um novo item ao seu estoque
-              </DialogDescription>
+              <DialogDescription>Adicione um novo item ao seu estoque</DialogDescription>
             </DialogHeader>
             <form onSubmit={createStock}>
               <div className="flex justify-start items-center w-[300px] gap-4">
@@ -314,9 +299,7 @@ const Stock = () => {
                   <Label>Nome da marca</Label>
                   <Input
                     value={stock.brand || ""}
-                    onChange={(event) =>
-                      setStock({ ...stock, brand: event.target.value })
-                    }
+                    onChange={(event) => setStock({ ...stock, brand: event.target.value })}
                     placeholder="Marca"
                   />
                 </div>
@@ -340,9 +323,7 @@ const Stock = () => {
                   <Label>Unidade de medida da unidade minima</Label>
                   <Select
                     value={stock.unit_of_measure}
-                    onValueChange={(value) =>
-                      setStock({ ...stock, unit_of_measure: value })
-                    }
+                    onValueChange={(value) => setStock({ ...stock, unit_of_measure: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecionar medida" />
@@ -359,11 +340,7 @@ const Stock = () => {
               <div className="flex w-full gap-4 mt-4 text-start">
                 <div className="flex w-full flex-col gap-2">
                   <Label>Preço por unidade</Label>
-                  <Input
-                    value={formatMoney(unitPrice)}
-                    onChange={handleChange}
-                    placeholder="Preço da unidade mínima"
-                  />
+                  <Input value={formatMoney(unitPrice)} onChange={handleChange} placeholder="Preço da unidade mínima" />
                 </div>
                 <div className="flex w-full flex-col gap-2">
                   <Label>Quantidade total comprada</Label>
@@ -400,10 +377,27 @@ const Stock = () => {
                   />
                 </div>
               </div>
+              <div className="flex w-full gap-4 mt-4 text-start">
+                <div className="flex w-full flex-col gap-2">
+                  <Label className="text-base mb-2 font-semibold">Observações</Label>
+                  <Card className="p-4">
+                    <Textarea
+                      value={stock.observation || ""}
+                      onChange={(e) =>
+                        setStock({
+                          ...stock,
+                          observation: e.target.value,
+                        })
+                      }
+                      className="w-full"
+                      rows={6}
+                      placeholder="obs ...."
+                    />
+                  </Card>
+                </div>
+              </div>
               <DialogFooter>
-                <Button className="bg-orange-500 hover:bg-orange-600 font-bold">
-                  Adicionar
-                </Button>
+                <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Adicionar</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -430,29 +424,17 @@ const Stock = () => {
       <div className="flex">
         <Card className="w-full p-4">
           <Table>
-            <TableCaption className="mt-10 text-gray-400">
-              Lista com todos os itens cadastrados.
-            </TableCaption>
+            <TableCaption className="mt-10 text-gray-400">Lista com todos os itens cadastrados.</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px] font-bold">
-                  Ingredientes
-                </TableHead>
+                <TableHead className="w-[200px] font-bold">Ingredientes</TableHead>
                 <TableHead className="font-bold">Marca</TableHead>
-                <TableHead className="font-bold">
-                  Pacote ou unidade minima
-                </TableHead>
+                <TableHead className="font-bold">Pacote ou unidade minima</TableHead>
                 <TableHead className="font-bold">Unid. med.</TableHead>
                 <TableHead className="font-bold">Preço por unidade</TableHead>
-                <TableHead className="font-bold">
-                  Quantidade total comprada
-                </TableHead>
-                <TableHead className="font-bold">
-                  Total de investimento
-                </TableHead>
-                <TableHead className="font-bold text-center">
-                  Data de validade
-                </TableHead>
+                <TableHead className="font-bold">Quantidade total comprada</TableHead>
+                <TableHead className="font-bold">Total de investimento</TableHead>
+                <TableHead className="font-bold text-center">Data de validade</TableHead>
                 <TableHead className="font-bold text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -476,37 +458,21 @@ const Stock = () => {
                       ? parseFloat(stock.total_invested).toFixed(2)
                       : stock?.total_invested?.toFixed(2)}
                   </TableCell>
-                  <TableCell>
-                    {" "}
-                    {new Date(stock.expiration_date).toLocaleDateString(
-                      "pt-BR"
-                    )}
-                  </TableCell>
+                  <TableCell> {new Date(stock.expiration_date).toLocaleDateString("pt-BR")}</TableCell>
                   <TableCell className="font-medium text-center">
                     <Dialog>
                       <DialogTrigger>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-700"
-                        >
+                        <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
                           <Trash />
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>
-                            Deseja remover o item do estoque?
-                          </DialogTitle>
-                          <DialogDescription>
-                            Essa ação não poderá ser desfeita.
-                          </DialogDescription>
+                          <DialogTitle>Deseja remover o item do estoque?</DialogTitle>
+                          <DialogDescription>Essa ação não poderá ser desfeita.</DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
-                          <Button
-                            variant="destructive"
-                            onClick={() => removeItem(stock.id || 0)}
-                          >
+                          <Button variant="destructive" onClick={() => removeItem(stock.id || 0)}>
                             Remover
                           </Button>
                         </DialogFooter>
