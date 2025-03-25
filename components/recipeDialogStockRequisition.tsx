@@ -1,3 +1,4 @@
+import { useUpdate } from "@/hook/useUpdate";
 import { formatValue } from "@/lib/utils/formatValue";
 import jsPDF from "jspdf";
 import { useState } from "react";
@@ -87,6 +88,49 @@ const RecipeDialogStockRequisition = ({ recipe, textButton }) => {
     return schoolName;
   };
 
+  const { data, loading, error, upDate } = useUpdate<any>("inventory/output");
+
+  const outputInventory = async () => {
+    try {
+      if (!recipe?.ingredients) {
+        console.error("Nenhum ingrediente encontrado.");
+        return;
+      }
+
+      for (const ingredient of recipe.ingredients) {
+        if (!ingredient.brand_allocations) continue;
+
+        for (const allocation of ingredient.brand_allocations) {
+          const inventoryData = {
+            ingredient_id: ingredient.id,
+            movement_type: "OUTPUT",
+            total_quantity: allocation.quantity_used,
+            unit_of_measure: allocation.unit_of_measure,
+            unit_price: allocation.cost,
+            brand: allocation.brand,
+            expiration_date: new Date(allocation.expiration_date).toISOString().split("T")[0],
+            observation: `Saída de estoque para a receita ${recipe.name}, na data ${new Date().toLocaleDateString()}`,
+          };
+
+          console.log(`Estoque para ${allocation.brand}:`, inventoryData);
+
+          try {
+            const response = await upDate(allocation.inventory_id, inventoryData);
+            console.log(`Estoque atualizado para ${allocation.brand}:`, response);
+          } catch (error) {
+            console.error(`Erro ao atualizar estoque de ${allocation.brand}:`, error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao processar saída de estoque:", error);
+    }
+  };
+
+  const handleButtonClick = () => {
+    handleExportToPDF();
+    outputInventory();
+  };
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -134,8 +178,7 @@ const RecipeDialogStockRequisition = ({ recipe, textButton }) => {
               ))}
           </>
         )}
-
-        <Button onClick={handleExportToPDF}>Exportar para PDF</Button>
+        <Button onClick={handleButtonClick}>Exportar para PDF</Button>
       </DialogContent>
     </Dialog>
   );
