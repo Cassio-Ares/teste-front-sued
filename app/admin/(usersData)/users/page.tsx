@@ -112,7 +112,6 @@ const RegisterUserPage = () => {
   };
 
   //state
-
   //buscar useState
   const [stateQuery, setStateQuery] = useState("");
   const [selectState, setSelectState] = useState<any>(null);
@@ -230,7 +229,6 @@ const RegisterUserPage = () => {
   };
 
   //users
-
   const [searchUser, setSearchUser] = useState("");
   const { data: userData, data, error, loading, setQuery, refetch } = useSearch<any>("users");
 
