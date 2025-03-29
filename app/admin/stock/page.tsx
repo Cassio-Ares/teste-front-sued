@@ -42,6 +42,7 @@ const Stock = () => {
     ingredient_id: "",
     brand: "",
     quantity_min: null,
+    packaging: "",
     unit_of_measure: "",
     unit_price: null,
     total_quantity: null,
@@ -161,6 +162,7 @@ const Stock = () => {
         ingredient_id: stock.ingredient_id,
         brand: stock.brand,
         quantity_min: stock.quantity_min,
+        packaging: stock.packaging,
         unit_of_measure: stock.unit_of_measure,
         unit_price: stock.unit_price,
         total_quantity: stock.total_quantity,
@@ -180,6 +182,7 @@ const Stock = () => {
         ingredient_id: "",
         brand: "",
         quantity_min: null,
+        packaging: "",
         unit_of_measure: "",
         unit_price: null,
         total_quantity: null,
@@ -320,6 +323,26 @@ const Stock = () => {
                   />
                 </div>
                 <div className="flex w-full flex-col gap-2">
+                  <Label>Tipo de embalagem</Label>
+                  <Select value={stock.packaging} onValueChange={(value) => setStock({ ...stock, packaging: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecionar medida" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="caixa">Caixa</SelectItem>
+                      <SelectItem value="saco">Saco</SelectItem>
+                      <SelectItem value="bandeija">Bandeija</SelectItem>
+                      <SelectItem value="pacote">Pacote</SelectItem>
+                      <SelectItem value="pote">Pote</SelectItem>
+                      <SelectItem value="galão">Galão</SelectItem>
+                      <SelectItem value="unit">Unidade (sem embalagem)</SelectItem>
+                      <SelectItem value="embalagem da marca com produto citado">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex w-full gap-4 mt-4 text-start">
+                <div className="flex w-full flex-col gap-2">
                   <Label>Unidade de medida da unidade minima</Label>
                   <Select
                     value={stock.unit_of_measure}
@@ -336,12 +359,12 @@ const Stock = () => {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <div className="flex w-full gap-4 mt-4 text-start">
                 <div className="flex w-full flex-col gap-2">
                   <Label>Preço por unidade</Label>
                   <Input value={formatMoney(unitPrice)} onChange={handleChange} placeholder="Preço da unidade mínima" />
                 </div>
+              </div>
+              <div className="flex w-full gap-4 mt-4 text-start">
                 <div className="flex w-full flex-col gap-2">
                   <Label>Quantidade total comprada</Label>
                   <Input
@@ -356,8 +379,6 @@ const Stock = () => {
                     placeholder="Quantidade total"
                   />
                 </div>
-              </div>
-              <div className="flex w-full gap-4 mt-4 text-start">
                 <div className="flex w-full flex-col gap-2">
                   <Label>Data de validade</Label>
                   <Input
