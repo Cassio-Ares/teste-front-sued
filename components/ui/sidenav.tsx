@@ -12,10 +12,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { removeToken } from "@/connect/api";
 import { useState } from "react";
 
 const Sidenav = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleExit = () => {
+    removeToken();
+  };
 
   return (
     <>
@@ -81,6 +86,7 @@ const Sidenav = () => {
                       <Link
                         className="hover:bg-red-400 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-bold text-sm text-red-400 flex gap-2 md:mt-20 md:fixed md:bottom-10 md:w-64"
                         href="/admin"
+                        onClick={handleExit}
                       >
                         <LogOutIcon size={18} /> Sair
                       </Link>
@@ -191,6 +197,7 @@ const Sidenav = () => {
           <Link
             className="hover:bg-red-400 hover:text-white transition-all duration-500 ease-in-out rounded-md p-3 font-bold text-sm text-red-400 flex gap-2"
             href="/admin"
+            onClick={handleExit}
           >
             <LogOutIcon size={18} /> Sair
           </Link>
