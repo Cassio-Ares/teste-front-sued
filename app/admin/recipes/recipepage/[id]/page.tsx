@@ -1,7 +1,6 @@
 "use client";
 
 import { informationError } from "@/components/informationError";
-import RecipeDialog from "@/components/recipeDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -182,7 +181,7 @@ const RecipeView = () => {
               Recalcular
             </Button>
             <RecipeDialogPNAE textButton="Ficha Tecnica PNAE" recipe={recipe} />
-            <RecipeDialog type="KITCHEN" textButton="Ficha Tecnica Cozinha" recipe={recipe} />
+            {/* <RecipeDialog type="KITCHEN" textButton="Ficha Tecnica Cozinha" recipe={recipe} /> */}
             <RecipeDialogStockRequisition textButton="Requisição do Estoque" recipe={recipe} />
           </div>
 
