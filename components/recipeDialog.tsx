@@ -1,27 +1,161 @@
-import { formatValue } from "@/lib/utils/formatValue";
 import jsPDF from "jspdf";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
-// import { RecipeInformationTypes } from "../lib/@types/recipeInformation.types.ts";
-//versão antes do inventory_history
-type RecipeType = "PNAE" | "KITCHEN" | "STOCK_REQUISITION";
-const RecipeDialog = ({
-  recipe,
-  type = "PNAE",
-  teaching_modality = null,
-  textButton,
-}: {
-  recipe: any;
-  type: RecipeType;
-  teaching_modality?: any;
-  textButton?: string;
-}) => {
+// Helper function to format values
+const formatValue = (value) => {
+  if (value === undefined || value === null) return "—";
+  if (typeof value === "number") {
+    return value.toFixed(2).replace(".", ",");
+  }
+  return String(value);
+};
+
+// Helper function to normalize recipe data regardless of structure
+const normalizeRecipeData = (recipeData) => {
+  // Handle case where recipe is nested inside a response object
+  const recipe = recipeData.recipe || recipeData;
+
+  // Handle case where ingredients are in a separate array
+  const ingredients = recipeData.ingredients || recipe.ingredients || [];
+
+  // Handle different metric structures
+  const metrics = recipe.metrics || {
+    total_cost: 0,
+    cost_per_serving: 0,
+    total_ingredients: ingredients.length,
+    average_ingredient_cost: 0,
+  };
+
+  return {
+    ...recipe,
+    ingredients,
+    metrics,
+  };
+};
+
+const RecipeTechnicalSheet = ({ recipe: rawRecipeData, teaching_modality = null, textButton = "Ver Receita" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  console.log("recipe", recipe); //inventory_id, inventory_data = [{ingredient_id, quantity= [gross_weight || adjusted_quantity, unit_of_measure || unit_of_measure_gross_weight] , movement_type="OUTPUT"}]
+  // Normalize the recipe data structure
+  const recipe = normalizeRecipeData(rawRecipeData);
+
+  // Helper for secretary title based on school name
+  const getSecretaryTitle = () => {
+    const schoolName = recipe.school_name || "Escola não informada";
+    const isMunicipal = schoolName.toLowerCase().includes("municipal");
+    const isEstadual = schoolName.toLowerCase().includes("estadual");
+
+    if (isMunicipal) {
+      return `SECRETARIA MUNICIPAL DE EDUCAÇÃO DO ${recipe.city_name || "MUNICÍPIO"}`;
+    } else if (isEstadual) {
+      return `SECRETARIA ESTADUAL DE EDUCAÇÃO DO ${recipe.state_name || "ESTADO"}`;
+    }
+
+    return `SECRETARIA (MUNICIPAL/ESTADUAL) DE EDUCAÇÃO DO (MUNICÍPIO/ESTADO)`;
+  };
+
+  // Calculate nutritional totals
+  const calculateTotals = () => {
+    if (!recipe.ingredients || recipe.ingredients.length === 0) {
+      return {
+        cost_per_serving: 0,
+        correction_factor: 0,
+        kcal: 0,
+        kj: 0,
+        protein: 0,
+        lipids: 0,
+        carbs: 0,
+        calcium: 0,
+        iron: 0,
+        retinol: 0,
+        vitC: 0,
+        sodium: 0,
+        grossWeight: 0,
+        cookedWeight: 0,
+        unit_measure_gross_weight: "",
+        unit_measure_cooked_weight: "",
+      };
+    }
+
+    return recipe.ingredients.reduce(
+      (totals, ingredient) => {
+        console.log("ingredient para total", ingredient);
+        return {
+          cost_per_serving:
+            totals.cost_per_serving +
+            (parseFloat(ingredient.cost_per_serving) || ingredient.adjusted_cost_per_serving || 0),
+          correction_factor: totals.correction_factor + parseFloat(ingredient.correction_factor),
+          kcal: totals.kcal + (parseFloat(ingredient.kcal) || 0),
+          kj: totals.kj + (parseFloat(ingredient.kj) || 0),
+          protein: totals.protein + (parseFloat(ingredient.protein) || 0),
+          lipids: totals.lipids + (parseFloat(ingredient.lipids) || 0),
+          carbs: totals.carbs + (parseFloat(ingredient.carbohydrate) || 0),
+          calcium: totals.calcium + (parseFloat(ingredient.calcium) || 0),
+          iron: totals.iron + (parseFloat(ingredient.iron) || 0),
+          retinol: totals.retinol + (parseFloat(ingredient.retinol) || 0),
+          vitC: totals.vitC + (parseFloat(ingredient.vitaminC) || 0),
+          sodium: totals.sodium + (parseFloat(ingredient.sodium) || 0),
+          grossWeight: totals.grossWeight + (parseFloat(ingredient.gross_weight) || 0),
+          cookedWeight:
+            totals.cookedWeight +
+            (parseFloat(ingredient.cooked_weight) || parseFloat(ingredient.ajustedCookedWeight) || 0),
+          unit_measure_gross_weight: ingredient?.unit_of_measure || ingredient?.unit_of_measure_gross_weight,
+          unit_measure_cooked_weight: ingredient?.unit_of_measure || ingredient?.unit_of_measure_cooked_weight,
+        };
+      },
+      {
+        cost_per_serving: 0,
+        correction_factor: 0,
+        kcal: 0,
+        kj: 0,
+        protein: 0,
+        lipids: 0,
+        carbs: 0,
+        calcium: 0,
+        iron: 0,
+        retinol: 0,
+        vitC: 0,
+        sodium: 0,
+        grossWeight: 0,
+        cookedWeight: 0,
+        unit_measure_gross_weight: "",
+        unit_measure_cooked_weight: "",
+      }
+    );
+  };
+
+  // Calculate per 100g values
+  const calculatePer100g = (totals) => {
+    if (totals.cookedWeight <= 0) return {};
+
+    const factor = 100 / totals.cookedWeight;
+    return {
+      kcal: totals.kcal * factor,
+      kj: totals.kj * factor,
+      protein: totals.protein * factor,
+      lipids: totals.lipids * factor,
+      carbs: totals.carbs * factor,
+      calcium: totals.calcium * factor,
+      iron: totals.iron * factor,
+      retinol: totals.retinol * factor,
+      vitC: totals.vitC * factor,
+      sodium: totals.sodium * factor,
+    };
+  };
+
+  const totals = calculateTotals();
+  const per100g = calculatePer100g(totals);
+
+  let serving = recipe?.servings;
+
+  let correctionFactor = 0;
+
+  if (totals.correction_factor > 0) {
+    correctionFactor = totals.correction_factor / recipe?.ingredients?.length;
+  }
 
   const handleExportToPDF = () => {
     const doc = new jsPDF({
@@ -32,433 +166,925 @@ const RecipeDialog = ({
 
     const margin = 10;
     let yPosition = margin;
+    const pageHeight = 210; // A4 landscape height
+    const pageWidth = 297; // A4 landscape width
 
-    const contentHeight = calculateContentHeight();
-    const pageHeight = 297;
-
+    // Header section
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.text(recipe?.school_name || "Escola não informada", margin, yPosition, {
-      align: "left",
-    });
-    yPosition += 10;
-    doc.text("FICHA TÉCNICA DE PREPARO", margin, yPosition, { align: "left" });
-    yPosition += 15;
+    doc.setFontSize(14);
+    doc.text(getSecretaryTitle(), pageWidth / 2, yPosition, { align: "center" });
+    yPosition += 7;
 
-    doc.setFontSize(16);
-    doc.text("Informações da Receita", margin, yPosition);
+    doc.text("PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE", pageWidth / 2, yPosition, { align: "center" });
+    yPosition += 7;
+
+    const modalityText = teaching_modality
+      ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${teaching_modality}`
+      : "FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ MODALIDADE DE ENSINO (FAIXA ETÁRIA)";
+
+    doc.text(modalityText, pageWidth / 2, yPosition, { align: "center" });
     yPosition += 10;
 
+    // Recipe name
     doc.setFontSize(12);
-    doc.text(`Custo Total: R$ ${recipe?.total_cost}`, margin, yPosition);
-    yPosition += 8;
-    doc.text(`Custo por Porção: R$ ${recipe?.metrics?.cost_per_serving.toFixed(2)}`, margin, yPosition);
-    yPosition += 8;
-    doc.text(`Número de Porções: ${recipe?.servings}`, margin, yPosition);
-    yPosition += 15;
-
-    doc.setFontSize(16);
-    doc.text("Utensílios Necessários", margin, yPosition);
-    yPosition += 10;
-
-    doc.setFontSize(12);
-    const utensilsText = doc.splitTextToSize(recipe?.required_utensils || "Nenhum utensílio informado", 170);
-    utensilsText.forEach((line: string) => {
-      doc.text(line, margin, yPosition);
-      yPosition += 6;
-    });
-    yPosition += 10;
-
-    doc.setFontSize(16);
-    doc.text("Ingredientes", margin, yPosition);
-    yPosition += 10;
-
-    const headers = [
-      "Ingrediente",
-      "Bruto",
-      "Uni.med",
-      "Líquido",
-      "Uni.med",
-      "Med. caseira",
-      "Fator Correção",
-      "Custo Unitário (R$)",
-      "kcal",
-      "kJ",
-      "Proteína (g)",
-      "Lipídios (g)",
-      "Carboidrato (g)",
-      "Cálcio (mg)",
-      "Ferro (mg)",
-      "Retinol (mcg)",
-      "Vitamina C (mg)",
-      "Sódio (mg)",
-      "Custo Total (R$)",
-    ];
-    const columnWidths = [40, 30, 15, 30, 15, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30];
-
-    doc.setFontSize(10);
-    let xPosition = margin;
-
-    // Cabeçalho da tabela
-    headers.forEach((header, index) => {
-      doc.text(header, xPosition, yPosition);
-      xPosition += columnWidths[index];
-    });
+    doc.text(`Nome: ${recipe.name || "Não informado"}`, margin, yPosition);
     yPosition += 8;
 
-    // Conteúdo da tabela
-    recipe?.ingredients?.forEach((ingredient) => {
-      xPosition = margin;
-      const rowData = [
-        ingredient.ingredient_description || ingredient.description,
-        ingredient?.gross_weight || ingredient?.adjusted_quantity || "N/A",
-        ingredient?.unit_of_measure || ingredient?.unit_of_measure_gross_weight || "N/A",
-        ingredient?.cooked_weight || ingredient?.ajustedCookedWeight || "N/A",
-        ingredient?.unit_of_measure || ingredient?.unit_of_measure_cooked_weight || "N/A",
-        ingredient?.homemade_measure || "N/A",
-        ingredient?.correction_factor || "N/A",
-        `R$ ${ingredient?.cost_per_serving || ingredient?.adjusted_cost || "0"}`,
-        ingredient?.kcal || "0",
-        ingredient?.kj || "0",
-        ingredient?.protein || "0",
-        ingredient?.lipids || "0",
-        ingredient?.carbohydrate || "0",
-        ingredient?.calcium || "0",
-        ingredient?.iron || "0",
-        ingredient?.retinol || "0",
-        ingredient?.vitaminC || "0",
-        ingredient?.sodium || "0",
-        ingredient?.cost || "0",
+    // Ingredients table
+    const drawTable = () => {
+      // Table header
+      const headers = [
+        "Ingredientes",
+        "Per capita\n(bruto)",
+        "Per capita\n(líquido)",
+        "Fator de\ncorreção",
+        "Medida\ncaseira",
+        "Custo\nunitário",
+        "Energia\n(kcal)",
+        "Energia\n(kJ)",
+        "Proteína\n(g)",
+        "Lipídeos\n(g)",
+        "Carboidratos\n(g)",
+        "Cálcio\n(mg)",
+        "Ferro\n(mg)",
+        "Retinol\n(mcg)",
+        "Vit. C\n(mg)",
+        "Sódio\n(mg)",
       ];
 
-      rowData.forEach((data, index) => {
-        doc.text(String(data), xPosition, yPosition);
-        xPosition += columnWidths[index];
+      const colWidths = [30, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15];
+      const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+      const startX = (pageWidth - tableWidth) / 2;
+
+      let currentX = startX;
+      let currentY = yPosition;
+
+      // Draw header
+      doc.setFillColor(230, 230, 230);
+      doc.rect(startX, currentY - 5, tableWidth, 7, "F");
+
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+
+      headers.forEach((header, index) => {
+        // Split header text to handle multiple lines
+        const headerLines = header.split("\n");
+        const lineHeight = 4; // Space between lines
+
+        // Calculate vertical position for multi-line text
+        const baseY = currentY - ((headerLines.length - 1) * lineHeight) / 2;
+
+        // Draw each line of the header
+        headerLines.forEach((line, lineIndex) => {
+          doc.text(line, currentX + colWidths[index] / 2, baseY + lineIndex * lineHeight, {
+            align: "center",
+          });
+        });
+
+        currentX += colWidths[index];
       });
 
-      yPosition += 6;
+      currentY += 10;
 
-      // Quebra de página
-      if (yPosition > pageHeight - margin) {
+      // Draw rows
+      doc.setFont("helvetica", "normal");
+
+      if (recipe.ingredients && recipe.ingredients.length > 0) {
+        recipe.ingredients.forEach((ingredient, rowIndex) => {
+          // Check if we need a new page
+          if (currentY > pageHeight - 15) {
+            doc.addPage();
+            currentY = margin;
+
+            // Redraw header on new page
+            currentX = startX;
+            doc.setFont("helvetica", "bold");
+            doc.setFillColor(230, 230, 230);
+            doc.rect(startX, currentY - 5, tableWidth, 7, "F");
+
+            headers.forEach((header, index) => {
+              doc.text(header, currentX + colWidths[index] / 2, currentY, { align: "center" });
+              currentX += colWidths[index];
+            });
+
+            currentY += 5;
+            doc.setFont("helvetica", "normal");
+          }
+
+          currentX = startX;
+
+          const rowData = [
+            ingredient.ingredient_description || ingredient.description || "—",
+            formatValue(ingredient.gross_weight) +
+              " " +
+              (ingredient?.unit_of_measure || ingredient?.unit_of_measure_gross_weight) || "—",
+            formatValue(ingredient.cooked_weight) +
+              " " +
+              (ingredient?.unit_of_measure || ingredient?.unit_of_measure_cooked_weight) || "—",
+            formatValue(ingredient.correction_factor) || "—",
+            formatValue(ingredient.homemade_measure) || "—",
+            formatValue(ingredient.cost_per_serving) || formatValue(ingredient.adjusted_cost) || "—",
+            formatValue(ingredient.kcal) || "—",
+            formatValue(ingredient.kj) || "—",
+            formatValue(ingredient.protein) || "—",
+            formatValue(ingredient.lipids) || "—",
+            formatValue(ingredient.carbohydrate) || "—",
+            formatValue(ingredient.calcium) || "—",
+            formatValue(ingredient.iron) || "—",
+            formatValue(ingredient.retinol) || "—",
+            formatValue(ingredient.vitaminC) || "—",
+            formatValue(ingredient.sodium) || "—",
+          ];
+
+          rowData.forEach((data, index) => {
+            doc.text(String(data), currentX + colWidths[index] / 2, currentY, { align: "center" });
+            currentX += colWidths[index];
+          });
+
+          currentY += 5;
+
+          // Draw row lines
+          doc.setDrawColor(200, 200, 200);
+          doc.line(startX, currentY - 2.5, startX + tableWidth, currentY - 2.5);
+        });
+      }
+
+      // Draw totals row
+      currentX = startX;
+      doc.setFont("helvetica", "bold");
+
+      const totalsRow = [
+        "Total",
+        formatValue(totals.grossWeight) + " " + totals.unit_measure_gross_weight,
+        formatValue(totals.cookedWeight) + " " + totals.unit_measure_cooked_weight,
+        "—",
+        "—",
+        formatValue(totals.cost_per_serving),
+        formatValue(totals.kcal),
+        formatValue(totals.kj),
+        formatValue(totals.protein),
+        formatValue(totals.lipids),
+        formatValue(totals.carbs),
+        formatValue(totals.calcium),
+        formatValue(totals.iron),
+        formatValue(totals.retinol),
+        formatValue(totals.vitC),
+        formatValue(totals.sodium),
+      ];
+
+      doc.setFillColor(240, 240, 240);
+      doc.rect(startX, currentY - 2.5, tableWidth, 5, "F");
+
+      totalsRow.forEach((data, index) => {
+        doc.text(String(data), currentX + colWidths[index] / 2, currentY, { align: "center" });
+        currentX += colWidths[index];
+      });
+
+      currentY += 7;
+
+      // Per 100g information
+      doc.text("Informação nutricional em 100g", startX, currentY);
+      currentY += 5;
+
+      currentX = startX;
+
+      const per100gRow = [
+        "",
+        "",
+        formatValue(100),
+        "",
+        "",
+        "",
+        formatValue(per100g.kcal),
+        formatValue(per100g.kj),
+        formatValue(per100g.protein),
+        formatValue(per100g.lipids),
+        formatValue(per100g.carbs),
+        formatValue(per100g.calcium),
+        formatValue(per100g.iron),
+        formatValue(per100g.retinol),
+        formatValue(per100g.vitC),
+        formatValue(per100g.sodium),
+      ];
+
+      doc.setFillColor(240, 240, 240);
+      doc.rect(startX, currentY - 2.5, tableWidth, 5, "F");
+
+      per100gRow.forEach((data, index) => {
+        doc.text(String(data), currentX + colWidths[index] / 2, currentY, { align: "center" });
+        currentX += colWidths[index];
+      });
+
+      return currentY + 7;
+    };
+
+    yPosition = drawTable();
+
+    // Add small data fields in a compact layout (side by side in groups)
+    const addSmallDataFields = () => {
+      // Check if we need a new page
+      if (yPosition > pageHeight - 30) {
         doc.addPage();
         yPosition = margin;
       }
-    });
 
-    doc.setFontSize(16);
-    doc.text("Nome da Receita", margin, yPosition);
-    yPosition += 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
 
-    doc.setFontSize(12);
-    doc.text(recipe?.name || "Receita sem nome", margin, yPosition);
-    yPosition += 15;
+      // Create a layout with small fields in two columns
+      const fieldWidth = (pageWidth - 2 * margin) / 3;
+      const fieldHeight = 12;
 
-    doc.setFontSize(16);
-    doc.text("Método de Preparo", margin, yPosition);
-    yPosition += 10;
+      // First row
+      let rowY = yPosition;
+      let colX = margin;
 
-    doc.setFontSize(12);
-    const preparationText = doc.splitTextToSize(recipe?.preparation_method || "Método de preparo não informado", 170);
-    preparationText.forEach((line: string) => {
-      doc.text(line, margin, yPosition);
-      yPosition += 6;
-    });
+      // Quantidade de porções
+      doc.text("Quantidade de porções", colX, rowY);
+      doc.setFillColor(255, 255, 220);
+      doc.rect(colX, rowY + 1, fieldWidth - 5, fieldHeight, "F");
+      doc.setFont("helvetica", "normal");
+      doc.text(String(recipe.servings || "Não informado"), colX + 3, rowY + 7);
 
-    doc.setFontSize(16);
-    doc.text("Medidas Caseiras", margin, yPosition);
-    yPosition += 10;
+      // Rendimento total
+      colX += fieldWidth;
+      doc.setFont("helvetica", "bold");
+      doc.text("Rendimento total", colX, rowY);
+      doc.setFillColor(255, 255, 220);
+      doc.rect(colX, rowY + 1, fieldWidth - 5, fieldHeight, "F");
+      doc.setFont("helvetica", "normal");
+      doc.text(formatValue(totals.cookedWeight), colX + 3, rowY + 7);
 
-    doc.setFontSize(12);
-    const preparationText2 = doc.splitTextToSize(recipe?.home_measurements || "Medidas caseiras não informadas", 170);
-    preparationText2.forEach((line: string) => {
-      doc.text(line, margin, yPosition);
-      yPosition += 6;
-    });
+      // Fator de cocção
+      colX += fieldWidth;
+      doc.setFont("helvetica", "bold");
+      doc.text("Fator de cocção", colX, rowY);
+      doc.setFillColor(255, 255, 220);
+      doc.rect(colX, rowY + 1, fieldWidth - 5, fieldHeight, "F");
+      doc.setFont("helvetica", "normal");
+      doc.text(formatValue(correctionFactor), colX + 3, rowY + 7);
 
-    doc.setFontSize(16);
-    doc.text("Tempo de Preparo", margin, yPosition);
-    yPosition += 10;
+      // Second row
+      rowY += fieldHeight + 5;
+      colX = margin;
 
-    doc.setFontSize(12);
-    doc.text(`${recipe?.prep_time || "Tempo de preparo não informado"} minutos`, margin, yPosition);
-    yPosition += 15;
+      // Tempo de Cocção
+      doc.setFont("helvetica", "bold");
+      doc.text("Tempo de Cocção", colX, rowY);
+      doc.setFillColor(255, 255, 220);
+      doc.rect(colX, rowY + 1, fieldWidth - 5, fieldHeight, "F");
+      doc.setFont("helvetica", "normal");
+      doc.text(`${recipe.timeOfCoccao || "0"} min`, colX + 3, rowY + 7);
 
-    // Salvar o PDF
-    doc.save(`${recipe?.name}_ficha_tecnica.pdf`);
-  };
+      // Tempo de Preparo
+      colX += fieldWidth;
+      doc.setFont("helvetica", "bold");
+      doc.text("Tempo de Preparo", colX, rowY);
+      doc.setFillColor(255, 255, 220);
+      doc.rect(colX, rowY + 1, fieldWidth - 5, fieldHeight, "F");
+      doc.setFont("helvetica", "normal");
+      doc.text(`${recipe.prep_time || "0"} min`, colX + 3, rowY + 7);
 
-  const calculateContentHeight = () => {
-    const lineHeight = 10;
-    const numberOfLines = 20;
-    return lineHeight * numberOfLines;
-  };
+      return rowY + fieldHeight + 5;
+    };
 
-  //ajuste do nome da tabela (lembrar de reorganizar)
-  const schoolName = recipe?.recipe?.school_name || recipe?.school_name || "Escola não informada";
-  const isMunicipal = schoolName.toLowerCase().includes("municipal");
-  const isEstadual = schoolName.toLowerCase().includes("estadual");
+    // Add small data fields
+    yPosition = addSmallDataFields();
 
-  const getSecretaryTitle = () => {
-    if (isMunicipal) {
-      return `Secretaria Municipal de Educação do Município de ${recipe?.city_name}`;
-    } else if (isEstadual) {
-      return `Secretaria Estadual de Educação do Estado de ${recipe?.state_name}`;
+    // Helper function for larger text sections
+    const addSection = (title, content) => {
+      // Check if we need a new page
+      if (yPosition > pageHeight - 15) {
+        doc.addPage();
+        yPosition = margin;
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text(title, margin, yPosition);
+
+      doc.setFillColor(255, 255, 200);
+      doc.rect(margin, yPosition + 1, pageWidth - 2 * margin, 10, "F");
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+
+      const textLines = doc.splitTextToSize(content || "Não informado", pageWidth - 2 * margin - 5);
+      doc.text(textLines, margin + 2, yPosition + 5);
+
+      return yPosition + 14 + (textLines.length - 1) * 3;
+    };
+
+    // Now add the larger sections in the requested order
+    yPosition = addSection("Utensilios necessários", recipe.utensils || "Não informado");
+    yPosition = addSection("Modo de preparo", recipe.preparation_method || "Não informado");
+    yPosition = addSection("Descrições extras sobre a receita", recipe.description_of_recipe || "Não informado");
+
+    // Handle ingredient allocations
+    if (recipe.ingredients && recipe.ingredients.some((ing) => ing.brand_allocations)) {
+      // Start with the header for the allocations
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("Alocações de Ingredientes", margin, yPosition);
+      yPosition += 5;
+
+      // Iterate through ingredients with brand allocations
+      recipe.ingredients
+        .filter((ing) => ing.brand_allocations)
+        .forEach((ing, idx) => {
+          // Check if we need a new page
+          if (yPosition > pageHeight - 20) {
+            doc.addPage();
+            yPosition = margin;
+          }
+
+          // Add the ingredient name
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          doc.text(`${ing.description || ing.ingredient_description}`, margin + 2, yPosition);
+          yPosition += 4;
+
+          // Add the allocations description
+          doc.setFont("helvetica", "normal");
+          const allocationText = ing.allocations_summary || ing.allocations_description || "Sem alocações";
+          const textLines = doc.splitTextToSize(allocationText, pageWidth - 2 * margin - 5);
+          doc.text(textLines, margin + 5, yPosition);
+          yPosition += 5 + (textLines.length - 1) * 3;
+        });
+
+      yPosition += 5; // Add some spacing
+    } else {
+      // If no allocations, can keep an empty placeholder or remove entirely
+      yPosition = addSection("Alocações de Ingredientes", "Não informado");
     }
 
-    return schoolName;
+    yPosition = addSection("Observações", recipe.observations || "Não informado");
+
+    // Footer
+    if (yPosition > pageHeight - 25) {
+      doc.addPage();
+      yPosition = margin;
+    }
+
+    doc.setFontSize(9);
+    doc.text("Nome, número do CRN e assinatura do nutricionista.", pageWidth - margin, pageHeight - margin, {
+      align: "right",
+    });
+
+    // Save the PDF
+    const safeName = (recipe.name || "receita").replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    doc.save(`${safeName}_ficha_tecnica.pdf`);
   };
 
   return (
+    // <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    //   <DialogTrigger asChild>
+    //     <Button>{textButton}</Button>
+    //   </DialogTrigger>
+
+    //   <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+    //     <DialogHeader className="m-auto">
+    //       <DialogTitle className="text-2xl flex flex-col justify-center items-center">
+    //         {getSecretaryTitle()}
+    //         <div className="text-xl items-center">PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE</div>
+    //       </DialogTitle>
+    //       <DialogDescription className="text-center text-lg">
+    //         {teaching_modality !== null
+    //           ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${teaching_modality}`
+    //           : "FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ MODALIDADE DE ENSINO (FAIXA ETÁRIA)"}
+    //       </DialogDescription>
+    //     </DialogHeader>
+
+    //     <div className="grid grid-cols-1 gap-2 mb-2">
+    //       <div className="border-b pb-2">
+    //         <h3 className="font-semibold">Nome: {recipe.name || "Não informado"}</h3>
+    //       </div>
+    //     </div>
+
+    //     <div className="overflow-x-auto">
+    //       <Table className="border">
+    //         <TableHeader className="bg-gray-100">
+    //           <TableRow>
+    //             <TableHead className="border w-auto font-bold">Ingredientes</TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Per capita
+    //               <br />
+    //               (bruto)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Per capita
+    //               <br />
+    //               (líquido)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Fator de
+    //               <br />
+    //               correção
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Medida
+    //               <br />
+    //               caseira
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Custo
+    //               <br />
+    //               unitário
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Energia
+    //               <br />
+    //               (kcal)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Energia
+    //               <br />
+    //               (kJ)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Proteína
+    //               <br />
+    //               (g)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Lipídeos
+    //               <br />
+    //               (g)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Carboi-
+    //               <br />
+    //               dratos (g)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Cálcio
+    //               <br />
+    //               (mg)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Ferro
+    //               <br />
+    //               (mg)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Retinol
+    //               <br />
+    //               (mcg)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Vit. C<br />
+    //               (mg)
+    //             </TableHead>
+    //             <TableHead className="border text-center whitespace-nowrap">
+    //               Sódio
+    //               <br />
+    //               (mg)
+    //             </TableHead>
+    //           </TableRow>
+    //         </TableHeader>
+    //         <TableBody>
+    //           {recipe.ingredients &&
+    //             recipe.ingredients.map(
+    //               (ingredient, index) => (
+    //                 console.log(
+    //                   "ingredienttttttttttttttttt",
+    //                   ingredient,
+    //                   ingredient.unit_of_measure_gross_weight,
+    //                   ingredient.unit_of_measure_cooked_weight
+    //                 ),
+    //                 (
+    //                   <TableRow key={index}>
+    //                     <TableCell className="border font-medium">
+    //                       {ingredient.ingredient_description || ingredient.description || "—"}
+    //                     </TableCell>
+    //                     <TableCell className="border text-center">
+    //                       {ingredient.unit_of_measure
+    //                         ? formatValue(ingredient.gross_weight) + " " + ingredient.unit_of_measure
+    //                         : ingredient.unit_of_measure_gross_weight
+    //                         ? formatValue(ingredient.gross_weight) + " " + ingredient.unit_of_measure_gross_weight
+    //                         : "—"}
+    //                     </TableCell>
+    //                     <TableCell className="border text-center">
+    //                       {ingredient.unit_of_measure
+    //                         ? formatValue(ingredient.cooked_weight) + " " + ingredient.unit_of_measure
+    //                         : ingredient.unit_of_measure_cooked_weight
+    //                         ? formatValue(ingredient.cooked_weight) + " " + ingredient.unit_of_measure_cooked_weight
+    //                         : "—"}
+    //                     </TableCell>
+    //                     <TableCell className="border text-center">
+    //                       {formatValue(ingredient.correction_factor) || "—"}
+    //                     </TableCell>
+    //                     <TableCell className="border text-center">
+    //                       {formatValue(ingredient.homemade_measure) || "—"}
+    //                     </TableCell>
+    //                     <TableCell className="border text-center">
+    //                       {formatValue(ingredient.cost_per_serving) || formatValue(ingredient.adjusted_cost) || "—"}
+    //                     </TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.kcal) || "—"}</TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.kj) || "—"}</TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.protein) || "—"}</TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.lipids) || "—"}</TableCell>
+    //                     <TableCell className="border text-center">
+    //                       {formatValue(ingredient.carbohydrate) || "—"}
+    //                     </TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.calcium) || "—"}</TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.iron) || "—"}</TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.retinol) || "—"}</TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.vitaminC) || "—"}</TableCell>
+    //                     <TableCell className="border text-center">{formatValue(ingredient.sodium) || "—"}</TableCell>
+    //                   </TableRow>
+    //                 )
+    //               )
+    //             )}
+    //           {/* Totals row */}
+    //           <TableRow className="bg-gray-100 font-bold">
+    //             <TableCell className="border">Total</TableCell>
+    //             <TableCell className="border text-center">
+    //               {formatValue(totals.grossWeight) + " " + totals.unit_measure_gross_weight}
+    //             </TableCell>
+    //             <TableCell className="border text-center">
+    //               {formatValue(totals.cookedWeight) + " " + totals.unit_measure_cooked_weight}
+    //             </TableCell>
+    //             <TableCell className="border text-center">—</TableCell>
+    //             <TableCell className="border text-center">—</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.cost_per_serving)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.kcal)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.kj)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.protein)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.lipids)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.carbs)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.calcium)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.iron)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.retinol)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.vitC)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(totals.sodium)}</TableCell>
+    //           </TableRow>
+    //           {/* <TableRow className="bg-gray-50">
+    //             <TableCell colSpan={2} className="border text-center font-bold">
+    //               Informação nutricional em 100g
+    //             </TableCell>
+    //             <TableCell className="border text-center">100,00</TableCell>
+    //             <TableCell className="border text-center">—</TableCell>
+    //             <TableCell className="border text-center">—</TableCell>
+    //             <TableCell className="border text-center">—</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.kcal)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.kj)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.protein)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.lipids)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.carbs)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.calcium)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.iron)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.retinol)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.vitC)}</TableCell>
+    //             <TableCell className="border text-center">{formatValue(per100g.sodium)}</TableCell>
+    //           </TableRow> */}
+    //         </TableBody>
+    //       </Table>
+    //     </div>
+
+    //     <div className="grid grid-cols-2 gap-4 mt-4">
+    //       <div className="space-y-4">
+    //         <div className="border p-2 bg-yellow-50">
+    //           <h3 className="text-md font-bold">Quantidade de Porções</h3>
+    //           <p>{serving || "1"}</p>
+    //         </div>
+    //         <div className="border p-2 bg-yellow-50">
+    //           <h3 className="text-md font-bold">Rendimento total</h3>
+    //           <p>{formatValue(totals.cookedWeight)}</p>
+    //         </div>
+    //         <div className="border p-2 bg-yellow-50">
+    //           <h3 className="text-md font-bold">Fator de cocção</h3>
+    //           <p>{correctionFactor || "0"}</p>
+    //         </div>
+    //         <div className="border p-2 bg-yellow-50">
+    //           <h3 className="text-md font-bold">Utensilios necessários</h3>
+    //           <p className="whitespace-pre-line">{recipe.required_utensils || "Não informado"}</p>
+    //         </div>
+    //         <div className="border p-2 bg-yellow-50">
+    //           <h3 className="text-md font-bold">Modo de prepararo</h3>
+    //           <p className="whitespace-pre-line">{recipe.preparation_method || "Não informado"}</p>
+    //         </div>
+    //       </div>
+    //       <div className="space-y-4">
+    //         <div className="border p-2 bg-yellow-50">
+    //           <h3 className="text-lg font-bold mt-4">Alocações de Ingredientes</h3>
+    //           {recipe.ingredients && recipe.ingredients.some((ing) => ing.brand_allocations) && (
+    //             <>
+    //               {recipe.ingredients
+    //                 .filter((ing) => ing.brand_allocations)
+    //                 .map((ing, idx) => (
+    //                   <div key={idx} className="mt-2">
+    //                     <h4 className="font-semibold">{ing.description || ing.ingredient_description}</h4>
+    //                     <p className="whitespace-pre-line">
+    //                       {ing.allocations_summary || ing.allocations_description || "Sem alocações"}
+    //                     </p>
+    //                   </div>
+    //                 ))}
+    //             </>
+    //           )}
+    //         </div>
+    //         <div className="border p-2 bg-yellow-50">
+    //           <h3 className="text-md font-bold">Tempo de Cocção</h3>
+    //           <p>{recipe.timeOfCoccao || "0"} min</p>
+    //         </div>
+    //         <div className="border p-2 bg-yellow-50">
+    //           <h3 className="text-md font-bold">Tempo de Preparo</h3>
+    //           <p>{recipe.prep_time || "0"} min</p>
+    //         </div>
+    //       </div>
+    //     </div>
+
+    //     <div className="space-y-4 mt-4">
+    //       <div className="border p-2 bg-yellow-50">
+    //         <h3 className="text-md font-bold">Descrições extras sobre a receita</h3>
+    //         <p className="whitespace-pre-line">{recipe.description_of_recipe || "Não informado"}</p>
+    //       </div>
+    //       <div className="border p-2 bg-yellow-50">
+    //         <h3 className="text-md font-bold">Observações</h3>
+    //         <p className="whitespace-pre-line">{recipe.observations || "Não informado"}</p>
+    //       </div>
+    //     </div>
+
+    //     <div className="flex justify-between mt-4">
+    //       <Button onClick={handleExportToPDF} className="mt-4">
+    //         Exportar para PDF
+    //       </Button>
+    //       {/* <div className="text-right text-sm italic mt-6">Nome, número do CRN e assinatura do nutricionista.</div> */}
+    //     </div>
+    //   </DialogContent>
+    // </Dialog>
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>{textButton}</Button>
       </DialogTrigger>
-      {/**Lembrar de reorganizar */}
-      {type === "PNAE" ? (
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="m-auto">
-            <DialogTitle className="text-4xl flex flex-col justify-center items-center">
-              {teaching_modality !== null ? getSecretaryTitle() : getSecretaryTitle() || "Escola não informada"}
-              <div className="text-2xl items-center">PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE</div>
-            </DialogTitle>
-            <DialogDescription className="text-center text-lg">
-              {teaching_modality !== null
-                ? `FICHA TÉCNICA DE PREPARO - ${teaching_modality}`
-                : "FICHA TÉCNICA DE PREPARO"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div>
-              <h3 className="font-semibold">Informações da Receita</h3>
-              <p>
-                Custo Total: R${" "}
-                {recipe?.recipe?.metrics?.total_cost.toFixed(2) || recipe?.metrics?.total_cost?.toFixed(2) || "0,00"}
-              </p>
-              <p>
-                Custo por Porção: R${" "}
-                {recipe?.recipe?.metrics?.cost_per_serving.toFixed(2) ||
-                  recipe?.metrics?.cost_per_serving?.toFixed(2) ||
-                  "0,00"}
-              </p>
-              <p>Número de Porções: {recipe.recipe?.servings || recipe?.servings || "0"}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
-              <p>{recipe.recipe?.name || recipe?.name}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Utensílios Necessários</h3>
-              <p>{recipe?.recipe?.required_utensils || recipe?.required_utensils || "Não informado"}</p>
-            </div>
-          </div>
-          <h3 className="text-lg font-bold mb-2">Ingredientes</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Ingrediente</TableHead>
-                <TableHead>Per capita (bruto)</TableHead>
-                <TableHead>Unid.Med</TableHead>
-                <TableHead>Per capita (liquído)</TableHead>
-                <TableHead>Unid.Med</TableHead>
-                <TableHead>Med. Caseira</TableHead>
-                <TableHead>Fator de correção</TableHead>
-                <TableHead>Custo unitário R$</TableHead>
-                <TableHead>(kcal)</TableHead>
-                <TableHead>(kJ)</TableHead>
-                <TableHead>Proteína(g)</TableHead>
-                <TableHead>Lipídeos(g)</TableHead>
-                <TableHead>Carboidrato(g)</TableHead>
-                <TableHead>Cálcio(mg)</TableHead>
-                <TableHead>Ferro(mg)</TableHead>
-                <TableHead>Retinol(mcg)</TableHead>
-                <TableHead>Vit.C (mg)</TableHead>
-                <TableHead>Sódio(mg)</TableHead>
-                <TableHead>Total R$</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recipe?.ingredients?.map((ingredient, index) => (
-                <TableRow key={index}>
-                  <TableCell>{ingredient.ingredient_description || ingredient?.description}</TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.gross_weight) || formatValue(ingredient.adjusted_quantity)}
-                  </TableCell>
-                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.cooked_weight) || formatValue(ingredient?.ajustedCookedWeight)}
-                  </TableCell>
-                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
-                  <TableCell>{formatValue(ingredient?.homemade_measure)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.correction_factor)}</TableCell>
-                  <TableCell>
-                    R$ {formatValue(ingredient?.cost_per_serving) || formatValue(ingredient?.adjusted_cost)}
-                  </TableCell>
-                  <TableCell>{formatValue(ingredient?.kcal)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.kj)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.protein)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.lipids)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.carbohydrate)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.calcium)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.iron)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.retinol)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.vitaminC)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.sodium)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.cost)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {/* <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
-          <p>{recipe.recipe?.name}</p> */}{" "}
-          <h3 className="text-lg font-bold mt-4">Método de Preparo</h3>
-          <p>{recipe?.recipe?.preparation_method || recipe?.preparation_method || "Não informado"}</p>
-          <h3 className="text-lg font-bold mt-4">Medida Caseira</h3>
-          <p>{recipe?.recipe?.home_measurements || recipe?.home_measurements || "Não informado"}</p>
-          <h3 className="text-lg font-bold mt-4">Tempo de Cocçõa</h3>
-          <p>{recipe?.recipe?.timeOfCoccao || recipe?.timeOfCoccao || "0"} min</p>
-          <h3 className="text-lg font-bold mt-4">Tempo de Preparo</h3>
-          <p>{recipe?.recipe?.prep_time || recipe?.prep_time || "0"} min</p>
-          <h3 className="text-lg font-bold mt-4">Descrições de Preparo</h3>
-          <p>{recipe?.recipe?.description_of_recipe || recipe?.description_of_recipe || "Não informado"}</p>
-          <h3 className="text-lg font-bold mt-4">Observações</h3>
-          <p>{recipe?.recipe?.observations || recipe?.observations || "Não informado"}</p>
-          <Button onClick={handleExportToPDF}>Exportar para PDF</Button>
-        </DialogContent>
-      ) : type === "KITCHEN" ? (
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="m-auto">
-            <DialogTitle className="text-4xl flex flex-col justify-center items-center">
-              {teaching_modality !== null ? getSecretaryTitle() : getSecretaryTitle() || "Escola não informada"}
-              <div className="text-2xl items-center">FICHA TÉCNICA DE COZINHA</div>
-            </DialogTitle>
-            <DialogDescription className="text-center text-lg">
-              {teaching_modality !== null
-                ? `FICHA TÉCNICA DE PREPARO - ${teaching_modality}`
-                : "FICHA TÉCNICA DE PREPARO"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div>
-              <h3 className="font-semibold">Informações da Receita</h3>
-              <p>Número de Porções: {recipe.recipe?.servings || recipe?.servings || "0"}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
-              <p>{recipe.recipe?.name || recipe?.name}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Utensílios Necessários</h3>
-              <p>{recipe?.recipe?.required_utensils || recipe?.required_utensils || "Não informado"}</p>
-            </div>
-          </div>
-          <h3 className="text-lg font-bold mb-2">Ingredientes</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Ingrediente</TableHead>
-                <TableHead>Per capita (bruto)</TableHead>
-                <TableHead>Unid.Med</TableHead>
-                <TableHead>Per capita (liquído)</TableHead>
-                <TableHead>Unid.Med</TableHead>
-                <TableHead>Med. Caseira</TableHead>
-                <TableHead>Fator de correção</TableHead>
-                <TableHead>(kcal)</TableHead>
-                <TableHead>(kJ)</TableHead>
-                <TableHead>Proteína(g)</TableHead>
-                <TableHead>Lipídeos(g)</TableHead>
-                <TableHead>Carboidrato(g)</TableHead>
-                <TableHead>Cálcio(mg)</TableHead>
-                <TableHead>Ferro(mg)</TableHead>
-                <TableHead>Retinol(mcg)</TableHead>
-                <TableHead>Vit.C (mg)</TableHead>
-                <TableHead>Sódio(mg)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recipe?.ingredients?.map((ingredient, index) => (
-                <TableRow key={index}>
-                  <TableCell>{ingredient.ingredient_description || ingredient?.description}</TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.gross_weight) || formatValue(ingredient.adjusted_quantity)}
-                  </TableCell>
-                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.cooked_weight) || formatValue(ingredient?.ajustedCookedWeight)}
-                  </TableCell>
-                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
-                  <TableCell>{ingredient?.homemade_measure}</TableCell>
-                  <TableCell>{formatValue(ingredient?.correction_factor)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.kcal)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.kj)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.protein)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.lipids)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.carbohydrate)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.calcium)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.iron)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.retinol)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.vitaminC)}</TableCell>
-                  <TableCell>{formatValue(ingredient?.sodium)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {/* <h3 className="text-lg font-bold mt-4">Nome da Receita</h3>
-          <p>{recipe.recipe?.name}</p> */}{" "}
-          <h3 className="text-lg font-bold mt-4">Método de Preparo</h3>
-          <p>{recipe?.recipe?.preparation_method || recipe?.preparation_method || "Não informado"}</p>
-          <h3 className="text-lg font-bold mt-4">Medida Caseira</h3>
-          <p>{recipe?.recipe?.home_measurements || recipe?.home_measurements || "Não informado"}</p>
-          <h3 className="text-lg font-bold mt-4">Tempo de Cocçõa</h3>
-          <p>{recipe?.recipe?.timeOfCoccao || recipe?.timeOfCoccao || "0"} min</p>
-          <h3 className="text-lg font-bold mt-4">Tempo de Preparo</h3>
-          <p>{recipe?.recipe?.prep_time || recipe?.prep_time || "0"} min</p>
-          <h3 className="text-lg font-bold mt-4">Descrições de Preparo</h3>
-          <p>{recipe?.recipe?.description_of_recipe || recipe?.description_of_recipe || "Não informado"}</p>
-          <h3 className="text-lg font-bold mt-4">Observações</h3>
-          <p>{recipe?.recipe?.observations || recipe?.observations || "Não informado"}</p>
-          <Button onClick={handleExportToPDF}>Exportar para PDF</Button>
-        </DialogContent>
-      ) : (
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="m-auto">
-            <DialogTitle className="text-4xl flex flex-col justify-center items-center">
-              {teaching_modality !== null ? getSecretaryTitle() : getSecretaryTitle() || "Escola não informada"}
-              <div className="text-2xl items-center">FICHA DE INGREDIENTES PARA PREPARO</div>
-            </DialogTitle>
-            <DialogDescription className="text-center text-lg">
-              {teaching_modality !== null
-                ? `${recipe.recipe?.name || recipe?.name} - ${teaching_modality}`
-                : `${recipe.recipe?.name || recipe?.name}`}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-3 gap-4 mb-4"></div>
-          <h3 className="text-lg font-bold mb-2">Ingredientes</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Ingrediente</TableHead>
-                <TableHead>Per capita (bruto)</TableHead>
-                <TableHead>Unid.Med</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recipe?.ingredients?.map((ingredient, index) => (
-                <TableRow key={index}>
-                  <TableCell>{ingredient.ingredient_description || ingredient?.description}</TableCell>
-                  <TableCell>
-                    {formatValue(ingredient?.gross_weight) || formatValue(ingredient.adjusted_quantity)}
-                  </TableCell>
-                  <TableCell>{ingredient.unit_of_measure || ingredient.unit_of_measure_gross_weight}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
 
-          <Button onClick={handleExportToPDF}>Exportar para PDF req</Button>
-        </DialogContent>
-      )}
+      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="m-auto">
+          <DialogTitle className="text-2xl flex flex-col justify-center items-center">
+            {getSecretaryTitle()}
+            <div className="text-xl items-center">PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE</div>
+          </DialogTitle>
+          <DialogDescription className="text-center text-lg font-bold">
+            {teaching_modality !== null
+              ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${teaching_modality}`
+              : "FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ MODALIDADE DE ENSINO (FAIXA ETÁRIA)"}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-1 gap-2 mb-2">
+          <div className="border-b pb-2">
+            <h3 className="font-semibold">Nome: {recipe.name || "Não informado"}</h3>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <Table className="border w-full">
+            <TableHeader className="bg-yellow-50">
+              <TableRow>
+                <TableHead className="border w-auto font-bold text-center">Ingredientes</TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Per capita
+                  <br />
+                  (bruto)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Per capita
+                  <br />
+                  (líquido)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Fator de
+                  <br />
+                  correção
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Medida
+                  <br />
+                  caseira
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Custo
+                  <br />
+                  unitário
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Energia
+                  <br />
+                  (kcal)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Energia
+                  <br />
+                  (kJ)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Proteína
+                  <br />
+                  (g)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Lipídeos
+                  <br />
+                  (g)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Carboi-
+                  <br />
+                  dratos (g)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Cálcio
+                  <br />
+                  (mg)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Ferro
+                  <br />
+                  (mg)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Retinol
+                  <br />
+                  (mcg)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Vit. C<br />
+                  (mg)
+                </TableHead>
+                <TableHead className="border text-center whitespace-nowrap">
+                  Sódio
+                  <br />
+                  (mg)
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recipe.ingredients &&
+                recipe.ingredients.map((ingredient, index) => (
+                  <TableRow key={index} className="bg-white">
+                    <TableCell className="border font-medium">
+                      {ingredient.ingredient_description || ingredient.description || "—"}
+                    </TableCell>
+                    <TableCell className="border text-center">
+                      {ingredient.unit_of_measure
+                        ? formatValue(ingredient.gross_weight) + " " + ingredient.unit_of_measure
+                        : ingredient.unit_of_measure_gross_weight
+                        ? formatValue(ingredient.gross_weight) + " " + ingredient.unit_of_measure_gross_weight
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="border text-center">
+                      {ingredient.unit_of_measure
+                        ? formatValue(ingredient.cooked_weight) + " " + ingredient.unit_of_measure
+                        : ingredient.unit_of_measure_cooked_weight
+                        ? formatValue(ingredient.cooked_weight) + " " + ingredient.unit_of_measure_cooked_weight
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="border text-center">
+                      {formatValue(ingredient.correction_factor) || "—"}
+                    </TableCell>
+                    <TableCell className="border text-center">
+                      {formatValue(ingredient.homemade_measure) || "—"}
+                    </TableCell>
+                    <TableCell className="border text-center">
+                      {formatValue(ingredient.cost_per_serving) || formatValue(ingredient.adjusted_cost) || "—"}
+                    </TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.kcal) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.kj) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.protein) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.lipids) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.carbohydrate) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.calcium) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.iron) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.retinol) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.vitaminC) || "—"}</TableCell>
+                    <TableCell className="border text-center">{formatValue(ingredient.sodium) || "—"}</TableCell>
+                  </TableRow>
+                ))}
+              {/* Totals row */}
+              <TableRow className="bg-yellow-50 font-bold">
+                <TableCell className="border">Total</TableCell>
+                <TableCell className="border text-center">
+                  {formatValue(totals.grossWeight) + " " + totals.unit_measure_gross_weight}
+                </TableCell>
+                <TableCell className="border text-center">
+                  {formatValue(totals.cookedWeight) + " " + totals.unit_measure_cooked_weight}
+                </TableCell>
+                <TableCell className="border text-center">—</TableCell>
+                <TableCell className="border text-center">—</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.cost_per_serving)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.kcal)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.kj)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.protein)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.lipids)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.carbs)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.calcium)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.iron)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.retinol)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.vitC)}</TableCell>
+                <TableCell className="border text-center">{formatValue(totals.sodium)}</TableCell>
+              </TableRow>
+              {/* Nutrition information per 100g row */}
+              {/* <TableRow className="bg-yellow-50">
+                <TableCell colSpan={1} className="border text-left font-bold">
+                  Informação nutricional em 100g
+                </TableCell>
+                <TableCell colSpan={15} className="border text-center">
+                  <div className="grid grid-cols-15 w-full">
+             
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>4192.98</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                    <div>100.00</div>
+                  </div>
+                </TableCell>
+              </TableRow> */}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="space-y-4">
+            <div className="border p-2 bg-yellow-50">
+              <h3 className="text-md font-bold">Quantidade de Porções</h3>
+              <p>{serving || "10"}</p>
+            </div>
+            <div className="border p-2 bg-yellow-50">
+              <h3 className="text-md font-bold">Rendimento total</h3>
+              <p>{formatValue(totals.cookedWeight) || "4.50"}</p>
+            </div>
+            <div className="border p-2 bg-yellow-50">
+              <h3 className="text-md font-bold">Tempo de Cocção</h3>
+              <p>{recipe.timeOfCoccao || "30"} min</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="border p-2 bg-yellow-50">
+              <h3 className="text-md font-bold">Fator de cocção</h3>
+              <p>{correctionFactor || "1.00"}</p>
+            </div>
+            <div className="border p-2 bg-yellow-50">
+              <h3 className="text-md font-bold">Tempo de Preparo</h3>
+              <p>{recipe.prep_time || "30"} min</p>
+            </div>
+            <div className="border p-2 bg-yellow-50">
+              <h3 className="text-md font-bold">Alocações de Ingredientes</h3>
+              {recipe.ingredients && recipe.ingredients.some((ing) => ing.brand_allocations) && (
+                <>
+                  {recipe.ingredients
+                    .filter((ing) => ing.brand_allocations)
+                    .map((ing, idx) => (
+                      <div key={idx} className="mt-2">
+                        <h4 className="font-semibold">{ing.description || ing.ingredient_description}</h4>
+                        <p className="whitespace-pre-line">
+                          {ing.allocations_summary || ing.allocations_description || "Sem alocações"}
+                        </p>
+                      </div>
+                    ))}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 mt-4">
+          <div className="border p-2 bg-yellow-50">
+            <h3 className="text-md font-bold">Utensílios necessários</h3>
+            <p className="whitespace-pre-line">{recipe.required_utensils || "Não informado"}</p>
+          </div>
+
+          <div className="border p-2 bg-yellow-50">
+            <h3 className="text-md font-bold">Modo de preparo</h3>
+            <p className="whitespace-pre-line">{recipe.preparation_method || "Não informado"}</p>
+          </div>
+          <div className="border p-2 bg-yellow-50">
+            <h3 className="text-md font-bold">Descrições extras sobre a receita</h3>
+            <p className="whitespace-pre-line">{recipe.description_of_recipe || "Não informado"}</p>
+          </div>
+          <div className="border p-2 bg-yellow-50">
+            <h3 className="text-md font-bold">Observações</h3>
+            <p className="whitespace-pre-line">{recipe.observations || "Não informado"}</p>
+          </div>
+        </div>
+
+        <div className="flex justify-between mt-4">
+          <Button onClick={handleExportToPDF} className="mt-4">
+            Exportar para PDF
+          </Button>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 };
 
-export default RecipeDialog;
+export default RecipeTechnicalSheet;
