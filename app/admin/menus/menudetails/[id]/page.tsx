@@ -1,7 +1,6 @@
 "use client";
 
 import { informationError } from "@/components/informationError";
-import RecipeDialog from "@/components/recipeDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -172,12 +171,12 @@ const RecipeMenuDetails = () => {
               recipe={recipe}
               teaching_modality={menuData.teaching_modality || "Não foi informado"}
             />
-            <RecipeDialog
+            {/* <RecipeDialog
               type="KITCHEN"
               textButton="Ficha tecnica Cozinha"
               recipe={recipe}
               teaching_modality={menuData.teaching_modality || "Não foi informado"}
-            />
+            /> */}
             <RecipeDialogStockRequisition
               textButton="Requisição do Estoque"
               recipe={recipe}
