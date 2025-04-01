@@ -1,51 +1,30 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useState, useEffect } from "react";
 
 import React from "react";
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Search, Trash2 } from "lucide-react";
-import { Card, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { informationError } from "@/components/informationError";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { api } from "@/connect/api";
-import { Trash, Pencil } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pencil, Search } from "lucide-react";
 
 //hooks personalizados
-import { useSearch } from "@/hook/useSearch";
-import { usePost } from "@/hook/usePost";
-import { useRemove } from "@/hook/useRemove";
 import { useGetById } from "@/hook/useGetById";
+import { usePost } from "@/hook/usePost";
+import { useSearch } from "@/hook/useSearch";
 import { useUpdate } from "@/hook/useUpdate";
 
 //formatValue
@@ -101,9 +80,7 @@ const Ingredients = () => {
     error: postError,
     postData: createPost,
   } = usePost<any>("ingredients", refetch);
-  const handleCreateIngredient = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleCreateIngredient = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
@@ -195,9 +172,7 @@ const Ingredients = () => {
     upDate: updateIngredientPost,
   } = useUpdate<any>("ingredients", refetch);
 
-  const handleUpdateIngredient = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleUpdateIngredient = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
@@ -205,10 +180,9 @@ const Ingredients = () => {
       // console.log("editingIngredient.id", editingIngredient.id);
       // console.log("url", `/ingredients/${editingIngredient.id}`);
 
-      const responseData = await updateIngredientPost(
-        editingIngredient?.id ?? 0,
-        editingIngredient
-      );
+      const responseData = await updateIngredientPost(editingIngredient?.id ?? 0, editingIngredient);
+
+      console.log("responseData", responseData);
 
       toast.success(responseData?.message);
 
@@ -237,7 +211,7 @@ const Ingredients = () => {
     }
   };
 
-  // //delete não esta visivel no front mudei regra de negocio
+  //delete não esta visivel no front mudei regra de negocio
   // const { data, loading, error, removeData } = useRemove(
   //   "ingredients",
   //   refetch
@@ -254,10 +228,7 @@ const Ingredients = () => {
       <h1 className="font-bold text-xl">Ingredientes </h1>
       <div className="flex justify-end">
         {/* <Link href="/admin/menus/new"> */}
-        <Button
-          className="bg-orange-500 hover:bg-orange-600 font-bold"
-          onClick={() => setIsOpen(true)}
-        >
+        <Button className="bg-orange-500 hover:bg-orange-600 font-bold" onClick={() => setIsOpen(true)}>
           + Novo ingrediente
         </Button>
         {/* </Link> */}
@@ -306,20 +277,13 @@ const Ingredients = () => {
                         <SelectItem value="Limitada para > 3 anos e proibida para ≤ 3 anos">
                           Limitada para `&gt;` 3 anos e proibida para ≤ 3 anos
                         </SelectItem>
-                        <SelectItem value="Aquisição proibida">
-                          Aquisição proibida
-                        </SelectItem>
+                        <SelectItem value="Aquisição proibida">Aquisição proibida</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label>Peso bruto(g)</Label>
-                    <Input
-                      name="gross_weight"
-                      type="number"
-                      value={newIngredient.gross_weight}
-                      disabled
-                    />
+                    <Input name="gross_weight" type="number" value={newIngredient.gross_weight} disabled />
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label>Fator de Correção </Label>
@@ -518,9 +482,7 @@ const Ingredients = () => {
               </DialogDescription>
 
               <DialogFooter>
-                <Button className="bg-orange-500 hover:bg-orange-600 font-bold">
-                  Salvar Ingrediente
-                </Button>
+                <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Salvar Ingrediente</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -534,9 +496,7 @@ const Ingredients = () => {
       <div className="flex">
         <Card className="w-full p-4">
           <Table>
-            <TableCaption className="mt-10 text-gray-400">
-              Lista com todas os ingredientes cadastrados.
-            </TableCaption>
+            <TableCaption className="mt-10 text-gray-400">Lista com todas os ingredientes cadastrados.</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="font-bold">Descrição</TableHead>
@@ -555,9 +515,7 @@ const Ingredients = () => {
 
                 <TableHead className="font-bold">Cálcio(mg)</TableHead>
                 <TableHead className="font-bold">Ferro(g)</TableHead>
-                <TableHead className="font-bold">
-                  Retinol (Vit.A) (mcg)
-                </TableHead>
+                <TableHead className="font-bold">Retinol (Vit.A) (mcg)</TableHead>
                 <TableHead className="font-bold">Vit.C(mg)</TableHead>
                 <TableHead className="font-bold">Sódio(g)</TableHead>
                 <TableHead className="font-bold">Acões</TableHead>
@@ -567,74 +525,42 @@ const Ingredients = () => {
               {searchData &&
                 searchData.map((ingredients) => (
                   <TableRow key={ingredients.id}>
-                    <TableCell className="font-medium">
-                      {ingredients.description}
-                    </TableCell>
+                    <TableCell className="font-medium">{ingredients.description}</TableCell>
 
-                    <TableCell className="font-medium">
-                      {formatValue(ingredients.legend_type)}
-                    </TableCell>
+                    <TableCell className="font-medium">{formatValue(ingredients.legend_type)}</TableCell>
 
-                    <TableCell className="font-medium">
-                      {formatValue(ingredients.gross_weight)}
-                    </TableCell>
+                    <TableCell className="font-medium">{formatValue(ingredients.gross_weight)}</TableCell>
 
-                    <TableCell className="font-medium">
-                      {formatValue(ingredients.correction_factor)}
-                    </TableCell>
+                    <TableCell className="font-medium">{formatValue(ingredients.correction_factor)}</TableCell>
 
-                    <TableCell className="font-medium">
-                      {formatValue(ingredients.cooking_index)}
-                    </TableCell>
+                    <TableCell className="font-medium">{formatValue(ingredients.cooking_index)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.kcal)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.kcal)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.kj)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.kj)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.protein)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.protein)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.lipids)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.lipids)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.carbohydrate)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.carbohydrate)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.calcium)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.calcium)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.iron)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.iron)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.retinol)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.retinol)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.vitaminC)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.vitaminC)}</TableCell>
 
-                    <TableCell className="font-medium text-center">
-                      {formatValue(ingredients.sodium)}
-                    </TableCell>
+                    <TableCell className="font-medium text-center">{formatValue(ingredients.sodium)}</TableCell>
 
                     <TableCell className="font-medium text-center">
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-black"
-                        onClick={() =>
-                          selectedIngredientIdHandler(ingredients.id)
-                        }
+                        onClick={() => selectedIngredientIdHandler(ingredients.id)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -695,6 +621,7 @@ const Ingredients = () => {
                           });
                         }}
                         placeholder="Digite o nome do ingrediente"
+                        disabled
                       />
                     </div>
                     <div className="flex flex-col gap-2">
@@ -718,20 +645,13 @@ const Ingredients = () => {
                           <SelectItem value="Limitada para > 3 anos e proibida para ≤ 3 anos">
                             Limitada para `&gt;` 3 anos e proibida para ≤ 3 anos
                           </SelectItem>
-                          <SelectItem value="Aquisição proibida">
-                            Aquisição proibida
-                          </SelectItem>
+                          <SelectItem value="Aquisição proibida">Aquisição proibida</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="flex flex-col gap-2">
                       <Label>Peso bruto(g)</Label>
-                      <Input
-                        name="gross_weight"
-                        type="number"
-                        value={editingIngredient.gross_weight}
-                        disabled
-                      />
+                      <Input name="gross_weight" type="number" value={editingIngredient.gross_weight} disabled />
                     </div>
                     <div className="flex flex-col gap-2">
                       <Label>Fator de Correção </Label>
@@ -903,9 +823,7 @@ const Ingredients = () => {
                 </DialogDescription>
 
                 <DialogFooter>
-                  <Button className="bg-orange-500 hover:bg-orange-600 font-bold">
-                    Atualizar Ingrediente
-                  </Button>
+                  <Button className="bg-orange-500 hover:bg-orange-600 font-bold">Atualizar Ingrediente</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
