@@ -88,7 +88,6 @@ const RecipeMenuDetails = () => {
         setRecipe(response.data.data || response.data);
       }
 
-      console.log("Full API Response:", response);
       // setRecipe(response.data.data || response.data);
       if (desiredServings) setServings(desiredServings);
     } catch (error) {
@@ -101,8 +100,6 @@ const RecipeMenuDetails = () => {
   // Verifica se `menuData` e `items` estão definidos
   useEffect(() => {
     const recipeId = params.id;
-
-    console.log("menuData", menuData);
 
     if ((recipeId && menuData && menuData?.schoolId && menuData.estimatedPortions) || 1) {
       fetchRecipeDetails(Number(recipeId), menuData?.schoolId, menuData?.estimatedPortions);
@@ -128,8 +125,6 @@ const RecipeMenuDetails = () => {
 
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>Erro: {error}</div>;
-
-  console.log("recipe", recipe);
 
   return (
     <div className="container mx-auto p-4">

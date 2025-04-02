@@ -56,8 +56,6 @@ const StatePage = () => {
 
   const { data, loading, error, postData } = usePost<any>("states");
 
-  console.log(inputData);
-
   const handleSubmitState = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -93,8 +91,6 @@ const StatePage = () => {
     setSearch(value);
     setQuery(value);
   };
-
-  console.log("oiii", search);
 
   const removeItem = async (id: number) => {};
 

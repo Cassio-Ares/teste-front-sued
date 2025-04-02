@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Trash } from "lucide-react";
+import { Search } from "lucide-react";
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -24,7 +24,6 @@ import "react-toastify/dist/ReactToastify.css";
 //hooks personalizados
 import { Textarea } from "@/components/ui/textarea";
 import { usePost } from "@/hook/usePost";
-import { useRemove } from "@/hook/useRemove";
 import { useSearch } from "@/hook/useSearch";
 import { useSearchPlusSchool } from "@/hook/useSearchPlusSchool";
 
@@ -64,7 +63,6 @@ const Stock = () => {
   } = useSearch<any>("schools", schoolSearch);
 
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
-  console.log("selectedSchool", selectedSchool?.id);
 
   const handleSchoolSelect = (schoolId: number | null) => {
     if (schoolId === null) {
@@ -131,8 +129,6 @@ const Stock = () => {
   } = useSearchPlusSchool<any>("inventory", search, {
     school_id: selectedSchool?.id,
   });
-
-  console.log("inventoryData", inventoryData);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -249,12 +245,12 @@ const Stock = () => {
   };
 
   //delete
-  const { data, loading, error, removeData } = useRemove(`inventory`, refetchInventory);
-  const removeItem = async (id: number) => {
-    await removeData(id);
+  // const { data, loading, error, removeData } = useRemove(`inventory`, refetchInventory);
+  // const removeItem = async (id: number) => {
+  //   await removeData(id);
 
-    toast.success(data?.message);
-  };
+  //   toast.success(data?.message);
+  // };
 
   return (
     <div className="flex flex-col justify-start gap-4">
@@ -456,7 +452,7 @@ const Stock = () => {
                 <TableHead className="font-bold">Quantidade total comprada</TableHead>
                 <TableHead className="font-bold">Total de investimento</TableHead>
                 <TableHead className="font-bold text-center">Data de validade</TableHead>
-                <TableHead className="font-bold text-center">Ações</TableHead>
+                {/* <TableHead className="font-bold text-center">Ações</TableHead> */}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -480,7 +476,7 @@ const Stock = () => {
                       : stock?.total_invested?.toFixed(2)}
                   </TableCell>
                   <TableCell> {new Date(stock.expiration_date).toLocaleDateString("pt-BR")}</TableCell>
-                  <TableCell className="font-medium text-center">
+                  {/* <TableCell className="font-medium text-center">
                     <Dialog>
                       <DialogTrigger>
                         <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
@@ -499,7 +495,7 @@ const Stock = () => {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               ))}
             </TableBody>
