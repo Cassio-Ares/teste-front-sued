@@ -63,7 +63,6 @@ const Stock = () => {
   } = useSearch<any>("schools", schoolSearch);
 
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
-  console.log("selectedSchool", selectedSchool?.id);
 
   const handleSchoolSelect = (schoolId: number | null) => {
     if (schoolId === null) {
@@ -130,8 +129,6 @@ const Stock = () => {
   } = useSearchPlusSchool<any>("inventory", search, {
     school_id: selectedSchool?.id,
   });
-
-  console.log("inventoryData", inventoryData);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;

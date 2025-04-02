@@ -108,8 +108,6 @@ const InstituitionsPage = () => {
     }
   };
 
-  console.log(inputData);
-
   //receber os estado do backend
   const { postData } = usePost<any>("schools");
 

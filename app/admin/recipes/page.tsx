@@ -1,34 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { use, useEffect, useState } from "react";
-import { menu } from "../../mock/menu.mock";
 
 import React from "react";
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { Card } from "@/components/ui/card";
+import { Eye, Search, Trash } from "lucide-react";
 import Link from "next/link";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, Eye, Trash } from "lucide-react";
 
 import {
   Dialog,
@@ -39,15 +22,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import MenuViewDialog from "@/components/menuViewDialog";
-import { api } from "@/connect/api";
-import { informationError } from "@/components/informationError";
-import { InputSelect } from "@/components/inputSelect";
 import { Input } from "@/components/ui/input";
 
 //hooks personalizados
-import { useSearch } from "@/hook/useSearch";
 import { useRemove } from "@/hook/useRemove";
+import { useSearch } from "@/hook/useSearch";
 
 interface Recipe {
   id?: number;
@@ -67,18 +46,13 @@ const Recipes = () => {
     refetch: refetchRecipe,
   } = useSearch<any>("recipes", searchRecipe);
 
-  console.log('recipesData ',  recipesData);
-
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSeachRecipe(value);
     setQueryRecipe(value);
   };
 
-  const { data, loading, error, removeData } = useRemove(
-    "recipes",
-    refetchRecipe,
-  );
+  const { data, loading, error, removeData } = useRemove("recipes", refetchRecipe);
 
   const removeItem = async (id: number) => {
     await removeData(id);
@@ -86,24 +60,18 @@ const Recipes = () => {
     toast.success(data?.message);
   };
 
-  
   return (
     <div className="flex flex-col justify-start gap-4">
       <h1 className="font-bold text-xl">Receitas</h1>
       <div className="flex justify-end">
         <Link href="/admin/recipes/new">
-          <Button className="bg-orange-500 hover:bg-orange-600 font-bold">
-            + Nova Receita
-          </Button>
+          <Button className="bg-orange-500 hover:bg-orange-600 font-bold">+ Nova Receita</Button>
         </Link>
         <ToastContainer />
       </div>
       <div className="flex justify-start items-center w-[300px] gap-4">
         <Search size={16} />
-        <Input
-          onChange={(event) => setSeachRecipe(event.target.value)}
-          placeholder="Pesquisar..."
-        ></Input>
+        <Input onChange={(event) => setSeachRecipe(event.target.value)} placeholder="Pesquisar..."></Input>
       </div>
       <div className="flex mt-6">
         <Card className="w-full p-4">
@@ -122,9 +90,7 @@ const Recipes = () => {
                 <TableRow key={recipe.id}>
                   <TableCell className="font-medium">{recipe.name}</TableCell>
                   <TableCell>{recipe?.nutricionist_name}</TableCell>
-                  <TableCell>
-                    {new Date(recipe.created_at).toLocaleDateString("pt-BR")}
-                  </TableCell>
+                  <TableCell>{new Date(recipe.created_at).toLocaleDateString("pt-BR")}</TableCell>
                   <TableCell className="text-end">
                     <div className="flex justify-end gap-2">
                       <Dialog>
@@ -140,39 +106,24 @@ const Recipes = () => {
 
                         {recipe?.id && (
                           <Link href={`/admin/recipes/recipepage/${recipe.id}`}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-gray-500 hover:text-gray-700"
-                            >
+                            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
                               <Eye />
                             </Button>
                           </Link>
                         )}
 
                         <DialogTrigger>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-500 hover:text-red-700"
-                          >
+                          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
                             <Trash />
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>
-                              Deseja remover o cardápio?
-                            </DialogTitle>
-                            <DialogDescription>
-                              Essa ação não poderá ser desfeita.
-                            </DialogDescription>
+                            <DialogTitle>Deseja remover o cardápio?</DialogTitle>
+                            <DialogDescription>Essa ação não poderá ser desfeita.</DialogDescription>
                           </DialogHeader>
                           <DialogFooter>
-                            <Button
-                              variant="destructive"
-                             onClick={() => removeItem(recipe.id || 0)}
-                            >
+                            <Button variant="destructive" onClick={() => removeItem(recipe.id || 0)}>
                               Remover
                             </Button>
                           </DialogFooter>

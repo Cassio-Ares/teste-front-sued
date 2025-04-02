@@ -161,8 +161,6 @@ const RegisterUserPage = () => {
 
     const city = cityData.find((i) => i.id === cityId);
 
-    console.log(city);
-
     if (city) {
       setSelectCity(city);
       setInputData((inputData) => ({

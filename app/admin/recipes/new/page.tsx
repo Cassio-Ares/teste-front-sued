@@ -85,8 +85,6 @@ const NewRecipe = () => {
 
   const [selectedIngredient, setSelectedIngredient] = useState<any>(null);
 
-  console.log("selectedIngredient", selectedIngredient);
-
   const handleIngredientSelect = (ingredientId: number) => {
     if (ingredientId === null) {
       setSelectedIngredient(null);
@@ -177,8 +175,6 @@ const NewRecipe = () => {
 
   const { data: dataPost, loading: postLoading, error: postError, postData: createPost } = usePost<any>("recipes");
 
-  console.log(dataPost);
-
   //colocar form
   //const createNewRecipe = async (event: React.FormEvent<HTMLFormElement>) => {
   const createNewRecipe = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -205,9 +201,6 @@ const NewRecipe = () => {
       setIsOpen(false);
     }
   };
-
-  console.log(ingredients);
-  console.log(newRecipe);
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">

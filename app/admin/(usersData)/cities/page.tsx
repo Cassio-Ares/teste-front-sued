@@ -51,8 +51,6 @@ const CitiesPage = () => {
     setQuery: setQueryState,
   } = useSearch<any>("states", stateQuery);
 
-  console.log(searchState);
-
   const handleStateSelect = (stateId: number) => {
     if (stateId === null) {
       setSelectedState(null);
@@ -94,7 +92,6 @@ const CitiesPage = () => {
     try {
       const response = await postData(inputData);
 
-      console.log("Response city", response);
       toast.success(response?.message);
 
       setInputData({
@@ -120,8 +117,6 @@ const CitiesPage = () => {
     setQuery(value);
     setQueryCity(value);
   };
-
-  console.log("searchCity", searchCity);
 
   const removeItem = async (id: number) => {};
 
@@ -206,7 +201,6 @@ const CitiesPage = () => {
             </TableHeader>
             <TableBody>
               {searchCity?.map((city) => {
-                console.log("city", city);
                 return (
                   <TableRow key={city.id}>
                     <TableCell>{city.name}</TableCell>
