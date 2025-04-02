@@ -1,6 +1,6 @@
-import { api } from "../connect/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { informationError } from "../components/informationError";
+import { api } from "../connect/api";
 
 export const usePost = <T>(endpoint: string, refetchFn?: () => void) => {
   const [data, setData] = useState<T | null>(null);
@@ -12,8 +12,6 @@ export const usePost = <T>(endpoint: string, refetchFn?: () => void) => {
     setError(null);
     try {
       const response = await api.post<T>(endpoint, body);
-
-      console.log("Full API Response:", response);
 
       setData(response.data);
 

@@ -182,8 +182,6 @@ const Ingredients = () => {
 
       const responseData = await updateIngredientPost(editingIngredient?.id ?? 0, editingIngredient);
 
-      console.log("responseData", responseData);
-
       toast.success(responseData?.message);
 
       setEditingIngredient({

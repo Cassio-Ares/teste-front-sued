@@ -346,9 +346,6 @@ const UpdateMenuPage = () => {
 
     try {
       // Depuração dos dados fundamentais
-      console.log("Menu data:", menuData);
-      console.log("Current selections:", selections);
-      console.log("weekDay array:", weekDay);
 
       // Verifica se temos os dados necessários
       if (!menuData || !(menuData as any)?.menu) {
@@ -365,8 +362,6 @@ const UpdateMenuPage = () => {
       // Preparação com verificações extremamente robustas
       const menuItemsToSend = Object.entries(selections)
         .map(([key, selection]) => {
-          console.log(`Processing selection for key ${key}:`, selection);
-
           // Extrai os valores necessários com verificações
           const menuId = (menuData as any)?.menu?.id;
           const schoolId = (menuData as any)?.menu?.school_id;
@@ -407,8 +402,6 @@ const UpdateMenuPage = () => {
         })
         .filter((item) => item !== null); // Remove itens nulos
 
-      console.log("Items to send after filtering:", menuItemsToSend);
-
       if (menuItemsToSend.length === 0) {
         toast.warning("Nenhum item válido para enviar");
         return;
@@ -420,27 +413,24 @@ const UpdateMenuPage = () => {
         (menuData as any).menuItems.forEach((item) => {
           if (item && item.weekday && item.meal_type && item.id) {
             const key = `${item.weekday}-${item.meal_type}`;
-            console.log("Mapped existing item:", key, item.id);
+
             existingItemIds.set(key, item.id);
           }
         });
       }
 
-      console.log("Existing item keys:", Array.from(existingItemIds.keys()));
-
       // Processa cada item
       for (const item of menuItemsToSend) {
         const key = `${item.weekday}-${item.meal_type}`;
-        console.log("Checking key:", key);
 
         try {
           if (existingItemIds.has(key)) {
             const itemId = existingItemIds.get(key);
-            console.log("MATCH! Updating item with ID:", itemId, "Data:", item);
+            // console.log("MATCH! Updating item with ID:", itemId, "Data:", item);
             // Passa o item como objeto (não como array) se a API espera isso
             await updateData(itemId, item as any); //mudei   await updateData(itemId, item);
           } else {
-            console.log("No match. Creating new item:", item);
+            //  console.log("No match. Creating new item:", item);
             await createPost(item);
           }
         } catch (err) {

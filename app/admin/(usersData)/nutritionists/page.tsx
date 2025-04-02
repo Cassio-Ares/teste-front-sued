@@ -57,8 +57,6 @@ const NutritionistPage = () => {
 
   const { postData: createPost } = usePost<any>("nutritionists");
 
-  console.log("inputData", inputData);
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 

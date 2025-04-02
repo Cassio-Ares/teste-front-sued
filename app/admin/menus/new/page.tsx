@@ -22,15 +22,7 @@ interface MenuItems {
   additional_notes: string;
 }
 
-const weekDay = [
-  "Segunda",
-  "Terça",
-  "Quarta",
-  "Quinta",
-  "Sexta",
-  "Sábado",
-  "Domingo",
-];
+const weekDay = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
 const mealType = [
   { label: "Lanche da Manhã", value: "MorningSnack" },
@@ -113,13 +105,9 @@ const NewMenu = () => {
         },
       });
 
-      console.log("Response menus", response);
-
       const formattedData = response.data.data.map((item: any) => ({
         id: item.id,
-        formattedLabel: `Mês: ${item.month}, Tipo: ${
-          item.week_type === "ODD" ? "Ímpar" : "Par"
-        }`,
+        formattedLabel: `Mês: ${item.month}, Tipo: ${item.week_type === "ODD" ? "Ímpar" : "Par"}`,
         week_type: item.week_type,
       }));
 
@@ -131,9 +119,6 @@ const NewMenu = () => {
       setLoading(false);
     }
   }, [menu, selectedSchool]);
-
-  console.log("searchMenu", searchMenu);
-  console.log("menu", menu);
 
   const handleMenuSelect = (selectedId: number) => {
     if (!selectedId) {
@@ -162,11 +147,7 @@ const NewMenu = () => {
   const [resetRecipeInput, setResetRecipeInput] = useState(false);
   const [selections, setSelections] = useState<Record<string, any>>({});
 
-  const handleRecipeSelect = (
-    recipeId: number,
-    weekdayIndex: number,
-    mealType: string
-  ) => {
+  const handleRecipeSelect = (recipeId: number, weekdayIndex: number, mealType: string) => {
     if (recipeId === null) {
       const newSelections = { ...selections };
       delete newSelections[`${weekdayIndex}-${mealType}`];
@@ -199,20 +180,13 @@ const NewMenu = () => {
   };
 
   // API Post hook
-  const {
-    data: dataPost,
-    loading: postLoading,
-    error: postError,
-    postData: createPost,
-  } = usePost<any>("menu_items");
+  const { data: dataPost, loading: postLoading, error: postError, postData: createPost } = usePost<any>("menu_items");
 
   const createMenuItem = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
       const menuItemsToSend = prepareMenuItems();
-
-      console.log("menuItemsToSend", menuItemsToSend);
 
       if (menuItemsToSend.length === 0) {
         toast.warning("Por favor, selecione pelo menos uma receita");
@@ -270,16 +244,11 @@ const NewMenu = () => {
     }
   }, [selectedSchool]);
 
-  console.log("menuItems", menuItems);
-
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
         <Link href="/admin/menus">
-          <Button
-            variant="outline"
-            className="text-orange-500 hover:text-orange-600 font-bold"
-          >
+          <Button variant="outline" className="text-orange-500 hover:text-orange-600 font-bold">
             <ArrowLeft /> Voltar
           </Button>
         </Link>
@@ -311,11 +280,7 @@ const NewMenu = () => {
                     options={searchMenu}
                     value={menuItems.menu_id}
                     onChange={selectedSchool ? handleMenuSelect : undefined}
-                    onSearchChange={
-                      selectedSchool
-                        ? (searchTerm) => setMenu(searchTerm)
-                        : undefined
-                    }
+                    onSearchChange={selectedSchool ? (searchTerm) => setMenu(searchTerm) : undefined}
                     placeholder="Selecione um Mês ex: 10"
                     forceReset={resetMenuInput}
                     field="formattedLabel"
@@ -332,19 +297,13 @@ const NewMenu = () => {
             <tbody>
               {mealType.map((meal) => (
                 <tr key={meal.value}>
-                  <td className="p-2 border bg-gray-50 font-medium">
-                    {meal.label}
-                  </td>
+                  <td className="p-2 border bg-gray-50 font-medium">{meal.label}</td>
                   {weekDay.map((day, index) => (
                     <td key={`${day}-${meal.value}`} className="p-2 border">
                       <InputSelect
                         options={searchRecipe}
-                        value={
-                          selections[`${index}-${meal.value}`]?.recipe_id || ""
-                        }
-                        onChange={(recipeId) =>
-                          handleRecipeSelect(recipeId, index, meal.value)
-                        }
+                        value={selections[`${index}-${meal.value}`]?.recipe_id || ""}
+                        onChange={(recipeId) => handleRecipeSelect(recipeId, index, meal.value)}
                         onSearchChange={(query) => setQueryRecipe(query)}
                         placeholder="Selecione uma Receita"
                         forceReset={resetRecipeInput}
@@ -360,11 +319,7 @@ const NewMenu = () => {
         </div>
 
         <div className="flex justify-end">
-          <Button
-            type="submit"
-            className="bg-orange-500 hover:bg-orange-600 font-bold"
-            disabled={postLoading}
-          >
+          <Button type="submit" className="bg-orange-500 hover:bg-orange-600 font-bold" disabled={postLoading}>
             {postLoading ? "Salvando..." : "Salvar"}
           </Button>
         </div>

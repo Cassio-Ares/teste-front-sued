@@ -83,7 +83,6 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
 
     return recipe.ingredients.reduce(
       (totals, ingredient) => {
-        console.log("ingredient para total", ingredient);
         return {
           cost_per_serving:
             totals.cost_per_serving +

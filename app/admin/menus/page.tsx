@@ -38,8 +38,6 @@ const Menus = () => {
     }
   };
 
-  console.log(selectedSchool?.name);
-
   useEffect(() => {
     fetchDataMenu();
   }, [selectedSchool]);
@@ -118,7 +116,6 @@ const Menus = () => {
             </TableHeader>
             <TableBody>
               {Array.from(new Set(searchMenu.map((menu) => menu.month))).map((month) => {
-                console.log("Processing month:", month);
                 const monthMenus = searchMenu.filter((menu) => menu.month === month);
                 const oddWeek = monthMenus.find((menu) => menu.week_type === "ODD");
                 const evenWeek = monthMenus.find((menu) => menu.week_type === "EVEN");

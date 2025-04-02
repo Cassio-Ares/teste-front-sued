@@ -4,13 +4,7 @@ import { InputSelect } from "@/components/inputSelect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -93,20 +87,13 @@ const CreateMenuPage = () => {
     }
   };
 
-  const {
-    data: dataPost,
-    loading: postLoading,
-    error: postError,
-    postData: createPost,
-  } = usePost<any>("menus");
+  const { data: dataPost, loading: postLoading, error: postError, postData: createPost } = usePost<any>("menus");
 
   const createMenu = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
       const response = await createPost(menu);
-
-      console.log("Response createMenu", response);
 
       toast.success(response?.message);
 
@@ -146,16 +133,11 @@ const CreateMenuPage = () => {
     }
   }, [selectedSchool]);
 
-  console.log("menu fora", menu);
-  console.log("menu", dataPost);
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
         <Link href="/admin/menus">
-          <Button
-            variant="outline"
-            className="text-orange-500 hover:text-orange-600 font-bold"
-          >
+          <Button variant="outline" className="text-orange-500 hover:text-orange-600 font-bold">
             <ArrowLeft /> Voltar
           </Button>
         </Link>
@@ -180,11 +162,7 @@ const CreateMenuPage = () => {
           <Label>Mês</Label>
           <Select
             value={menu.month.toString()}
-            onValueChange={
-              selectedSchool
-                ? (value) => setMenu({ ...menu, month: parseInt(value) })
-                : undefined
-            }
+            onValueChange={selectedSchool ? (value) => setMenu({ ...menu, month: parseInt(value) }) : undefined}
           >
             <SelectTrigger
               className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
@@ -206,11 +184,7 @@ const CreateMenuPage = () => {
           <Label>Semanas</Label>
           <Select
             value={menu.week_type}
-            onValueChange={
-              selectedSchool
-                ? (value) => setMenu({ ...menu, week_type: value })
-                : undefined
-            }
+            onValueChange={selectedSchool ? (value) => setMenu({ ...menu, week_type: value }) : undefined}
           >
             <SelectTrigger
               className={!selectedSchool ? "cursor-not-allowed opacity-80" : ""}
@@ -231,20 +205,14 @@ const CreateMenuPage = () => {
           <Card className="p-4">
             <Textarea
               value={menu.observations}
-              onChange={(e) =>
-                setMenu({ ...menu, observations: e.target.value })
-              }
+              onChange={(e) => setMenu({ ...menu, observations: e.target.value })}
               placeholder="Descreva detalhes sobre o menu criado"
               rows={6}
             />
           </Card>
         </div>
 
-        <Button
-          type="submit"
-          disabled={postLoading}
-          className="bg-orange-500 hover:bg-orange-600 font-bold"
-        >
+        <Button type="submit" disabled={postLoading} className="bg-orange-500 hover:bg-orange-600 font-bold">
           {postLoading ? "Criando..." : "Criar Menu"}
         </Button>
       </form>
