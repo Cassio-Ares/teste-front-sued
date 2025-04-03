@@ -24,6 +24,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  console.log("data", data);
   // Group schools by state and municipality and initialize inputs
   useEffect(() => {
     if (data?.schools) {
