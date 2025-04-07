@@ -128,6 +128,8 @@ const RecipeView = () => {
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>Erro: {error}</div>;
 
+  console.log("recipe", recipe);
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
