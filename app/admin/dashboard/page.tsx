@@ -4,15 +4,21 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useGet } from "@/hook/useGet";
+import { useGetById } from "@/hook/useGetById";
 import { usePost } from "@/hook/usePost";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
 const Dashboard = () => {
   const { data, loading, error, fetchData } = useGet<any>("dashboard");
+  const { data: states, fetchData: fetchStates } = useGetById<any>("states");
+  const { data: cities, fetchData: fetchCities } = useGetById<any>("cities");
+
   const [schoolInputs, setSchoolInputs] = useState<any>({});
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
   const [groupedSchools, setGroupedSchools] = useState<any>({});
+  const [stateNames, setStateNames] = useState<{ [key: string]: string }>({});
+  const [cityNames, setCityNames] = useState<{ [key: string]: string }>({});
 
   // API hooks
   const { postData: createMorning } = usePost<any>("numberOfStudents/morning");
@@ -24,8 +30,61 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  console.log("data", data);
-  // Group schools by state and municipality and initialize inputs
+  useEffect(() => {
+    if (data?.schools) {
+      // Get unique state IDs
+      const uniqueStateIds = [...new Set(data.schools.map((school) => school.state_id))];
+
+      // Fetch data for each state ID
+      uniqueStateIds.forEach((stateId) => {
+        fetchStates(stateId as number);
+      });
+    }
+  }, [data?.schools]);
+
+  // Load city data for all unique city IDs
+  useEffect(() => {
+    if (data?.schools) {
+      // Get unique city IDs
+      const uniqueCityIds = [...new Set(data.schools.map((school) => school.city_id))];
+
+      // Fetch data for each city ID
+      uniqueCityIds.forEach((cityId) => {
+        fetchCities(cityId as number);
+      });
+    }
+  }, [data?.schools]);
+
+  // Update state and city names when API data is loaded
+  useEffect(() => {
+    if (states && states.length > 0) {
+      const newStateNames = { ...stateNames };
+      states.forEach((state) => {
+        newStateNames[state.id] = state.name;
+      });
+      setStateNames(newStateNames);
+    }
+  }, [states]);
+
+  useEffect(() => {
+    if (cities && cities.length > 0) {
+      const newCityNames = { ...cityNames };
+      cities.forEach((city) => {
+        newCityNames[city.id] = city.name;
+      });
+      setCityNames(newCityNames);
+    }
+  }, [cities]);
+
+  const getStateName = (stateId) => {
+    return stateNames[stateId] || `Estado ${stateId}`;
+  };
+
+  // Helper function to get city name by ID
+  const getCityName = (cityId) => {
+    return cityNames[cityId] || `Município ${cityId}`;
+  };
+
   useEffect(() => {
     if (data?.schools) {
       // Group schools by state and municipality
@@ -33,12 +92,10 @@ const Dashboard = () => {
       const initialInputs = {};
 
       data.schools.forEach((school) => {
-        // For grouping, we'd need state and municipality data which isn't in your sample
-        // Let's assume we get it from the API or we can add mock data
         const stateId = school.state_id;
         const cityId = school.city_id;
-        const stateName = getStateName(stateId) || "Estado " + stateId;
-        const cityName = getCityName(cityId) || "Município " + cityId;
+        const stateName = getStateName(stateId);
+        const cityName = getCityName(cityId);
 
         if (!grouped[stateName]) {
           grouped[stateName] = {};
@@ -61,7 +118,46 @@ const Dashboard = () => {
       setGroupedSchools(grouped);
       setSchoolInputs(initialInputs);
     }
-  }, [data]);
+  }, [data, stateNames, cityNames]);
+
+  console.log("data", data);
+  // Group schools by state and municipality and initialize inputs
+  // useEffect(() => {
+  //   if (data?.schools) {
+  //     // Group schools by state and municipality
+  //     const grouped = {};
+  //     const initialInputs = {};
+
+  //     data.schools.forEach((school) => {
+  //       // For grouping, we'd need state and municipality data which isn't in your sample
+  //       // Let's assume we get it from the API or we can add mock data
+  //       const stateId = school.state_id;
+  //       const cityId = school.city_id;
+  //       const stateName = getStateName(stateId) || "Estado " + stateId;
+  //       const cityName = getCityName(cityId) || "Município " + cityId;
+
+  //       if (!grouped[stateName]) {
+  //         grouped[stateName] = {};
+  //       }
+  //       if (!grouped[stateName][cityName]) {
+  //         grouped[stateName][cityName] = [];
+  //       }
+
+  //       grouped[stateName][cityName].push(enrichSchoolData(school));
+
+  //       // Initialize inputs
+  //       initialInputs[school.id] = {
+  //         morning: school.student_numbers?.morning || "",
+  //         afternoon: school.student_numbers?.afternoon || "",
+  //         night: school.student_numbers?.night || "",
+  //         integral: school.student_numbers?.integral || "",
+  //       };
+  //     });
+
+  //     setGroupedSchools(grouped);
+  //     setSchoolInputs(initialInputs);
+  //   }
+  // }, [data]);
 
   // Helper function to enrich school data with calculated fields
   const enrichSchoolData = (school) => {
@@ -121,23 +217,6 @@ const Dashboard = () => {
       stock,
       dailyCount,
     };
-  };
-
-  // Mock functions to get state and city names (replace with real data)
-  const getStateName = (stateId) => {
-    const states = {
-      1: "Rio Grande do Sul",
-      // Add more state mappings as needed
-    };
-    return states[stateId];
-  };
-
-  const getCityName = (cityId) => {
-    const cities = {
-      1: "Torres",
-      // Add more city mappings as needed
-    };
-    return cities[cityId];
   };
 
   const handleInputChange = (schoolId, shift, value) => {
@@ -296,6 +375,8 @@ const Dashboard = () => {
   if (error) {
     return <div className="flex justify-center p-8 text-red-500">Erro ao carregar dados: {error.message}</div>;
   }
+
+  console.log("groupedSchools", groupedSchools);
 
   return (
     <div className="flex flex-col gap-4 p-4">
