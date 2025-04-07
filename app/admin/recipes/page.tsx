@@ -71,7 +71,7 @@ const Recipes = () => {
       </div>
       <div className="flex justify-start items-center w-[300px] gap-4">
         <Search size={16} />
-        <Input onChange={(event) => setSeachRecipe(event.target.value)} placeholder="Pesquisar..."></Input>
+        <Input placeholder="Pesquisar..." onChange={handleSearchChange} />
       </div>
       <div className="flex mt-6">
         <Card className="w-full p-4">

@@ -9,11 +9,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 const formatValue = (value) => {
   if (value === undefined || value === null) return "—";
   if (typeof value === "number") {
-    return value.toFixed(2).replace(".", ",");
+    // Check if the value is an integer (has no decimal part)
+    if (Number.isInteger(value)) {
+      return String(value).replace(".", ",");
+    } else {
+      return value.toFixed(2).replace(".", ",");
+    }
   }
   return String(value);
 };
-
 // Helper function to normalize recipe data regardless of structure
 const normalizeRecipeData = (recipeData) => {
   // Handle case where recipe is nested inside a response object

@@ -10,11 +10,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 const formatValue = (value) => {
   if (value === undefined || value === null) return "—";
   if (typeof value === "number") {
-    return value.toFixed(2).replace(".", ",");
+    // Check if the value is an integer (has no decimal part)
+    if (Number.isInteger(value)) {
+      return String(value).replace(".", ",");
+    } else {
+      return value.toFixed(2).replace(".", ",");
+    }
   }
   return String(value);
 };
-
 // Helper function to normalize recipe data regardless of structure
 const normalizeRecipeData = (recipeData) => {
   // Handle case where recipe is nested inside a response object
@@ -349,10 +353,10 @@ const RecipeDialogStockRequisition = ({
                 ))}
               {/* Totals row */}
               <TableRow className="bg-yellow-50 font-bold">
-                <TableCell className="border text-center">Total</TableCell>
+                {/* <TableCell className="border text-center">Total</TableCell>
                 <TableCell className="border text-center">
                   {formatValue(totals.grossWeight) + " " + totals.unit_measure_gross_weight}
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             </TableBody>
           </Table>
