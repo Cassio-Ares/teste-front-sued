@@ -78,8 +78,8 @@ export const InputSelect = ({
         onKeyDown={handleKeyDown}
         onFocus={() => setShowOptions(true)}
         placeholder={placeholder}
-        className={`w-full p-2 border rounded ${
-          disabled ? "cursor-not-allowed opacity-80" : ""
+        className={`w-full p-2 border rounded placeholder:text-gray-500 ${
+          disabled ? "cursor-not-allowed opacity-80 placeholder:text-black" : ""
         }`}
         disabled={disabled}
       />

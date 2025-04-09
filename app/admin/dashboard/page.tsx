@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useGet } from "@/hook/useGet";
 import { useGetById } from "@/hook/useGetById";
 import { usePost } from "@/hook/usePost";
+import { Pencil } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
@@ -159,9 +161,7 @@ const Dashboard = () => {
   //   }
   // }, [data]);
 
-  // Helper function to enrich school data with calculated fields
   const enrichSchoolData = (school) => {
-    // Extract values from average_result_details or set defaults
     let perCapitalGross = "0";
     let perCapitalNet = "0";
     let energy = "0";
@@ -169,7 +169,6 @@ const Dashboard = () => {
     let stock = school.total_invested || "0";
     let dailyCount = 0;
 
-    // Calculate daily count from student_numbers
     if (school.student_numbers) {
       dailyCount =
         (parseInt(school.student_numbers.morning) || 0) +
@@ -178,7 +177,6 @@ const Dashboard = () => {
         (parseInt(school.student_numbers.integral) || 0);
     }
 
-    // Process average_result_details if available
     if (
       school.average_result_details &&
       school.average_result_details.total &&
@@ -186,28 +184,23 @@ const Dashboard = () => {
     ) {
       const totalDetails = school.average_result_details.total[0];
 
-      // Get gross weight with unit
       if (totalDetails.average_gross_weight && totalDetails.unit_measure_gross) {
         perCapitalGross = `${totalDetails.average_gross_weight} ${totalDetails.unit_measure_gross}`;
       }
 
-      // Get net weight with unit
       if (totalDetails.average_cooked_weight && totalDetails.unit_measure_weight) {
         perCapitalNet = `${totalDetails.average_cooked_weight} ${totalDetails.unit_measure_weight}`;
       }
 
-      // Get energy value
       if (totalDetails.average_kcal) {
         energy = totalDetails.average_kcal;
       }
 
-      // Get cost per serving
       if (totalDetails.average_cost_per_serving) {
         unitCost = totalDetails.average_cost_per_serving;
       }
     }
 
-    // Return enriched school object
     return {
       ...school,
       perCapitalGross,
@@ -250,7 +243,6 @@ const Dashboard = () => {
     setSelectedSchool(null);
   };
 
-  // Check if a shift exists and has students
   const shiftExists = (school, shiftKey) => {
     const totalStudentsKey = `total_students_${shiftKey}`;
     const modalityKey = `teaching_modality_${shiftKey}`;
@@ -261,17 +253,15 @@ const Dashboard = () => {
     );
   };
 
-  // Get shift details for a specific shift
   const getShiftDetails = (school, shiftKey) => {
     const totalStudentsKey = `total_students_${shiftKey}`;
     const modalityKey = `teaching_modality_${shiftKey}`;
 
-    // Map shift keys to their respective detail keys in the API data
     const detailKeyMap = {
       morning: "morningSnack",
       afternoon: "afternoonSnack",
       night: "nightSnack",
-      nigth: "nightSnack", // Handle typo in API
+      nigth: "nightSnack",
       integral: "integral",
     };
 
@@ -285,20 +275,18 @@ const Dashboard = () => {
     };
   };
 
-  // Format shift name for display
   const formatShiftName = (shiftKey) => {
     const shiftNames = {
       morning: "Manhã",
       afternoon: "Tarde",
       night: "Noite",
-      nigth: "Noite", // Handle typo in API
+      nigth: "Noite",
       integral: "Integral",
     };
 
     return shiftNames[shiftKey] || shiftKey;
   };
 
-  // Determine which shifts to render for a school
   const getActiveShifts = (school) => {
     const shifts: string[] = [];
 
@@ -310,18 +298,16 @@ const Dashboard = () => {
     return shifts;
   };
 
-  // Render a row for a specific shift
   const renderShiftRow = (school, shiftKey, createFn) => {
     const { count, modality, details } = getShiftDetails(school, shiftKey);
     const shiftName = formatShiftName(shiftKey);
 
-    // Determine which API function to use based on shift key
     const apiFunction =
       {
         morning: createMorning,
         afternoon: createAfternoon,
         night: createNight,
-        nigth: createNight, // Handle typo in API
+        nigth: createNight,
         integral: createIntegral,
       }[shiftKey] || createFn;
 
@@ -439,7 +425,6 @@ const Dashboard = () => {
         </>
       )}
 
-      {/* Detailed School View */}
       {selectedSchool && (
         <div>
           <Button onClick={closeSchoolDetail} className="mb-4">
@@ -448,7 +433,16 @@ const Dashboard = () => {
 
           <Card className="p-4">
             <div className="text-center mb-6">
-              <h1 className="font-bold text-2xl">{selectedSchool.name}</h1>
+              <h1 className="font-bold text-2xl">
+                {selectedSchool.name}
+                {selectedSchool?.id && (
+                  <Link href={`/admin/dashboard/update_institutions/${selectedSchool.id}`}>
+                    <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
+                      <Pencil />
+                    </Button>
+                  </Link>
+                )}
+              </h1>
               <h3 className="text-gray-600">
                 {getCityName(selectedSchool.city_id)}, {getStateName(selectedSchool.state_id)}
               </h3>
@@ -496,7 +490,6 @@ const Dashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {/* Render all active shifts dynamically */}
                     {getActiveShifts(selectedSchool).map((shift) =>
                       renderShiftRow(
                         selectedSchool,
@@ -511,7 +504,6 @@ const Dashboard = () => {
                       )
                     )}
 
-                    {/* Show message if no shifts are active */}
                     {getActiveShifts(selectedSchool).length === 0 && (
                       <TableRow>
                         <TableCell colSpan={8} className="text-center py-8 text-gray-500">
