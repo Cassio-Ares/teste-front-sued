@@ -191,7 +191,7 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
 
     // Recipe name
     doc.setFontSize(12);
-    doc.text(`Receita: ${recipe.name || "Não informado"}`, margin, yPosition);
+    doc.text(`Receita: ${recipe.name}`, margin, yPosition);
     yPosition += 8;
 
     // Ingredients table
