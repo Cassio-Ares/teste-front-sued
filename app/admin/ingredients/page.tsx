@@ -516,7 +516,7 @@ const Ingredients = () => {
                 <TableHead className="font-bold">Retinol (Vit.A) (mcg)</TableHead>
                 <TableHead className="font-bold">Vit.C(mg)</TableHead>
                 <TableHead className="font-bold">Sódio(g)</TableHead>
-                <TableHead className="font-bold">Acões</TableHead>
+                <TableHead className="font-bold">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

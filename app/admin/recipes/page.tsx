@@ -10,7 +10,7 @@ import React from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { Card } from "@/components/ui/card";
-import { Eye, Search, Trash } from "lucide-react";
+import { Eye, Pencil, Search, Trash } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -94,20 +94,19 @@ const Recipes = () => {
                   <TableCell className="text-end">
                     <div className="flex justify-end gap-2">
                       <Dialog>
-                        {/* enviar recipe para visualização */}
-                        {/* <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-500 hover:text-gray-700"
-                          onClick={() => recipe.id && viewRecipe(recipe.id)}
-                        >
-                          <Eye />
-                        </Button> */}
-
                         {recipe?.id && (
                           <Link href={`/admin/recipes/recipepage/${recipe.id}`}>
                             <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
                               <Eye />
+                            </Button>
+                          </Link>
+                        )}
+                        {/** mandar id para a rota*/}
+
+                        {recipe?.id && (
+                          <Link href={`/admin/recipes/update_recipe/${recipe.id}`}>
+                            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
+                              <Pencil />
                             </Button>
                           </Link>
                         )}
