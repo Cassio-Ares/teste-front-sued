@@ -1,3 +1,4 @@
+import { formModality } from "@/lib/utils/formModality";
 import jsPDF from "jspdf";
 import { Download } from "lucide-react";
 import { useState } from "react";
@@ -47,6 +48,8 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
   // Normalize the recipe data structure
   const recipe = normalizeRecipeData(rawRecipeData);
 
+  console.log("dialog", recipe);
+
   // Helper for secretary title based on school name
   const getSecretaryTitle = () => {
     const schoolName = recipe.school_name || "Escola não informada";
@@ -54,9 +57,9 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
     const isEstadual = schoolName.toLowerCase().includes("estadual");
 
     if (isMunicipal) {
-      return `SECRETARIA MUNICIPAL DE EDUCAÇÃO DO ${recipe.city_name || "MUNICÍPIO"}`;
+      return `SECRETARIA MUNICIPAL DE EDUCAÇÃO DE ${recipe.city_name.toUpperCase() || "MUNICÍPIO"}`;
     } else if (isEstadual) {
-      return `SECRETARIA ESTADUAL DE EDUCAÇÃO DO ${recipe.state_name || "ESTADO"}`;
+      return `SECRETARIA ESTADUAL DE EDUCAÇÃO DO ${recipe.state_name.toUpperCase() || "ESTADO"}`;
     }
 
     return `SECRETARIA (MUNICIPAL/ESTADUAL) DE EDUCAÇÃO DO (MUNICÍPIO/ESTADO)`;
@@ -182,8 +185,10 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
     doc.text("PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE", pageWidth / 2, yPosition, { align: "center" });
     yPosition += 7;
 
-    const modalityText = teaching_modality
-      ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${teaching_modality}`
+    const modalityText = recipe.teaching_modality
+      ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${formModality(
+          recipe.teaching_modality
+        ).toUpperCase()} (FAIXA ETÁRIA)`
       : "FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ MODALIDADE DE ENSINO (FAIXA ETÁRIA)";
 
     doc.text(modalityText, pageWidth / 2, yPosition, { align: "center" });
@@ -191,7 +196,7 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
 
     // Recipe name
     doc.setFontSize(12);
-    doc.text(`Receita: ${recipe.name || "Não informado"}`, margin, yPosition);
+    doc.text(`Receita: ${recipe.name}`, margin, yPosition);
     yPosition += 8;
 
     // Ingredients table
@@ -829,8 +834,10 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
             <div className="text-xl items-center">PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE</div>
           </DialogTitle>
           <DialogDescription className="text-center text-lg font-bold">
-            {teaching_modality !== null
-              ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${teaching_modality}`
+            {recipe.teaching_modality !== null
+              ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${formModality(
+                  recipe.teaching_modality
+                ).toLocaleUpperCase()}`
               : "FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ MODALIDADE DE ENSINO (FAIXA ETÁRIA)"}
           </DialogDescription>
         </DialogHeader>
