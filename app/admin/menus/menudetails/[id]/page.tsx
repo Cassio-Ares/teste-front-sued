@@ -126,6 +126,9 @@ const RecipeMenuDetails = () => {
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>Erro: {error}</div>;
 
+  console.log("recipe menu", recipe);
+  console.log("menuData", menuData);
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-start gap-4 md:justify-end mb-4">
@@ -138,7 +141,9 @@ const RecipeMenuDetails = () => {
       </div>
       {recipe && (
         <Card className="p-6">
-          <h1 className="text-3xl font-bold mb-4">{menuData?.schoolName}</h1>
+          <h1 className="text-3xl font-bold mb-4">
+            {recipe?.school_name} - {recipe?.teaching_modality}
+          </h1>
           <div className="flex items-center justify-between gap-4 mb-4">
             <h4 className="text-2xl font-bold">{recipe?.recipe?.name || recipe?.name}</h4>
             {recipe?.missingIngredients && (

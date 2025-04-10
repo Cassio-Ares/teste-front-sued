@@ -1,4 +1,5 @@
 export interface RecipeTypes {
+  teaching_modality?: string;
   name: string;
   preparation_method: string;
   required_utensils: string;

@@ -54,6 +54,7 @@ const NewRecipe = () => {
   const [editingIngredient, setEditingIngredient] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [newRecipe, setNewRecipe] = useState<Partial<RecipeTypes>>({
+    teaching_modality: "",
     name: "",
     preparation_method: "",
     required_utensils: "",
@@ -184,6 +185,7 @@ const NewRecipe = () => {
       const responseData = await createPost(newRecipe);
       toast.success(responseData?.message);
       setNewRecipe({
+        teaching_modality: "",
         name: "",
         preparation_method: "",
         required_utensils: "",
@@ -221,22 +223,29 @@ const NewRecipe = () => {
           <ToastContainer />
         </div>
       </div>
-
-      <div className="flex flex-col md:flex-row w-full gap-4 mt-6 md:mt-20">
+      <div className="flex flex-col md:flex-row w-full gap-5 mt-6 md:mt-20">
         <div className="flex w-full md:w-[60%] flex-col gap-4">
-          {/* Recipe Name */}
-          {/* <div className="flex justify-start items-center w-[300px] gap-4">
-            <Label>Nome da Instituição</Label>
-            <InputSelect
-              options={searchSchool?.data}
-              value={selectedSchool?.id}
-              onChange={handleSchoolSelect}
-              onSearchChange={(query) => setQuerySchool(query)}
-              placeholder="Selecione uma Instituição"
-              forceReset={resetSchoolInput}
-              field="name"
-            />
-          </div> */}
+          <div className="flex flex-col justify-start w-full gap-2">
+            <Label className="text-base mb-1 font-semibold">Modalidade de Ensino (Faixa Etária)</Label>
+            <Select
+              value={newRecipe.teaching_modality}
+              onValueChange={(e) => setNewRecipe({ ...newRecipe, teaching_modality: e })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Modalidade de Ensino da Receita" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Fruits</SelectLabel>
+                  <SelectItem value="E.I">E.I (Educação Infantil)</SelectItem>
+                  <SelectItem value="E.M">E.M (Ensino Médio)</SelectItem>
+                  <SelectItem value="E.F">E.F (Ensino Fundamental)</SelectItem>
+                  <SelectItem value="EJA (E.F)">EJA (E.F) - Educação de Jovens e Adultos</SelectItem>
+                  <SelectItem value="EJA (E.M)">EJA (E.M) - Educação de Jovens e Adultos</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex w-full flex-col gap-2">
             <Label className="text-base mb-2 font-semibold">Nome da refeição</Label>
             <Input
