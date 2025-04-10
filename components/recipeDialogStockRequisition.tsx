@@ -1,4 +1,5 @@
 import { useUpdate } from "@/hook/useUpdate";
+import { formModality } from "@/lib/utils/formModality";
 import jsPDF from "jspdf";
 import { Download } from "lucide-react";
 import { useState } from "react";
@@ -123,8 +124,8 @@ const RecipeDialogStockRequisition = ({
     // Make sure this text doesn't get cut off
     doc.setFontSize(10);
     const modalityText =
-      teaching_modality !== null
-        ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${teaching_modality}`
+      recipe.teaching_modality !== null
+        ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${formModality(recipe.teaching_modality).toUpperCase()}`
         : "FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ MODALIDADE DE ENSINO (FAIXA ETÁRIA)";
     doc.text(modalityText, pageWidth / 2, yPosition, { align: "center" });
     yPosition += 10;
@@ -346,8 +347,8 @@ const RecipeDialogStockRequisition = ({
             </div>
           </DialogTitle>
           <DialogDescription className="text-center text-lg font-bold">
-            {teaching_modality !== null
-              ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${teaching_modality}`
+            {recipe.teaching_modality !== null
+              ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${formModality(recipe.teaching_modality).toUpperCase()}`
               : "FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ MODALIDADE DE ENSINO (FAIXA ETÁRIA)"}
           </DialogDescription>
         </DialogHeader>
