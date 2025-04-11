@@ -197,13 +197,13 @@ const RecipeDialogStockRequisition = ({
         doc.setFontSize(9);
 
         // Add "Total" text and total weight
-        doc.text("Total", margin + colWidths[0] / 2, yPosition + 4, { align: "center" });
-        doc.text(
-          `${formatValue(totals.grossWeight)} ${totals.unit_measure_gross_weight}`,
-          margin + colWidths[0] + colWidths[1] / 2,
-          yPosition + 4,
-          { align: "center" }
-        );
+        // doc.text("Total", margin + colWidths[0] / 2, yPosition + 4, { align: "center" });
+        // doc.text(
+        //   `${formatValue(totals.grossWeight)} ${totals.unit_measure_gross_weight}`,
+        //   margin + colWidths[0] + colWidths[1] / 2,
+        //   yPosition + 4,
+        //   { align: "center" }
+        // );
       } else {
         // If no ingredients, show empty table with message
         doc.setFont("helvetica", "italic");
@@ -389,10 +389,10 @@ const RecipeDialogStockRequisition = ({
                 ))}
               {/* Totals row */}
               <TableRow className="bg-yellow-50 font-bold">
-                <TableCell className="border text-center">Total</TableCell>
-                <TableCell className="border text-center">
+                {/* <TableCell className="border text-center">Total</TableCell> */}
+                {/* <TableCell className="border text-center">
                   {formatValue(totals.grossWeight) + " " + totals.unit_measure_gross_weight}
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             </TableBody>
           </Table>
