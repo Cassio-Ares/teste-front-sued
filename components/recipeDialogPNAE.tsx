@@ -84,6 +84,107 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
   };
 
   // Calculate nutritional totals with unit conversion
+  // const calculateTotals = () => {
+  //   if (!recipe.ingredients || recipe.ingredients.length === 0) {
+  //     return {
+  //       cost_per_serving: 0,
+  //       correction_factor: 0,
+  //       kcal: 0,
+  //       kj: 0,
+  //       protein: 0,
+  //       lipids: 0,
+  //       carbs: 0,
+  //       calcium: 0,
+  //       iron: 0,
+  //       retinol: 0,
+  //       vitC: 0,
+  //       sodium: 0,
+  //       grossWeight: 0,
+  //       cookedWeight: 0,
+  //       unit_measure_gross_weight: "kg",
+  //       unit_measure_cooked_weight: "kg",
+  //     };
+  //   }
+
+  //   return recipe.ingredients.reduce(
+  //     (totals, ingredient) => {
+  //       // Get units of measurement
+  //       const grossWeightUnit = ingredient?.unit_of_measure || ingredient?.unit_of_measure_gross_weight || "g";
+  //       const cookedWeightUnit = ingredient?.unit_of_measure || ingredient?.unit_of_measure_cooked_weight || "g";
+
+  //       // Convert weights considering their units
+  //       const convertedGrossWeight = converterValor(parseFloat(ingredient.gross_weight) || 0, grossWeightUnit);
+
+  //       const convertedCookedWeight = converterValor(
+  //         parseFloat(ingredient.cooked_weight) || parseFloat(ingredient.ajustedCookedWeight) || 0,
+  //         cookedWeightUnit
+  //       );
+
+  //       return {
+  //         cost_per_serving:
+  //           totals.cost_per_serving +
+  //           (parseFloat(ingredient.cost_per_serving) || ingredient.adjusted_cost_per_serving || 0),
+  //         correction_factor: totals.correction_factor + parseFloat(ingredient.correction_factor),
+  //         kcal: totals.kcal + (parseFloat(ingredient.kcal) || 0),
+  //         kj: totals.kj + (parseFloat(ingredient.kj) || 0),
+  //         protein: totals.protein + (parseFloat(ingredient.protein) || 0),
+  //         lipids: totals.lipids + (parseFloat(ingredient.lipids) || 0),
+  //         carbs: totals.carbs + (parseFloat(ingredient.carbohydrate) || 0),
+  //         calcium: totals.calcium + (parseFloat(ingredient.calcium) || 0),
+  //         iron: totals.iron + (parseFloat(ingredient.iron) || 0),
+  //         retinol: totals.retinol + (parseFloat(ingredient.retinol) || 0),
+  //         vitC: totals.vitC + (parseFloat(ingredient.vitaminC) || 0),
+  //         sodium: totals.sodium + (parseFloat(ingredient.sodium) || 0),
+  //         // Use the converted values for weights
+  //         grossWeight: totals.grossWeight + convertedGrossWeight,
+  //         cookedWeight: totals.cookedWeight + convertedCookedWeight,
+  //         // Always use kg/L as standard unit for totals
+  //         unit_measure_gross_weight: "kg",
+  //         unit_measure_cooked_weight: "kg",
+  //       };
+  //     },
+  //     {
+  //       cost_per_serving: 0,
+  //       correction_factor: 0,
+  //       kcal: 0,
+  //       kj: 0,
+  //       protein: 0,
+  //       lipids: 0,
+  //       carbs: 0,
+  //       calcium: 0,
+  //       iron: 0,
+  //       retinol: 0,
+  //       vitC: 0,
+  //       sodium: 0,
+  //       grossWeight: 0,
+  //       cookedWeight: 0,
+  //       unit_measure_gross_weight: "kg",
+  //       unit_measure_cooked_weight: "kg",
+  //     }
+  //   );
+  // };
+
+  // // Calculate per 100g values - modified to ensure we're working with kg
+  // const calculatePer100g = (totals) => {
+  //   if (totals.grossWeight <= 0) return {};
+
+  //   // Convert to per 100g (0.1 kg)
+  //   const factor = 0.1 / totals.grossWeight;
+  //   return {
+  //     kcal: totals.kcal * factor,
+  //     kj: totals.kj * factor,
+  //     protein: totals.protein * factor,
+  //     lipids: totals.lipids * factor,
+  //     carbs: totals.carbs * factor,
+  //     calcium: totals.calcium * factor,
+  //     iron: totals.iron * factor,
+  //     retinol: totals.retinol * factor,
+  //     vitC: totals.vitC * factor,
+  //     sodium: totals.sodium * factor,
+  //   };
+  // };
+
+  // Improved calculateTotals function - keeping original units
   const calculateTotals = () => {
     if (!recipe.ingredients || recipe.ingredients.length === 0) {
       return {
@@ -91,14 +192,14 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
         correction_factor: 0,
         kcal: 0,
         kj: 0,
-        protein: 0,
-        lipids: 0,
-        carbs: 0,
-        calcium: 0,
-        iron: 0,
-        retinol: 0,
-        vitC: 0,
-        sodium: 0,
+        protein: 0, // grams
+        lipids: 0, // grams
+        carbs: 0, // grams
+        calcium: 0, // milligrams
+        iron: 0, // milligrams
+        retinol: 0, // micrograms
+        vitC: 0, // milligrams
+        sodium: 0, // milligrams
         grossWeight: 0,
         cookedWeight: 0,
         unit_measure_gross_weight: "kg",
@@ -108,36 +209,36 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
 
     return recipe.ingredients.reduce(
       (totals, ingredient) => {
-        // Get units of measurement
+        // Get units of measurement for weights
         const grossWeightUnit = ingredient?.unit_of_measure || ingredient?.unit_of_measure_gross_weight || "g";
         const cookedWeightUnit = ingredient?.unit_of_measure || ingredient?.unit_of_measure_cooked_weight || "g";
 
-        // Convert weights considering their units
+        // Convert weights considering their units (g → kg, ml → L)
         const convertedGrossWeight = converterValor(parseFloat(ingredient.gross_weight) || 0, grossWeightUnit);
-
         const convertedCookedWeight = converterValor(
           parseFloat(ingredient.cooked_weight) || parseFloat(ingredient.ajustedCookedWeight) || 0,
           cookedWeightUnit
         );
 
+        // For nutritional values, simply add the values - they're already in their correct units
         return {
           cost_per_serving:
             totals.cost_per_serving +
-            (parseFloat(ingredient.cost_per_serving) || ingredient.adjusted_cost_per_serving || 0),
-          correction_factor: totals.correction_factor + parseFloat(ingredient.correction_factor),
+            (parseFloat(ingredient.cost_per_serving) || parseFloat(ingredient.adjusted_cost_per_serving) || 0),
+          correction_factor: totals.correction_factor + (parseFloat(ingredient.correction_factor) || 0),
           kcal: totals.kcal + (parseFloat(ingredient.kcal) || 0),
           kj: totals.kj + (parseFloat(ingredient.kj) || 0),
-          protein: totals.protein + (parseFloat(ingredient.protein) || 0),
-          lipids: totals.lipids + (parseFloat(ingredient.lipids) || 0),
-          carbs: totals.carbs + (parseFloat(ingredient.carbohydrate) || 0),
-          calcium: totals.calcium + (parseFloat(ingredient.calcium) || 0),
-          iron: totals.iron + (parseFloat(ingredient.iron) || 0),
-          retinol: totals.retinol + (parseFloat(ingredient.retinol) || 0),
-          vitC: totals.vitC + (parseFloat(ingredient.vitaminC) || 0),
-          sodium: totals.sodium + (parseFloat(ingredient.sodium) || 0),
+          protein: totals.protein + (parseFloat(ingredient.protein) || 0), // already in g
+          lipids: totals.lipids + (parseFloat(ingredient.lipids) || 0), // already in g
+          carbs: totals.carbs + (parseFloat(ingredient.carbohydrate) || 0), // already in g
+          calcium: totals.calcium + (parseFloat(ingredient.calcium) || 0), // already in mg
+          iron: totals.iron + (parseFloat(ingredient.iron) || 0), // already in mg
+          retinol: totals.retinol + (parseFloat(ingredient.retinol) || 0), // already in mcg
+          vitC: totals.vitC + (parseFloat(ingredient.vitaminC) || 0), // already in mg
+          sodium: totals.sodium + (parseFloat(ingredient.sodium) || 0), // already in mg
           // Use the converted values for weights
-          grossWeight: totals.grossWeight + convertedGrossWeight,
-          cookedWeight: totals.cookedWeight + convertedCookedWeight,
+          grossWeight: totals.grossWeight + convertedGrossWeight, // in kg
+          cookedWeight: totals.cookedWeight + convertedCookedWeight, // in kg
           // Always use kg/L as standard unit for totals
           unit_measure_gross_weight: "kg",
           unit_measure_cooked_weight: "kg",
@@ -164,23 +265,25 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
     );
   };
 
-  // Calculate per 100g values - modified to ensure we're working with kg
+  // Improved calculatePer100g function
   const calculatePer100g = (totals) => {
     if (totals.grossWeight <= 0) return {};
 
-    // Convert to per 100g (0.1 kg)
+    // We want nutritional values per 100g (0.1 kg)
+    // So we calculate what fraction of the total weight 100g represents
     const factor = 0.1 / totals.grossWeight;
+
     return {
       kcal: totals.kcal * factor,
       kj: totals.kj * factor,
-      protein: totals.protein * factor,
-      lipids: totals.lipids * factor,
-      carbs: totals.carbs * factor,
-      calcium: totals.calcium * factor,
-      iron: totals.iron * factor,
-      retinol: totals.retinol * factor,
-      vitC: totals.vitC * factor,
-      sodium: totals.sodium * factor,
+      protein: totals.protein * factor, // will remain in g
+      lipids: totals.lipids * factor, // will remain in g
+      carbs: totals.carbs * factor, // will remain in g
+      calcium: totals.calcium * factor, // will remain in mg
+      iron: totals.iron * factor, // will remain in mg
+      retinol: totals.retinol * factor, // will remain in mcg
+      vitC: totals.vitC * factor, // will remain in mg
+      sodium: totals.sodium * factor, // will remain in mg
     };
   };
 
@@ -189,10 +292,10 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
 
   let serving = recipe?.servings;
 
-  let correctionFactor = 0;
+  let correctionFactor = "0.00";
 
   if (totals.correction_factor > 0) {
-    correctionFactor = totals.correction_factor / recipe?.ingredients?.length;
+    correctionFactor = (totals.correction_factor / recipe?.ingredients?.length).toFixed(2);
   }
 
   const handleExportToPDF = () => {
@@ -577,282 +680,6 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
   };
 
   return (
-    // <Dialog open={isOpen} onOpenChange={setIsOpen}>
-    //   <DialogTrigger asChild>
-    //     <Button>{textButton}</Button>
-    //   </DialogTrigger>
-
-    //   <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
-    //     <DialogHeader className="m-auto">
-    //       <DialogTitle className="text-2xl flex flex-col justify-center items-center">
-    //         {getSecretaryTitle()}
-    //         <div className="text-xl items-center">PROGRAMA NACIONAL DE ALIMENTAÇÃO ESCOLAR - PNAE</div>
-    //       </DialogTitle>
-    //       <DialogDescription className="text-center text-lg">
-    //         {teaching_modality !== null
-    //           ? `FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ ${teaching_modality}`
-    //           : "FICHA TÉCNICA DE PREPARO - CARDÁPIO ETAPA/ MODALIDADE DE ENSINO (FAIXA ETÁRIA)"}
-    //       </DialogDescription>
-    //     </DialogHeader>
-
-    //     <div className="grid grid-cols-1 gap-2 mb-2">
-    //       <div className="border-b pb-2">
-    //         <h3 className="font-semibold">Nome: {recipe.name || "Não informado"}</h3>
-    //       </div>
-    //     </div>
-
-    //     <div className="overflow-x-auto">
-    //       <Table className="border">
-    //         <TableHeader className="bg-gray-100">
-    //           <TableRow>
-    //             <TableHead className="border w-auto font-bold">Ingredientes</TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Per capita
-    //               <br />
-    //               (bruto)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Per capita
-    //               <br />
-    //               (líquido)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Fator de
-    //               <br />
-    //               correção
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Medida
-    //               <br />
-    //               caseira
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Custo
-    //               <br />
-    //               unitário
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Energia
-    //               <br />
-    //               (kcal)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Energia
-    //               <br />
-    //               (kJ)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Proteína
-    //               <br />
-    //               (g)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Lipídeos
-    //               <br />
-    //               (g)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Carboi-
-    //               <br />
-    //               dratos (g)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Cálcio
-    //               <br />
-    //               (mg)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Ferro
-    //               <br />
-    //               (mg)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Retinol
-    //               <br />
-    //               (mcg)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Vit. C<br />
-    //               (mg)
-    //             </TableHead>
-    //             <TableHead className="border text-center whitespace-nowrap">
-    //               Sódio
-    //               <br />
-    //               (mg)
-    //             </TableHead>
-    //           </TableRow>
-    //         </TableHeader>
-    //         <TableBody>
-    //           {recipe.ingredients &&
-    //             recipe.ingredients.map(
-    //               (ingredient, index) => (
-    //                 console.log(
-    //                   "ingredienttttttttttttttttt",
-    //                   ingredient,
-    //                   ingredient.unit_of_measure_gross_weight,
-    //                   ingredient.unit_of_measure_cooked_weight
-    //                 ),
-    //                 (
-    //                   <TableRow key={index}>
-    //                     <TableCell className="border font-medium">
-    //                       {ingredient.ingredient_description || ingredient.description || "—"}
-    //                     </TableCell>
-    //                     <TableCell className="border text-center">
-    //                       {ingredient.unit_of_measure
-    //                         ? formatValue(ingredient.gross_weight) + " " + ingredient.unit_of_measure
-    //                         : ingredient.unit_of_measure_gross_weight
-    //                         ? formatValue(ingredient.gross_weight) + " " + ingredient.unit_of_measure_gross_weight
-    //                         : "—"}
-    //                     </TableCell>
-    //                     <TableCell className="border text-center">
-    //                       {ingredient.unit_of_measure
-    //                         ? formatValue(ingredient.cooked_weight) + " " + ingredient.unit_of_measure
-    //                         : ingredient.unit_of_measure_cooked_weight
-    //                         ? formatValue(ingredient.cooked_weight) + " " + ingredient.unit_of_measure_cooked_weight
-    //                         : "—"}
-    //                     </TableCell>
-    //                     <TableCell className="border text-center">
-    //                       {formatValue(ingredient.correction_factor) || "—"}
-    //                     </TableCell>
-    //                     <TableCell className="border text-center">
-    //                       {formatValue(ingredient.homemade_measure) || "—"}
-    //                     </TableCell>
-    //                     <TableCell className="border text-center">
-    //                       {formatValue(ingredient.cost_per_serving) || formatValue(ingredient.adjusted_cost) || "—"}
-    //                     </TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.kcal) || "—"}</TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.kj) || "—"}</TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.protein) || "—"}</TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.lipids) || "—"}</TableCell>
-    //                     <TableCell className="border text-center">
-    //                       {formatValue(ingredient.carbohydrate) || "—"}
-    //                     </TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.calcium) || "—"}</TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.iron) || "—"}</TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.retinol) || "—"}</TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.vitaminC) || "—"}</TableCell>
-    //                     <TableCell className="border text-center">{formatValue(ingredient.sodium) || "—"}</TableCell>
-    //                   </TableRow>
-    //                 )
-    //               )
-    //             )}
-    //           {/* Totals row */}
-    //           <TableRow className="bg-gray-100 font-bold">
-    //             <TableCell className="border">Total</TableCell>
-    //             <TableCell className="border text-center">
-    //               {formatValue(totals.grossWeight) + " " + totals.unit_measure_gross_weight}
-    //             </TableCell>
-    //             <TableCell className="border text-center">
-    //               {formatValue(totals.cookedWeight) + " " + totals.unit_measure_cooked_weight}
-    //             </TableCell>
-    //             <TableCell className="border text-center">—</TableCell>
-    //             <TableCell className="border text-center">—</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.cost_per_serving)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.kcal)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.kj)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.protein)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.lipids)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.carbs)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.calcium)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.iron)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.retinol)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.vitC)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(totals.sodium)}</TableCell>
-    //           </TableRow>
-    //           {/* <TableRow className="bg-gray-50">
-    //             <TableCell colSpan={2} className="border text-center font-bold">
-    //               Informação nutricional em 100g
-    //             </TableCell>
-    //             <TableCell className="border text-center">100,00</TableCell>
-    //             <TableCell className="border text-center">—</TableCell>
-    //             <TableCell className="border text-center">—</TableCell>
-    //             <TableCell className="border text-center">—</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.kcal)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.kj)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.protein)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.lipids)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.carbs)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.calcium)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.iron)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.retinol)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.vitC)}</TableCell>
-    //             <TableCell className="border text-center">{formatValue(per100g.sodium)}</TableCell>
-    //           </TableRow> */}
-    //         </TableBody>
-    //       </Table>
-    //     </div>
-
-    //     <div className="grid grid-cols-2 gap-4 mt-4">
-    //       <div className="space-y-4">
-    //         <div className="border p-2 bg-yellow-50">
-    //           <h3 className="text-md font-bold">Quantidade de Porções</h3>
-    //           <p>{serving || "1"}</p>
-    //         </div>
-    //         <div className="border p-2 bg-yellow-50">
-    //           <h3 className="text-md font-bold">Rendimento total</h3>
-    //           <p>{formatValue(totals.cookedWeight)}</p>
-    //         </div>
-    //         <div className="border p-2 bg-yellow-50">
-    //           <h3 className="text-md font-bold">Fator de cocção</h3>
-    //           <p>{correctionFactor || "0"}</p>
-    //         </div>
-    //         <div className="border p-2 bg-yellow-50">
-    //           <h3 className="text-md font-bold">Utensilios necessários</h3>
-    //           <p className="whitespace-pre-line">{recipe.required_utensils || "Não informado"}</p>
-    //         </div>
-    //         <div className="border p-2 bg-yellow-50">
-    //           <h3 className="text-md font-bold">Modo de prepararo</h3>
-    //           <p className="whitespace-pre-line">{recipe.preparation_method || "Não informado"}</p>
-    //         </div>
-    //       </div>
-    //       <div className="space-y-4">
-    //         <div className="border p-2 bg-yellow-50">
-    //           <h3 className="text-lg font-bold mt-4">Alocações de Ingredientes</h3>
-    //           {recipe.ingredients && recipe.ingredients.some((ing) => ing.brand_allocations) && (
-    //             <>
-    //               {recipe.ingredients
-    //                 .filter((ing) => ing.brand_allocations)
-    //                 .map((ing, idx) => (
-    //                   <div key={idx} className="mt-2">
-    //                     <h4 className="font-semibold">{ing.description || ing.ingredient_description}</h4>
-    //                     <p className="whitespace-pre-line">
-    //                       {ing.allocations_summary || ing.allocations_description || "Sem alocações"}
-    //                     </p>
-    //                   </div>
-    //                 ))}
-    //             </>
-    //           )}
-    //         </div>
-    //         <div className="border p-2 bg-yellow-50">
-    //           <h3 className="text-md font-bold">Tempo de Cocção</h3>
-    //           <p>{recipe.timeOfCoccao || "0"} min</p>
-    //         </div>
-    //         <div className="border p-2 bg-yellow-50">
-    //           <h3 className="text-md font-bold">Tempo de Preparo</h3>
-    //           <p>{recipe.prep_time || "0"} min</p>
-    //         </div>
-    //       </div>
-    //     </div>
-
-    //     <div className="space-y-4 mt-4">
-    //       <div className="border p-2 bg-yellow-50">
-    //         <h3 className="text-md font-bold">Descrições extras sobre a receita</h3>
-    //         <p className="whitespace-pre-line">{recipe.description_of_recipe || "Não informado"}</p>
-    //       </div>
-    //       <div className="border p-2 bg-yellow-50">
-    //         <h3 className="text-md font-bold">Observações</h3>
-    //         <p className="whitespace-pre-line">{recipe.observations || "Não informado"}</p>
-    //       </div>
-    //     </div>
-
-    //     <div className="flex justify-between mt-4">
-    //       <Button onClick={handleExportToPDF} className="mt-4">
-    //         Exportar para PDF
-    //       </Button>
-    //       {/* <div className="text-right text-sm italic mt-6">Nome, número do CRN e assinatura do nutricionista.</div> */}
-    //     </div>
-    //   </DialogContent>
-    // </Dialog>
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>{textButton}</Button>
