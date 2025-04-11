@@ -1,5 +1,4 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { useRouter } from "next/router";
 
 export function createApiInstance() {
   const api: AxiosInstance = axios.create({
@@ -40,8 +39,8 @@ export function createApiInstance() {
     (error: AxiosError) => {
       if (error.response?.status === 401) {
         removeToken();
-        const router = useRouter();
-        router.push("/login");
+
+        window.location.href = "/admin";
       }
       return Promise.reject(error);
     }
