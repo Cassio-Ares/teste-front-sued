@@ -19,6 +19,24 @@ const formatValue = (value) => {
   }
   return String(value);
 };
+
+// Function to convert values based on unit to standardized measurement
+const converterValor = (valor, unidade) => {
+  // Convert string to number if needed
+  const valorNumerico = typeof valor === "string" ? parseFloat(valor) : valor;
+
+  // If value is NaN or null, return 0
+  if (isNaN(valorNumerico) || valorNumerico === null) return 0;
+
+  // Convert to kg/L if in g/ml
+  if (unidade && (unidade.toLowerCase() === "g" || unidade.toLowerCase() === "ml")) {
+    return valorNumerico / 1000;
+  }
+
+  // Return original value for kg/L or if no unit specified
+  return valorNumerico;
+};
+
 // Helper function to normalize recipe data regardless of structure
 const normalizeRecipeData = (recipeData) => {
   // Handle case where recipe is nested inside a response object
@@ -65,7 +83,7 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
     return `SECRETARIA (MUNICIPAL/ESTADUAL) DE EDUCAÇÃO DO (MUNICÍPIO/ESTADO)`;
   };
 
-  // Calculate nutritional totals
+  // Calculate nutritional totals with unit conversion
   const calculateTotals = () => {
     if (!recipe.ingredients || recipe.ingredients.length === 0) {
       return {
@@ -83,13 +101,25 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
         sodium: 0,
         grossWeight: 0,
         cookedWeight: 0,
-        unit_measure_gross_weight: "",
-        unit_measure_cooked_weight: "",
+        unit_measure_gross_weight: "kg",
+        unit_measure_cooked_weight: "kg",
       };
     }
 
     return recipe.ingredients.reduce(
       (totals, ingredient) => {
+        // Get units of measurement
+        const grossWeightUnit = ingredient?.unit_of_measure || ingredient?.unit_of_measure_gross_weight || "g";
+        const cookedWeightUnit = ingredient?.unit_of_measure || ingredient?.unit_of_measure_cooked_weight || "g";
+
+        // Convert weights considering their units
+        const convertedGrossWeight = converterValor(parseFloat(ingredient.gross_weight) || 0, grossWeightUnit);
+
+        const convertedCookedWeight = converterValor(
+          parseFloat(ingredient.cooked_weight) || parseFloat(ingredient.ajustedCookedWeight) || 0,
+          cookedWeightUnit
+        );
+
         return {
           cost_per_serving:
             totals.cost_per_serving +
@@ -105,12 +135,12 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
           retinol: totals.retinol + (parseFloat(ingredient.retinol) || 0),
           vitC: totals.vitC + (parseFloat(ingredient.vitaminC) || 0),
           sodium: totals.sodium + (parseFloat(ingredient.sodium) || 0),
-          grossWeight: totals.grossWeight + (parseFloat(ingredient.gross_weight) || 0),
-          cookedWeight:
-            totals.cookedWeight +
-            (parseFloat(ingredient.cooked_weight) || parseFloat(ingredient.ajustedCookedWeight) || 0),
-          unit_measure_gross_weight: ingredient?.unit_of_measure || ingredient?.unit_of_measure_gross_weight,
-          unit_measure_cooked_weight: ingredient?.unit_of_measure || ingredient?.unit_of_measure_cooked_weight,
+          // Use the converted values for weights
+          grossWeight: totals.grossWeight + convertedGrossWeight,
+          cookedWeight: totals.cookedWeight + convertedCookedWeight,
+          // Always use kg/L as standard unit for totals
+          unit_measure_gross_weight: "kg",
+          unit_measure_cooked_weight: "kg",
         };
       },
       {
@@ -128,17 +158,18 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
         sodium: 0,
         grossWeight: 0,
         cookedWeight: 0,
-        unit_measure_gross_weight: "",
-        unit_measure_cooked_weight: "",
+        unit_measure_gross_weight: "kg",
+        unit_measure_cooked_weight: "kg",
       }
     );
   };
 
-  // Calculate per 100g values
+  // Calculate per 100g values - modified to ensure we're working with kg
   const calculatePer100g = (totals) => {
-    if (totals.cookedWeight <= 0) return {};
+    if (totals.grossWeight <= 0) return {};
 
-    const factor = 100 / totals.cookedWeight;
+    // Convert to per 100g (0.1 kg)
+    const factor = 0.1 / totals.grossWeight;
     return {
       kcal: totals.kcal * factor,
       kj: totals.kj * factor,
@@ -995,31 +1026,26 @@ const RecipeDialogPNAE = ({ recipe: rawRecipeData, teaching_modality = null, tex
                 <TableCell className="border text-center">{formatValue(totals.sodium)}</TableCell>
               </TableRow>
               {/* Nutrition information per 100g row */}
-              {/* <TableRow className="bg-yellow-50">
-                <TableCell colSpan={1} className="border text-left font-bold">
-                  Informação nutricional em 100g
+              <TableRow className="bg-yellow-50">
+                <TableCell className="border text-left font-bold">
+                  Informação nutricional <br /> em 100g
                 </TableCell>
-                <TableCell colSpan={15} className="border text-center">
-                  <div className="grid grid-cols-15 w-full">
-             
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>4192.98</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                    <div>100.00</div>
-                  </div>
-                </TableCell>
-              </TableRow> */}
+                <TableCell className="border text-center">100 g</TableCell>
+                <TableCell className="border text-center">—</TableCell>
+                <TableCell className="border text-center">—</TableCell>
+                <TableCell className="border text-center">—</TableCell>
+                <TableCell className="border text-center">—</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.kcal)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.kj)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.protein)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.lipids)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.carbs)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.calcium)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.iron)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.retinol)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.vitC)}</TableCell>
+                <TableCell className="border text-center">{formatValue(per100g.sodium)}</TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </div>
